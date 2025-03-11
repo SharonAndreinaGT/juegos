@@ -3,11 +3,11 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #f0f0f0; /* Color de fondo */
+  background: linear-gradient(135deg, #a8c0ff, #fbc2eb);
 }
 
 .login-box {
-  background-color: #fff;
+  background-color: rgba(255, 255, 255, 0.8);
   padding: 30px;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -42,7 +42,7 @@ input[type="password"] {
 .login-button {
   width: 100%;
   padding: 10px;
-  background-color: #007bff; /* Color del botón */
+  background: linear-gradient(to right, #6a82fb, #fc5c7d);
   color: #fff;
   border: none;
   border-radius: 4px;

@@ -56,6 +56,8 @@
           "defaultConfiguration": "production"
         },
         "serve": {
+          "options": {
+          },
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {

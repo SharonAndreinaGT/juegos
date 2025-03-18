@@ -1,0 +1,47 @@
+.container {
+    height: 100vh;
+    background: rgba(128, 128, 128, 0.402);
+  }
+  
+  .sidenav {
+    width: 250px;
+    background-color: #9fd3f3d9;
+  }
+  
+  .sidenav-bar {
+    width: 250px;
+    background-color: #fffffff3;
+  }
+  .content {
+    padding: 20px;
+  }
+  
+  .students-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+  }
+  
+  .grade-card {
+    width: 300px; /* Ajusta el ancho según tus necesidades */
+    margin: 20px;
+  }
+
+  .grade {
+    width: 30%;
+  }
+  
+  .grade h2 {
+    margin-bottom: 10px;
+  }
+  
+  .grade ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .grade li {
+    margin-bottom: 5px;
+  }
+
+  

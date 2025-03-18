@@ -1,2 +1,34 @@
-<h1>Bienvenido al Componente Principal</h1>
-<p>Este es el contenido del componente principal.</p>
+<mat-sidenav-container class="container">
+  <mat-sidenav mode="side" opened class="sidenav-bar">
+    <mat-toolbar class="sidenav">Administrador</mat-toolbar>
+    <mat-nav-list>
+      <a mat-list-item routerLink="/firstGrade">
+        <mat-icon>person_add</mat-icon>
+        <span>Primer Grado</span>
+      </a>
+      <a mat-list-item routerLink="/secondGrade">
+        <mat-icon>person_add</mat-icon>
+        <span>Segundo Grado</span>
+      </a>
+      <a mat-list-item routerLink="/thirdGrade">
+        <mat-icon>person_add</mat-icon>
+        <span>Tercer Grado</span>
+      </a>
+      <a mat-list-item routerLink="/">
+        <mat-icon>timeline</mat-icon>
+        <span>Progreso</span>
+      </a>
+      <a mat-list-item routerLink="/">
+        <mat-icon>settings</mat-icon>
+        <span>Configuración Juegos</span>
+      </a>
+      <a mat-list-item routerLink="/">
+        <mat-icon>description</mat-icon>
+        <span>Informes</span>
+      </a>
+    </mat-nav-list>
+  </mat-sidenav>
+  <mat-sidenav-content class="content">
+    <router-outlet></router-outlet>
+  </mat-sidenav-content>
+</mat-sidenav-container>

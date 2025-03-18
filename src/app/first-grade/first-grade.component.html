@@ -1,0 +1,23 @@
+
+<mat-card class="grade-card">
+    <mat-card-content>
+      <div class="grade-header">
+        <h2>Primer Grado</h2>
+        <button mat-icon-button (click)="openAddStudentDialog()">
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
+      <mat-list>
+        <mat-list-item *ngFor="let student of students" class="student-item">
+          <div class="student-info">
+            <div matListItemTitle>Id: {{ student.id }}</div>
+            <div matListItemLine>Nombre: {{ student.firstName }}</div>
+            <div matListItemLine>Apellido: {{ student.lastName }}</div>
+          </div>
+          <button mat-icon-button (click)="editStudent()" class="edit-button">
+            <mat-icon>edit</mat-icon>
+          </button>
+        </mat-list-item>
+      </mat-list>
+    </mat-card-content>
+  </mat-card>

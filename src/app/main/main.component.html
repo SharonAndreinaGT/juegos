@@ -1,34 +1,71 @@
 <mat-sidenav-container class="container">
   <mat-sidenav mode="side" opened class="sidenav-bar">
-    <mat-toolbar class="sidenav">Administrador</mat-toolbar>
+    <mat-toolbar class="sidenav">
+      <span>Administrador</span>
+    </mat-toolbar>
+    
     <mat-nav-list>
-      <a mat-list-item routerLink="/firstGrade">
+      <button mat-button class="menu-button" (click)="navigateTo('main')">
+        <mat-icon>person</mat-icon>
+        <span>Inicio</span>
+      </button>
+      <button mat-button class="menu-button" (click)="navigateTo('firstGrade')">
         <mat-icon>person_add</mat-icon>
         <span>Primer Grado</span>
-      </a>
-      <a mat-list-item routerLink="/secondGrade">
+      </button>
+      <button mat-button class="menu-button" (click)="navigateTo('secondGrade')">
         <mat-icon>person_add</mat-icon>
         <span>Segundo Grado</span>
-      </a>
-      <a mat-list-item routerLink="/thirdGrade">
+      </button>
+      <button mat-button class="menu-button" (click)="navigateTo('thirdGrade')">
         <mat-icon>person_add</mat-icon>
         <span>Tercer Grado</span>
-      </a>
-      <a mat-list-item routerLink="/">
+      </button>
+      <button mat-button class="menu-button">
         <mat-icon>timeline</mat-icon>
         <span>Progreso</span>
-      </a>
-      <a mat-list-item routerLink="/">
+      </button>
+      <button mat-button class="menu-button">
         <mat-icon>settings</mat-icon>
         <span>Configuración Juegos</span>
-      </a>
-      <a mat-list-item routerLink="/">
+      </button>
+      <button mat-button class="menu-button" >
         <mat-icon>description</mat-icon>
         <span>Informes</span>
-      </a>
+      </button>
+
+      <mat-divider></mat-divider>
+
+      <button mat-button class="menu-button">
+        <mat-icon>logout</mat-icon>
+        <span>Salir</span>
+      </button>
     </mat-nav-list>
   </mat-sidenav>
+
   <mat-sidenav-content class="content">
+    <ng-container >
+      <div class="welcome-container">
+        <mat-card class="welcome-card">
+          <mat-card-content>
+            <div class="welcome-content">
+              <h2>¡Bienvenido, Docente!</h2>
+              <p>
+                Gracias por el esfuerzo y dedicación. Aquí encontrarás las herramientas
+                para gestionar el contenido de tus clases de manera interactiva, y mantener la motivación de los estudiantes.
+              </p>
+              <img src="assets/gif/welcome.gif" alt="Animación de bienvenida" class="welcome-image" />
+              <p>
+                Navega por el menú lateral para acceder a las diferentes secciones.
+              </p>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+
+    </ng-container>
+
     <router-outlet></router-outlet>
   </mat-sidenav-content>
 </mat-sidenav-container>

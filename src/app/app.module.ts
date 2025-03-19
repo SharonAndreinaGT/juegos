@@ -8,9 +8,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { MainComponent } from './main/main.component';
 import { WelcomeComponent } from './welcome/welcome.component';
 import { LoginIDComponent } from './login-id/login-id.component';
-import { FirstGradeComponent } from './first-grade/first-grade.component'; 
-import { SecondGradeComponent } from './second-grade/second-grade.component';
-import { ThirdGradeComponent } from './third-grade/third-grade.component';
+import { GradeStudentsComponent } from './grade-students/grade-students.component';
+
+//importaciones de angular material
+
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -18,6 +19,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { MatCardModule } from '@angular/material/card';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatButton } from '@angular/material/button';
+import { MatIconButton } from '@angular/material/button';
+
 
 @NgModule({
     declarations: [
@@ -26,9 +33,7 @@ import { MatCardModule } from '@angular/material/card';
       LoginComponent, // Declaramos el nuevo componente
       MainComponent, //componente siguiente del inicio de sesion, o sea el menu del docente
       LoginIDComponent, //componente que tiene el inicio despues de darle jugar para ingresar con el ID
-      FirstGradeComponent,
-      SecondGradeComponent,
-      ThirdGradeComponent
+      GradeStudentsComponent
     ],
     imports: [
       BrowserModule,
@@ -39,7 +44,12 @@ import { MatCardModule } from '@angular/material/card';
       MatToolbarModule,
       MatIconModule,
       BrowserAnimationsModule,
-      MatCardModule
+      MatCardModule,
+      MatDialogModule,
+      MatTableModule,
+      MatPaginatorModule,
+      MatButton,
+      MatIconButton
     ],
     providers: [
       provideHttpClient(),

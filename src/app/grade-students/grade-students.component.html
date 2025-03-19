@@ -1,0 +1,77 @@
+<mat-sidenav-container class="container">
+    <mat-sidenav mode="side" opened class="sidenav-bar">
+        <mat-toolbar class="sidenav">
+            <span>Administrador</span>
+        </mat-toolbar>
+
+    <mat-nav-list>
+        <button mat-button class="menu-button" routerLink="/main">
+            <mat-icon>person</mat-icon>
+            <span>Inicio</span>
+        </button>
+        <button mat-button class="menu-button" routerLink="/firstGrade">
+            <mat-icon>person_add</mat-icon>
+            <span>Primer Grado</span>
+        </button>
+        <button mat-button class="menu-button" routerLink="/secondGrade">
+            <mat-icon>person_add</mat-icon>
+            <span>Segundo Grado</span>
+        </button>
+        <button mat-button class="menu-button" routerLink="/thirdGrade">
+            <mat-icon>person_add</mat-icon>
+            <span>Tercer Grado</span>
+        </button>
+        <button mat-button class="menu-button" routerLink="/">
+            <mat-icon>timeline</mat-icon>
+            <span>Progreso</span>
+        </button>
+        <button mat-button class="menu-button" routerLink="/">
+            <mat-icon>settings</mat-icon>
+            <span>Configuración Juegos</span>
+        </button>
+        <button mat-button class="menu-button" routerLink="/">
+            <mat-icon>description</mat-icon>
+            <span>Informes</span>
+        </button>
+
+    <mat-divider></mat-divider>
+
+        <button mat-button class="menu-button">
+            <mat-icon>logout</mat-icon>
+            <span>Salir</span>
+        </button>
+        </mat-nav-list>
+    </mat-sidenav>
+  
+    <mat-card class="welcome-container">
+      <mat-card-content class="">
+        <div class="grade-header">
+            <h1>{{ gradeTitle }}</h1>
+        </div>
+  
+        <div class="mat-elevation-z8">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nombre</th>
+                  <th>Calificación</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let student of students">
+                  <td>{{ student.id }}</td>
+                  <td>{{ student.name }}</td>
+                  <td>{{ student.grade }}</td>
+                </tr>
+              </tbody>
+            </table>
+            
+  
+          <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons aria-label="Select page of students">
+          </mat-paginator>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </mat-sidenav-container>
+

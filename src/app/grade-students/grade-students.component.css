@@ -1,64 +1,57 @@
 .container {
-    background: rgba(128, 128, 128, 0.402);
+  background: rgba(128, 128, 128, 0.402);
+}
+
+.sidenav {
+  background-color: #9fd3f3d9;
+  border-radius: 0px;
+}
+
+.sidenav-bar {
+  width: 200px;
+  margin: 16px;
+  border-right: none;
+  border-radius: 10px;
+  background-color: #f0f8ff;
+}
+
+.content {
+  padding: 20px;
+}
+
+.menu-button{
+  width: 100%;
+  margin-right: 8px;
+  display: flex;
+  font-size: 1rem;
+  justify-content: flex-start;
+}
+  
+.welcome-card{
+  background-color: #f0f8ff;
+}
+
+.welcome-container {
+  height: calc(100vh - 65px);
+  border-radius: 10px;
+  margin: 16px;
+  margin-left: 20px;
+  display: flex;
+  background-color: #f0f8ff;
+}
+  
+  .welcome-content h1 {
+    font-size: 2.5em; 
+    color: #3f51b5; 
+    margin-bottom: 20px;
+    font-family: 'Arial', sans-serif; 
   }
   
-  .sidenav {
-    background-color: #9fd3f3d9;
-    border-radius: 0px;
+  .welcome-content p {
+    font-size: 1.1em; /* Tamaño del texto */
+    color: #333; /* Color del texto */
+    line-height: 1.6;
+    font-family: 'Verdana', sans-serif; /* Fuente del texto */
   }
+
   
-  .sidenav-bar {
-    width: 200px;
-    margin: 16px;
-    border-right: none;
-    border-radius: 10px;
-    background-color: #f0f8ff;
-  }
-  
-  .content {
-    padding: 20px;
-  }
-  
-  .menu-button{
-    width: 100%;
-    margin-right: 8px;
-    display: flex;
-    font-size: 1rem;
-    justify-content: flex-start;
-  }
-    
-  .welcome-card{
-    background-color: #f0f8ff;
-  }
-  
-  .welcome-container {
-    height: calc(100vh - 65px);
-    border-radius: 10px;
-    margin: 16px;
-    margin-left: 20px;
-    display: flex;
-    background-color: #f0f8ff;
-  }
-    
-    .welcome-content h2 {
-      font-size: 2.5em; 
-      color: #3f51b5; 
-      margin-bottom: 20px;
-      font-family: 'Arial', sans-serif; 
-    }
-    
-    .welcome-content p {
-      font-size: 1.1em; /* Tamaño del texto */
-      color: #333; /* Color del texto */
-      line-height: 1.6;
-      font-family: 'Verdana', sans-serif; /* Fuente del texto */
-    }
-    
-    .welcome-image {
-      max-width: 500px; /* Tamaño del GIF */
-      height: auto;
-      display: block;
-      margin: 30px auto; /* Centrar el GIF */
-    }
-  
-    

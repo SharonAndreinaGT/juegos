@@ -17,23 +17,26 @@ const routes: Routes = [
 
   { path: 'firstGrade',component: GradeStudentsComponent,data: { gradeTitle: 'Primer Grado', 
       students: [
-        { id: 1, name: 'Ana', grade: 90 },
-        { id: 2, name: 'Luis', grade: 85 },
+        { id: 1, name: 'Ana', lastname: 'Pérez', grade: 90 },
+        { id: 2, name: 'Luis', lastname: 'Martinez', grade: 85 },
+        { id: 3, name: 'Paola', lastname: 'Gonzalez', grade: 90 },
         //supongo que aquí se consumiria la api para traer los datos reales
       ],
     },
   },
   { path: 'secondGrade', component: GradeStudentsComponent,data: { gradeTitle: 'Segundo Grado',
       students: [
-        { id: 3, name: 'María', grade: 95 },
-        { id: 4, name: 'Carlos', grade: 88 },
+        { id: 1, name: 'María', lastname: 'Gamboa', grade: 95 },
+        { id: 2, name: 'Carlos', lastname: 'Silva', grade: 88 },
+        { id: 3, name: 'Marta', lastname: 'Sosa', grade: 90 },
       ],
     },
   },
   { path: 'thirdGrade', component: GradeStudentsComponent, data: { gradeTitle: 'Tercer Grado',
       students: [
-        { id: 5, name: 'Sofía', grade: 92 },
-        { id: 6, name: 'Pedro', grade: 89 },
+        { id: 1, name: 'Sofía', lastname: 'Blanco', grade: 92 },
+        { id: 2, name: 'Pedro', lastname: 'Mendoza', grade: 89 },
+        { id: 3, name: 'Carolina', lastname: 'Tanco', grade: 90 },
       ],
     },
   },

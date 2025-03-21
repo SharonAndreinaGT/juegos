@@ -19,15 +19,15 @@
   padding: 20px;
 }
 
-.menu-button{
+.menu-button {
   width: 100%;
   margin-right: 8px;
   display: flex;
   font-size: 1rem;
   justify-content: flex-start;
 }
-  
-.welcome-card{
+
+.welcome-card {
   background-color: #f0f8ff;
 }
 
@@ -39,19 +39,62 @@
   display: flex;
   background-color: #f0f8ff;
 }
-  
-  .welcome-content h1 {
-    font-size: 2.5em; 
-    color: #3f51b5; 
-    margin-bottom: 20px;
-    font-family: 'Arial', sans-serif; 
-  }
-  
-  .welcome-content p {
-    font-size: 1.1em; /* Tamaño del texto */
-    color: #333; /* Color del texto */
-    line-height: 1.6;
-    font-family: 'Verdana', sans-serif; /* Fuente del texto */
-  }
 
-  
+.welcome-content h1 {
+  font-size: 2.5em;
+  color: #3f51b5;
+  margin-bottom: 20px;
+  font-family: 'Arial', sans-serif;
+}
+
+.welcome-content p {
+  font-size: 1.1em;
+  color: #333;
+  line-height: 1.6;
+  font-family: 'Verdana', sans-serif;
+}
+
+.table-responsive {
+  margin-top: 20px;
+  width: 100%;
+}
+
+.table {
+  width: 100%;
+}
+
+.table th{
+  color: #0b185f;
+}
+
+.table th, .table td {
+  vertical-align: middle;
+  text-align: center;
+}
+
+/* Estilos de la cabecera */
+.table thead th {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+  font-weight: bold;
+}
+
+/* Estilos de las filas */
+.table tbody tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+/* Estilos de los botones */
+.mat-icon {
+  font-size: 20px; 
+  vertical-align: middle;
+  color: #3348bc; 
+}
+
+.btn-icon {
+  background-color: transparent;
+  border: none; 
+  padding: 0; 
+  min-width: 30px; 
+  line-height: 1; 
+}

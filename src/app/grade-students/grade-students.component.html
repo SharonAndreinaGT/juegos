@@ -42,36 +42,50 @@
         </button>
         </mat-nav-list>
     </mat-sidenav>
-  
-    <mat-card class="welcome-container">
-      <mat-card-content class="">
-        <div class="welcome-content">
+
+    <mat-sidenav-content class="content">
+      <mat-card class="welcome-container">
+        <mat-card-content class="">
+          <div class="welcome-content">
             <h1>{{ gradeTitle }}</h1>
-        </div>
-  
-        <div class=".welcome-content mat-elevation-z8">
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Nombre</th>
-                  <th>Calificación</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let student of students">
-                  <td>{{ student.id }}</td>
-                  <td>{{ student.name }}</td>
-                  <td>{{ student.grade }}</td>
-                </tr>
-              </tbody>
-            </table>
-            
-  
-          <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons aria-label="Select page of students">
-          </mat-paginator>
-        </div>
-      </mat-card-content>
-    </mat-card>
-  </mat-sidenav-container>
+          </div>
+    
+          <div class="welcome-content mat-elevation-z8">
+            <div class="table-responsive">
+              <table class="table table-striped table-bordered">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Calificación</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let student of students">
+                    <td>{{ student.id }}</td>
+                    <td>{{ student.name }}</td>
+                    <td>{{ student.lastname }}</td>
+                    <td>{{ student.grade }}</td>
+                    <td>
+                      <button class="btn btn-sm btn-icon mr-1">
+                        <mat-icon>visibility</mat-icon>
+                      </button>
+                      <button class="btn btn-sm btn-icon">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+    
+            <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons aria-label="Select page of students">
+            </mat-paginator>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </mat-sidenav-content>
+</mat-sidenav-container>
 

@@ -19,5 +19,5 @@ export class GradeStudentsComponent implements OnInit {
       this.students = data['students'];
     });
   }
-  
+
 }

@@ -1,0 +1,74 @@
+.container {
+    background: rgba(128, 128, 128, 0.402);
+  }
+  
+  .sidenav {
+    background-color: #9fd3f3d9;
+    border-radius: 0px;
+  }
+  
+  .sidenav-bar {
+    width: 200px;
+    margin: 16px;
+    border-right: none;
+    border-radius: 10px;
+    background-color: #f0f8ff;
+  }
+  
+  .content {
+    padding: 20px;
+  }
+  
+  .menu-button {
+    width: 100%;
+    margin-right: 8px;
+    display: flex;
+    font-size: 1rem;
+    justify-content: flex-start;
+  }
+  
+  .welcome-card {
+    background-color: #f0f8ff;
+  }
+  
+  .welcome-container {
+    height: calc(100vh - 65px);
+    border-radius: 10px;
+    margin: 16px;
+    margin-left: 20px;
+    display: flex;
+    background-color: #f0f8ff;
+  }
+  
+  .welcome-content h1 {
+    font-size: 2.5em;
+    color: #3f51b5;
+    margin-bottom: 20px;
+    font-family: 'Arial', sans-serif;
+  }
+
+  /* css para el contenido de las imagenes */
+  .image-container {
+    display: flex;
+    justify-content: center; /* Centra las imágenes horizontalmente */
+    align-items: center; /* Centra las imágenes verticalmente */
+    height: 55vh; /* Asegura que el contenedor ocupe toda la altura de la ventana */
+    gap: 60px; /* Espacio entre los elementos */
+  }
+  
+  .image-item {
+    display: flex;
+    flex-direction: column; /* Alinea el título y la imagen en columna */
+    align-items: center; /* Centra el título y la imagen horizontalmente */
+  }
+  
+  .image-item span {
+    text-align: center; /* Asegura que el título esté centrado */
+    margin-bottom: 5px; /* Espacio entre el título y la imagen */
+  }
+  
+  .small-image {
+    width: 180px;
+    height: auto;
+    cursor: pointer;
+  }

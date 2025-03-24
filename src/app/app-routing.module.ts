@@ -5,7 +5,7 @@ import { MainComponent } from './main/main.component';
 import { WelcomeComponent } from './welcome/welcome.component';
 import { LoginIDComponent } from './login-id/login-id.component';
 import { GradeStudentsComponent } from './grade-students/grade-students.component';
-
+import { GamesSettingsComponent } from './games-settings/games-settings.component';
 
 //rutas de navegacion
 
@@ -14,6 +14,8 @@ const routes: Routes = [
   { path: 'loginID', component: LoginIDComponent}, //ruta de jugar para ir al componente del estudiante ingresar ID
   { path: 'login', component: LoginComponent}, // nuevo componente "inicio de sesión"
   { path: 'main', component: MainComponent}, //ruta siguiente, menu principal del docente
+
+  //Rutas de navegacion entre las vistas de primer a tercer grado, redirigidas a un solo componente 
 
   { path: 'firstGrade',component: GradeStudentsComponent,data: { gradeTitle: 'Primer Grado', 
       students: [
@@ -40,6 +42,14 @@ const routes: Routes = [
       ],
     },
   },
+
+  //Rutas de navegacion para las vistas de configuracion de los juegos
+
+  { path: 'settings', component: GamesSettingsComponent, data: { title: 'Configuración de Juegos'}},
+  { path: 'puzzle', component: GamesSettingsComponent, data: { title: 'Rompecabezas'}},
+  { path: 'memory', component: GamesSettingsComponent, data: { title: 'Memoria'}},
+  { path: 'words', component: GamesSettingsComponent, data: { title: 'Adivina la Palabra Oculta'}},
+  
   { path: '', redirectTo: 'welcome', pathMatch: 'full' },
 ];
 

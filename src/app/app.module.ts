@@ -9,6 +9,7 @@ import { MainComponent } from './main/main.component';
 import { WelcomeComponent } from './welcome/welcome.component';
 import { LoginIDComponent } from './login-id/login-id.component';
 import { GradeStudentsComponent } from './grade-students/grade-students.component';
+import { GamesSettingsComponent } from './games-settings/games-settings.component';
 
 //importaciones de angular material
 
@@ -33,7 +34,8 @@ import { MatIconButton } from '@angular/material/button';
       LoginComponent, // Declaramos el nuevo componente
       MainComponent, //componente siguiente del inicio de sesion, o sea el menu del docente
       LoginIDComponent, //componente que tiene el inicio despues de darle jugar para ingresar con el ID
-      GradeStudentsComponent
+      GradeStudentsComponent,
+      GamesSettingsComponent
     ],
     imports: [
       BrowserModule,

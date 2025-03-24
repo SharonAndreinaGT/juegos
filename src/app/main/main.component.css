@@ -52,10 +52,11 @@
     color: #333; /* Color del texto */
     line-height: 1.6;
     font-family: 'Verdana', sans-serif; /* Fuente del texto */
+    text-align: center;
   }
   
   .welcome-image {
-    max-width: 500px; /* Tamaño del GIF */
+    width: 550px; /* Tamaño del GIF */
     height: auto;
     display: block;
     margin: 30px auto; /* Centrar el GIF */

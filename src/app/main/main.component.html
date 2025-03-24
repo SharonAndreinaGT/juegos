@@ -25,7 +25,7 @@
         <mat-icon>timeline</mat-icon>
         <span>Progreso</span>
       </button>
-      <button mat-button class="menu-button">
+      <button mat-button class="menu-button" (click)="navigateTo('settings')">
         <mat-icon>settings</mat-icon>
         <span>Configuración Juegos</span>
       </button>
@@ -36,7 +36,7 @@
 
       <mat-divider></mat-divider>
 
-      <button mat-button class="menu-button">
+      <button mat-button class="menu-button" (click)="navigateTo('welcome')">
         <mat-icon>logout</mat-icon>
         <span>Salir</span>
       </button>

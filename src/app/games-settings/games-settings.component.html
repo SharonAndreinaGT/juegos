@@ -44,48 +44,28 @@
     </mat-sidenav>
 
     <mat-sidenav-content class="content">
-      <mat-card class="welcome-container">
-        <mat-card-content class="">
-          <div class="welcome-content">
-            <h1>{{ gradeTitle }}</h1>
-          </div>
-    
-          <div class="welcome-content mat-elevation-z8">
-            <div class="table-responsive">
-              <table class="table table-striped table-bordered">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th>Apellido</th>
-                    <th>Calificación</th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let student of students">
-                    <td>{{ student.id }}</td>
-                    <td>{{ student.name }}</td>
-                    <td>{{ student.lastname }}</td>
-                    <td>{{ student.grade }}</td>
-                    <td>
-                      <button class="btn btn-sm btn-icon mr-1">
-                        <mat-icon>visibility</mat-icon>
-                      </button>
-                      <button class="btn btn-sm btn-icon">
-                        <mat-icon>edit</mat-icon>
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-    
-            <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons aria-label="Select page of students">
-            </mat-paginator>
-          </div>
-        </mat-card-content>
-      </mat-card>
-    </mat-sidenav-content>
-</mat-sidenav-container>
+        <mat-card class="welcome-container">
+            <mat-card-content class="">
+                <div class="welcome-content">
+                    <h1>{{ title }}</h1>
+                </div>
 
+                <div class="image-container">
+                    <div class="image-item">
+                      <span>ROMPECABEZAS</span>
+                      <img src="assets/img/puzzle.png" alt="" class="small-image" routerLink="/puzzle">
+                    </div>
+                    <div class="image-item">
+                      <span>MEMORIA</span>
+                      <img src="assets/img/memory.png" alt="" class="small-image" routerLink="/memory">
+                    </div>
+                    <div class="image-item">
+                      <span>ADIVINA LA PALABRA OCULTA</span>
+                      <img src="assets/img/words.png" alt="" class="small-image" routerLink="/words">
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </mat-sidenav-content>
+
+</mat-sidenav-container>

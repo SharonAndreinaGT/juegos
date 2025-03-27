@@ -98,3 +98,23 @@
   min-width: 30px; 
   line-height: 1; 
 }
+
+.colorbutton-btn-container {
+  display: flex; 
+  justify-content: flex-end; 
+  margin-bottom: 5px; /* Agregamos un margen inferior para separarlo de la tabla */
+}
+
+.colorbutton-btn {
+  background-color: #97cbf9e7;
+  color: #3f51b5de !important;
+  border: 2px solid #3f51b5d6;
+  padding: 10px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+}
+.colorbutton-btn:hover {
+  background-color: #97cbf9; /* Azul ligeramente más oscuro al pasar el ratón */
+  border-color: #3f51b5; /* Borde más oscuro al pasar el ratón */
+}

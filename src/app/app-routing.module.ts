@@ -7,6 +7,7 @@ import { LoginIDComponent } from './login-id/login-id.component';
 import { GradeStudentsComponent } from './grade-students/grade-students.component';
 import { GamesSettingsComponent } from './games-settings/games-settings.component';
 
+
 //rutas de navegacion
 
 const routes: Routes = [

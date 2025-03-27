@@ -1,5 +1,7 @@
 import { Component, input, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { CreateUserFormComponent } from '../create-user-form/create-user-form.component';
 
 @Component({
   selector: 'app-grade-students',
@@ -11,13 +13,29 @@ export class GradeStudentsComponent implements OnInit {
   gradeTitle: string = '';
   students: any[] = [];
 
-  constructor(private route: ActivatedRoute) {}
+  constructor(private route: ActivatedRoute, private dialog: MatDialog) {}
 
   ngOnInit() {
     this.route.data.subscribe((data) => {
       this.gradeTitle = data['gradeTitle'];
-      this.students = data['students'];
+      this.students = data['students']; //trae los datos del array declarado en el app-routing
     });
   }
+
+
+  //se crea la función del modal, donde se llama al component del form que tiene los datos para agregar el nuevo estudiante. donde se guarda en la variable result
+  abrirModal() {
+    const dialogRef = this.dialog.open(CreateUserFormComponent, {
+      width: '400px'
+    });
+  
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        console.log('Nuevo estudiante:', result);
+        this.students.push(result);
+        // aquí se agrega el nuevo estudiante a la tabla, enviandolo al array declarado students
+      }
+    });
+}
 
 }

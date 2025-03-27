@@ -10,7 +10,6 @@ export class GamesSettingsComponent implements OnInit {
 
   //Declara la variable de tipo entero y vacio porque se llama el dato que fue declarado anteriormente
   title: string = '';
-  
 
   constructor(private route: ActivatedRoute) {} // permite acceder a la ruta actual dentro del componente.
 
@@ -20,4 +19,5 @@ export class GamesSettingsComponent implements OnInit {
       this.title = data['title'];
     });
   }
+
 }

@@ -48,6 +48,7 @@
   }
 
   /* css para el contenido de las imagenes */
+  
   .image-container {
     display: flex;
     justify-content: center; /* Centra las imágenes horizontalmente */

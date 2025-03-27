@@ -10,6 +10,7 @@ import { WelcomeComponent } from './welcome/welcome.component';
 import { LoginIDComponent } from './login-id/login-id.component';
 import { GradeStudentsComponent } from './grade-students/grade-students.component';
 import { GamesSettingsComponent } from './games-settings/games-settings.component';
+import { CreateUserFormComponent } from './create-user-form/create-user-form.component';
 
 //importaciones de angular material
 
@@ -25,6 +26,13 @@ import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatButton } from '@angular/material/button';
 import { MatIconButton } from '@angular/material/button';
+import { MatDialogContent } from '@angular/material/dialog'
+import { MatFormField } from '@angular/material/form-field';
+import { MatLabel } from '@angular/material/form-field';
+import { ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
 
 
 @NgModule({
@@ -35,7 +43,8 @@ import { MatIconButton } from '@angular/material/button';
       MainComponent, //componente siguiente del inicio de sesion, o sea el menu del docente
       LoginIDComponent, //componente que tiene el inicio despues de darle jugar para ingresar con el ID
       GradeStudentsComponent,
-      GamesSettingsComponent
+      GamesSettingsComponent,
+      CreateUserFormComponent
     ],
     imports: [
       BrowserModule,
@@ -51,7 +60,14 @@ import { MatIconButton } from '@angular/material/button';
       MatTableModule,
       MatPaginatorModule,
       MatButton,
-      MatIconButton
+      MatIconButton,
+      MatDialogContent,
+      MatFormField,
+      MatLabel,
+      ReactiveFormsModule,
+      MatInputModule,
+      MatFormFieldModule,
+      MatButtonModule
     ],
     providers: [
       provideHttpClient(),

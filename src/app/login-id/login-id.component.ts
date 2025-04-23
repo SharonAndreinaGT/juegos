@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login-id',
@@ -7,4 +8,10 @@ import { Component } from '@angular/core';
 })
 export class LoginIDComponent {
 
+   //utilizando servicio de ruteo para poder navegar entre los componentes
+   constructor(private router: Router) {}
+   
+  navegar(){ //se llama la funcion para navegar entre componentes
+    this.router.navigate(['/options']);
+  }
 }

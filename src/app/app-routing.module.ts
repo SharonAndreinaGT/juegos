@@ -6,7 +6,7 @@ import { WelcomeComponent } from './welcome/welcome.component';
 import { LoginIDComponent } from './login-id/login-id.component';
 import { GradeStudentsComponent } from './grade-students/grade-students.component';
 import { GamesSettingsComponent } from './games-settings/games-settings.component';
-
+import { GamesOptionsComponent } from './games-options/games-options.component';
 
 //rutas de navegacion
 
@@ -15,6 +15,7 @@ const routes: Routes = [
   { path: 'loginID', component: LoginIDComponent}, //ruta de jugar para ir al componente del estudiante ingresar ID
   { path: 'login', component: LoginComponent}, // nuevo componente "inicio de sesión"
   { path: 'main', component: MainComponent}, //ruta siguiente, menu principal del docente
+  { path: 'options', component: GamesOptionsComponent},
 
   //Rutas de navegacion entre las vistas de primer a tercer grado, redirigidas a un solo componente 
 

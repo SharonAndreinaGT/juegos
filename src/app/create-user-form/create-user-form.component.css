@@ -1,0 +1,30 @@
+mat-dialog-content {
+    width: 400px; /* Ajusta el ancho total del diálogo según tus necesidades */
+    padding: 20px;
+    background-color: #7fadd4c0; /* Cambia el color de fondo del formulario */
+  }
+  
+  h2 {
+    text-align: center; /* Centra el título */
+    color: #3f51b5; /* Cambia el color del título al mismo azul del fondo */
+    margin-bottom: 20px; /* Espacio entre el título y los campos */
+  }
+
+  
+  mat-form-field {
+    width: 250px; 
+    margin: 10px auto;
+    display: block; 
+  }
+  
+  .button-group {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    border-color: #007bff
+  }
+  
+  .button-group button {
+    margin: 0 10px;
+    border-color: #007bff;
+  }

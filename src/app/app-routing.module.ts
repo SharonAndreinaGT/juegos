@@ -7,6 +7,9 @@ import { LoginIDComponent } from './login-id/login-id.component';
 import { GradeStudentsComponent } from './grade-students/grade-students.component';
 import { GamesSettingsComponent } from './games-settings/games-settings.component';
 import { GamesOptionsComponent } from './games-options/games-options.component';
+import { PuzzleComponent } from './puzzle/puzzle.component';
+import { MemoryComponent } from './memory/memory.component';
+import { RiddleComponent } from './riddle/riddle.component';
 
 //rutas de navegacion
 
@@ -16,6 +19,9 @@ const routes: Routes = [
   { path: 'login', component: LoginComponent}, // nuevo componente "inicio de sesión"
   { path: 'main', component: MainComponent}, //ruta siguiente, menu principal del docente
   { path: 'options', component: GamesOptionsComponent},
+  { path: 'puzzle', component: PuzzleComponent},
+  { path: 'memory', component: MemoryComponent},
+  { path: 'riddle', component: RiddleComponent},
 
   //Rutas de navegacion entre las vistas de primer a tercer grado, redirigidas a un solo componente 
 

@@ -11,6 +11,9 @@ import { LoginIDComponent } from './login-id/login-id.component';
 import { GradeStudentsComponent } from './grade-students/grade-students.component';
 import { GamesSettingsComponent } from './games-settings/games-settings.component';
 import { CreateUserFormComponent } from './create-user-form/create-user-form.component';
+import { PuzzleComponent } from './puzzle/puzzle.component';
+import { MemoryComponent } from './memory/memory.component';
+import { RiddleComponent } from './riddle/riddle.component';
 
 //importaciones de angular material
 
@@ -44,7 +47,10 @@ import { MatButtonModule } from '@angular/material/button';
       LoginIDComponent, //componente que tiene el inicio despues de darle jugar para ingresar con el ID
       GradeStudentsComponent,
       GamesSettingsComponent,
-      CreateUserFormComponent
+      CreateUserFormComponent,
+      PuzzleComponent,
+      MemoryComponent,
+      RiddleComponent
     ],
     imports: [
       BrowserModule,

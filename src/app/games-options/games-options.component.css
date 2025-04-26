@@ -1,0 +1,52 @@
+.main-container {
+    display: flex; /* Para que los contenedores se coloquen en fila */
+    justify-content: space-around; /* Espacio igual entre los contenedores */
+    align-items: center; 
+    min-height: 100vh;
+    background: rgba(128, 128, 128, 0.419); 
+    padding: 20px; /* Espacio alrededor de los contenedores */
+  }
+  .game-container {
+    background-color: rgba(255, 255, 255, 0.83);
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 300px; 
+    height: auto; /* Ajuste automático de altura para el título y la imagen */
+    display: flex;
+    flex-direction: column; /* Coloca el título encima de la imagen */
+    justify-content: center; /* Centra los elementos verticalmente */
+    align-items: center; /* Centra los elementos horizontalmente */
+    text-align: center;
+    cursor: pointer;
+    padding: 15px; /* Añade un poco de espacio interno */
+  }
+  
+  .game-container h2 {
+    color: #0f83d1; 
+    margin-top: 0; 
+    margin-bottom: 10px; /* Espacio entre el título y la imagen */
+    font-size: 1.5em; 
+  }
+  
+  .game-container img {
+    max-width: 80%;
+    max-height: 150px; /* Ajusta la altura máxima de la imagen */
+    object-fit: contain;
+  }
+  
+.game-container:nth-child(3) h2 {
+    font-size: 1.2em; /* Reduce un poco el tamaño del título si es muy largo */
+ }
+
+ /* animaciones */
+
+ .game-container {
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .game-container:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    transform: scale(1.1);
+  }
+
+  

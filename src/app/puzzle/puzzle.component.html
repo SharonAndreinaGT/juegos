@@ -1,1 +1,35 @@
-<p>puzzle works!</p>
+<mat-sidenav-container class="container">
+  <div class="welcome-container">
+    <div class="header">
+      <h1 class="puzzle-title">¡A JUGAR!</h1>
+      <div class="status">
+        <p class="score">Movimientos: {{ score }}</p>
+        <p class="timer">Tiempo: {{ elapsedTime }}</p>
+      </div>
+    </div>
+    <div class="puzzle-wrapper">
+      <div
+        class="puzzle-grid"
+        [style.width.px]="cols * pieceSize"
+        [style.height.px]="rows * pieceSize"
+        [style.grid-template-columns]="'repeat(' + cols + ', 1fr)'"
+        [style.grid-template-rows]="'repeat(' + rows + ', 1fr)'"
+      >
+        <div
+          class="puzzle-piece"
+          *ngFor="let piece of pieces; let i = index"
+          [style.background-image]="'url(' + imageUrl + ')'"
+          [style.background-position]="piece.bgPosition"
+          [style.width.px]="pieceSize"
+          [style.height.px]="pieceSize"
+          [style.background-size]="(cols * pieceSize) + 'px ' + (rows * pieceSize) + 'px'"
+          draggable="true"
+          (dragstart)="onDragStart($event, i)"
+          (dragover)="onDragOver($event)"
+          (drop)="onDrop($event, i)"
+        ></div>
+      </div>
+      <p *ngIf="isComplete" class="success-message">¡Rompecabezas completado en {{ elapsedTime }} con {{ score }} movimientos!</p>
+    </div>
+  </div>
+</mat-sidenav-container>

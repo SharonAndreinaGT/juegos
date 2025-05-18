@@ -1,0 +1,72 @@
+.container {
+  background: rgba(128, 128, 128, 0.402);
+}
+
+.welcome-container {
+  height: calc(100vh - 65px);
+  border-radius: 10px;
+  margin: 16px;
+  margin-left: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #f0f8ffeb;
+  padding: 16.5px;
+  justify-content: flex-start; /* Alinea los elementos desde la parte superior */
+}
+
+.header {
+  display: flex;
+  justify-content: space-between; /* Espacia el título y el estado */
+  align-items: center;
+  width: 100%; /* Ocupa todo el ancho del contenedor */
+  margin-bottom: 150px; /* Espacio entre el encabezado y el puzzle */
+ 
+}
+
+.puzzle-title {
+  font-size: 2.5rem; /* Título más grande */
+  color: #006dbb;
+  margin: 0;
+}
+
+.status {
+  display: flex;
+  gap: 20px; /* Espacio entre Movimientos y Tiempo */
+}
+
+.score,
+.timer {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.puzzle-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.puzzle-grid {
+  display: grid;
+  gap: 4px; /* Ajusta el espacio entre las piezas según sea necesario */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.puzzle-piece {
+  border: 2px solid #ccc;
+  cursor: grab;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #333;
+}
+
+.success-message {
+  color: green;
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin-top: 15px;
+  padding: 50px;
+}

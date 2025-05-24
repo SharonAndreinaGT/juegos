@@ -1,12 +1,15 @@
 <mat-sidenav-container class="container">
   <div class="welcome-container">
     <div class="header">
-      <h1 class="puzzle-title">¡A JUGAR!</h1>
-      <div class="status">
+      <h1 class="puzzle-title" *ngIf="!isComplete && timeLeft > 0">
+        ¡Que comience la diversión!
+      </h1>
+      <div class="status" *ngIf="!isComplete && timeLeft > 0">
         <p class="score">Movimientos: {{ score }}</p>
         <p class="timer">Tiempo: {{ elapsedTime }}</p>
       </div>
     </div>
+
     <div class="puzzle-wrapper">
       <div
         class="puzzle-grid"
@@ -14,6 +17,7 @@
         [style.height.px]="rows * pieceSize"
         [style.grid-template-columns]="'repeat(' + cols + ', 1fr)'"
         [style.grid-template-rows]="'repeat(' + rows + ', 1fr)'"
+        *ngIf="!isComplete && timeLeft > 0"
       >
         <div
           class="puzzle-piece"
@@ -23,13 +27,32 @@
           [style.width.px]="pieceSize"
           [style.height.px]="pieceSize"
           [style.background-size]="(cols * pieceSize) + 'px ' + (rows * pieceSize) + 'px'"
-          draggable="true"
+          [draggable]="!isComplete && timeLeft > 0"
           (dragstart)="onDragStart($event, i)"
           (dragover)="onDragOver($event)"
           (drop)="onDrop($event, i)"
         ></div>
       </div>
-      <p *ngIf="isComplete" class="success-message">¡Rompecabezas completado en {{ elapsedTime }} con {{ score }} movimientos!</p>
+
+      <div *ngIf="isComplete || timeLeft <= 0" class="game-over-message">
+        <h2 *ngIf="isComplete">¡Rompecabezas completado!</h2>
+        <h2 *ngIf="!isComplete && timeLeft <= 0">
+          ¡Tiempo agotado! ¡Sigue practicando!
+        </h2>
+
+        <p>Movimientos: {{ score }}</p>
+        <p>Tiempo restante: {{ elapsedTime }}</p>
+
+        <div class="stars-display">
+          <h3>Tu Puntuación:</h3>
+          <span *ngFor="let i of [0, 1, 2]" class="star" [class.filled]="i < stars">
+            &#9733; </span>
+        </div>
+
+        <button *ngIf="!isComplete && timeLeft <= 0" (click)="resetGame()">
+          Volver a intentar
+        </button>
+        </div>
     </div>
   </div>
 </mat-sidenav-container>

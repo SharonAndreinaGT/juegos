@@ -32,7 +32,7 @@
     margin-left: 6%;
   }
   
-  input[type="id"] {
+  input[type="text"] {
     width: calc(90% - 12px);
     padding: 10px;
     border: 1px solid #ccc;

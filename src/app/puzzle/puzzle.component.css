@@ -1,72 +1,159 @@
 .container {
   background: rgba(128, 128, 128, 0.402);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  
 }
 
 .welcome-container {
-  height: calc(100vh - 65px);
+ width: 900px; /* Aumentamos el ancho a 600px */
+  height: auto;
   border-radius: 10px;
-  margin: 16px;
-  margin-left: 20px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   background-color: #f0f8ffeb;
-  padding: 16.5px;
-  justify-content: flex-start; /* Alinea los elementos desde la parte superior */
+  padding: 70px;
+  justify-content: flex-start;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Sutil sombra para resaltar */
 }
 
 .header {
-  display: flex;
-  justify-content: space-between; /* Espacia el título y el estado */
+   display: flex;
+  justify-content: space-between;
   align-items: center;
-  width: 100%; /* Ocupa todo el ancho del contenedor */
-  margin-bottom: 150px; /* Espacio entre el encabezado y el puzzle */
- 
+  width: 100%;
+  margin-bottom: 40px;
 }
 
 .puzzle-title {
-  font-size: 2.5rem; /* Título más grande */
+  font-size: 2.2rem;
   color: #006dbb;
-  margin: 0;
+  margin: 0; 
 }
 
 .status {
   display: flex;
-  gap: 20px; /* Espacio entre Movimientos y Tiempo */
+  gap: 18px;
+  background-color: #e0f2f7;
+  padding: 8px 15px;
+  border-radius: 5px;
 }
 
 .score,
 .timer {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: bold;
   margin: 0;
+  color: #333;
 }
 
 .puzzle-wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
+  flex-grow: 1; 
+  justify-content: center;
 }
 
 .puzzle-grid {
   display: grid;
-  gap: 4px; /* Ajusta el espacio entre las piezas según sea necesario */
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  gap: 3px;
+  box-shadow: 0 0 9px rgba(0, 0, 0, 0.25);
+  border-radius: 5px;
+  overflow: hidden;
+  max-width: 100%; 
+  height: auto;
 }
 
 .puzzle-piece {
-  border: 2px solid #ccc;
+  border: 1px solid #ccc;
   cursor: grab;
   display: flex;
   justify-content: center;
   align-items: center;
   color: #333;
+  transition: transform 0.1s ease-out;
+  flex-shrink: 0; 
 }
 
-.success-message {
-  color: green;
-  font-size: 1.3rem;
-  font-weight: bold;
-  margin-top: 15px;
-  padding: 50px;
+.puzzle-piece:active {
+  cursor: grabbing;
+  transform: scale(1.02);
+}
+
+/* --- Estilos para el mensaje de fin de juego --- */
+.game-over-message {
+  text-align: center;
+  padding: 30px;
+  background-color: #ffffff;
+  border: 2px solid #006dbb;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  max-width: 450px; 
+  width: 90%; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  box-sizing: border-box; 
+}
+
+.game-over-message h2 {
+  font-size: 2.2rem; 
+  color: #006dbb;
+  margin-bottom: 10px;
+}
+
+.game-over-message p {
+  font-size: 1.1rem;
+  margin: 5px 0;
+  color: #555;
+}
+
+.stars-display {
+  font-size: 2.5em;
+  margin: 15px 0; 
+  display: flex;
+  gap: 5px;
+}
+
+.stars-display h3 {
+  font-size: 1.3rem; 
+  color: #333;
+  margin-bottom: 8px; 
+}
+
+.stars-display .star {
+  transition: color 0.3s ease-in-out;
+}
+
+.stars-display .star.filled {
+  color: gold;
+  text-shadow: 0 0 5px rgba(255, 215, 0, 0.7);
+}
+
+.game-over-message button {
+  background-color: #006dbb;
+  color: white;
+  padding: 10px 20px; 
+  border: none;
+  border-radius: 5px;
+  font-size: 1em; 
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+  margin-top: 15px; 
+}
+
+.game-over-message button:hover {
+  background-color: #005691;
+  transform: translateY(-2px);
+}
+
+.game-over-message button:active {
+  transform: translateY(0);
 }

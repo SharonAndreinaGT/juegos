@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { AppComponent } from './app.component';
 import { LoginComponent } from './login/login.component';
 import { AppRoutingModule } from './app-routing.module';
-import { provideHttpClient } from '@angular/common/http';
+
 import { MainComponent } from './main/main.component';
 import { WelcomeComponent } from './welcome/welcome.component';
 import { LoginIDComponent } from './login-id/login-id.component';
@@ -14,6 +14,7 @@ import { CreateUserFormComponent } from './create-user-form/create-user-form.com
 import { PuzzleComponent } from './puzzle/puzzle.component';
 import { MemoryComponent } from './memory/memory.component';
 import { RiddleComponent } from './riddle/riddle.component';
+import { HttpClientModule } from '@angular/common/http';
 
 //importaciones de angular material
 
@@ -73,10 +74,12 @@ import { MatButtonModule } from '@angular/material/button';
       ReactiveFormsModule,
       MatInputModule,
       MatFormFieldModule,
-      MatButtonModule
+      MatButtonModule,
+      FormsModule,
+      HttpClientModule
     ],
     providers: [
-      provideHttpClient(),
+     
       provideAnimationsAsync() //configura el cliente HTTP aquí, ahora se usa esta forma y no httpClientModule
     ],
     bootstrap: [AppComponent] // lo coloco asi para que luego se rediriga a login

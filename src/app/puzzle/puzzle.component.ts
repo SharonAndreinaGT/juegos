@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core'; // Eliminado AfterViewInit
 import { interval, Subscription } from 'rxjs';
 
 // Interfaz que representa una pieza del rompecabezas
@@ -10,7 +10,7 @@ interface PuzzlePiece {
 @Component({
   selector: 'app-puzzle',
   templateUrl: './puzzle.component.html',
-  styleUrl: './puzzle.component.css'
+  styleUrls: ['./puzzle.component.css']
 })
 export class PuzzleComponent implements OnInit, OnDestroy {
 
@@ -18,7 +18,7 @@ export class PuzzleComponent implements OnInit, OnDestroy {
   rows = 3;                      // Número de filas
   cols = 3;                      // Número de columnas
   pieceSize = 110;              // Tamaño en píxeles de cada pieza
-  imageUrl = 'assets/img/prueba.jpg';  // Ruta de la imagen del rompecabezas
+  imageUrl = 'assets/img/prueba.jpg';
 
   // Estado del rompecabezas
   pieces: PuzzlePiece[] = [];   // Arreglo de piezas mezcladas
@@ -26,35 +26,25 @@ export class PuzzleComponent implements OnInit, OnDestroy {
   draggedIndex: number | null = null; // Índice de la pieza que se está arrastrando
   score = 0;                    // Conteo de movimientos realizados
   isComplete = false;          // Indica si el rompecabezas fue completado
+  stars = 0;                   // Número de estrellas ganadas
 
   // Temporizador
-  startTime: number | null = null;     // Marca de tiempo de inicio
-  elapsedTime = '00:00';               // Tiempo transcurrido formateado
-  timerSubscription: Subscription | null = null; // Subscripción al temporizador
+  timeLimit = 180;             
+  timeLeft = this.timeLimit;    // Tiempo restante
+  elapsedTime = '03:00';        // Tiempo formateado para mostrar
+  timerSubscription: Subscription | null = null; 
 
-  /**
-   * Método que se ejecuta al iniciar el componente.
-   * Genera las piezas del rompecabezas y arranca el temporizador.
-   */
   ngOnInit(): void {
     this.generatePuzzle();
     this.startTimer();
   }
 
-  /**
-   * Método que se ejecuta al destruir el componente.
-   * Detiene el temporizador para evitar fugas de memoria.
-   */
   ngOnDestroy(): void {
     if (this.timerSubscription) {
       this.timerSubscription.unsubscribe();
     }
   }
 
-  /**
-   * Genera y mezcla las piezas del rompecabezas.
-   * Asigna posiciones de fondo para mostrar las partes correspondientes de la imagen.
-   */
   generatePuzzle(): void {
     const total = this.rows * this.cols;
     this.correctOrder = Array.from({ length: total }, (_, i) => i); // Orden correcto
@@ -79,7 +69,10 @@ export class PuzzleComponent implements OnInit, OnDestroy {
    * @param index Índice de la pieza arrastrada
    */
   onDragStart(event: DragEvent, index: number): void {
-    this.draggedIndex = index;
+    // Solo permitir arrastrar si el juego no ha terminado
+    if (!this.isComplete && this.timeLeft > 0) {
+      this.draggedIndex = index;
+    }
   }
 
   /**
@@ -96,7 +89,8 @@ export class PuzzleComponent implements OnInit, OnDestroy {
    * @param targetIndex Índice del objetivo donde se suelta la pieza
    */
   onDrop(event: DragEvent, targetIndex: number): void {
-    if (this.draggedIndex === null || this.draggedIndex === targetIndex) return;
+    // Solo permitir soltar si el juego no ha terminado
+    if (this.draggedIndex === null || this.draggedIndex === targetIndex || this.isComplete || this.timeLeft <= 0) return;
 
     // Intercambio de piezas
     const temp = this.pieces[targetIndex];
@@ -111,22 +105,53 @@ export class PuzzleComponent implements OnInit, OnDestroy {
 
   /**
    * Verifica si las piezas están en el orden correcto.
-   * Si es así, detiene el temporizador.
+   * Si es así, detiene el temporizador y calcula las estrellas.
    */
   checkCompletion(): void {
     this.isComplete = this.pieces.every((piece, index) => piece.index === index);
     if (this.isComplete) {
       this.stopTimer();
+      this.calculateStars(); // Calcula las estrellas al completar
     }
+  }
+
+  /**
+   * Calcula el número de estrellas en función del tiempo restante.
+   */
+  calculateStars(): void {
+    if (this.isComplete) { // Solo calcula estrellas altas si se completó
+      if (this.timeLeft >= 120) { // Si quedan 2 minutos o más
+        this.stars = 3;
+      } else if (this.timeLeft >= 60) { // Si queda 1 minuto o más
+        this.stars = 2;
+      } else if (this.timeLeft > 0) { // Si queda algo de tiempo
+        this.stars = 1;
+      } else { // Si el tiempo se agotó antes de completar
+        this.stars = 0;
+      }
+    } else { // Si el tiempo se agotó y no se completó
+      this.stars = 0;
+    }
+    console.log(`¡Ganaste ${this.stars} estrellas!`);
   }
 
   /**
    * Inicia el temporizador para medir el tiempo que tarda el jugador.
    */
   startTimer(): void {
-    this.startTime = Date.now();
+    this.timeLeft = this.timeLimit; // Inicializa el tiempo restante
+    this.updateElapsedTime();       // Actualiza la visualización inicial
     this.timerSubscription = interval(1000).subscribe(() => {
-      this.updateElapsedTime();
+      this.timeLeft--;              // Decrementa el tiempo restante
+      this.updateElapsedTime();       // Actualiza la visualización
+      if (this.timeLeft <= 0) {
+        this.stopTimer();          // Detiene el temporizador si se acaba el tiempo
+        // Si el tiempo se agota y el rompecabezas no está completo
+        if (!this.isComplete) {
+          this.calculateStars();     // Calcula las estrellas (que será 0)
+          console.log("¡Tiempo agotado!");
+        }
+      }
     });
   }
 
@@ -144,12 +169,21 @@ export class PuzzleComponent implements OnInit, OnDestroy {
    * Actualiza el tiempo transcurrido desde el inicio del juego.
    */
   updateElapsedTime(): void {
-    if (this.startTime) {
-      const now = Date.now();
-      const difference = Math.floor((now - this.startTime) / 1000);
-      const minutes = Math.floor(difference / 60).toString().padStart(2, '0');
-      const seconds = (difference % 60).toString().padStart(2, '0');
-      this.elapsedTime = `${minutes}:${seconds}`;
-    }
+    const minutes = Math.floor(this.timeLeft / 60).toString().padStart(2, '0');
+    const seconds = (this.timeLeft % 60).toString().padStart(2, '0');
+    this.elapsedTime = `${minutes}:${seconds}`;
+  }
+
+  /**
+   * Reinicia el juego a su estado inicial.
+   */
+  resetGame(): void {
+    this.score = 0;
+    this.isComplete = false;
+    this.stars = 0;
+    this.draggedIndex = null;
+    this.stopTimer(); 
+    this.generatePuzzle(); // Genera un nuevo rompecabezas
+    this.startTimer(); // Inicia un nuevo temporizador
   }
 }

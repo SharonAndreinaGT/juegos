@@ -1,13 +1,16 @@
 .container {
   background: rgba(128, 128, 128, 0.402);
-  }
-  
-.welcome-container {
-  height: calc(100vh - 65px);
-  border-radius: 10px;
-  margin: 16px;
-  margin-left: 20px;
   display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.welcome-container {
+  width: 500px;
+  height: auto;
+  border-radius: 10px;
   background-color: #f0f8ffeb;
-  padding: 16.5px;
+  padding: 300px; 
+  margin: 0 auto; 
 }

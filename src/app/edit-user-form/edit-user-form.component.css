@@ -1,0 +1,30 @@
+mat-dialog-content {
+    width: 400px; /* Ajusta el ancho total del diálogo según tus necesidades */
+    padding: 20px;
+    background-color: #7fadd4c0; 
+  }
+  
+  h2 {
+    text-align: center; 
+    color: #3f51b5; 
+    margin-bottom: 20px; 
+  }
+
+  
+  mat-form-field {
+    width: 250px; 
+    margin: 10px auto;
+    display: block; 
+  }
+  
+  .button-group {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    border-color: #007bff
+  }
+  
+  .button-group button {
+    margin: 0 10px;
+    border-color: #007bff;
+  }

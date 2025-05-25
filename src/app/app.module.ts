@@ -15,6 +15,7 @@ import { PuzzleComponent } from './puzzle/puzzle.component';
 import { MemoryComponent } from './memory/memory.component';
 import { RiddleComponent } from './riddle/riddle.component';
 import { HttpClientModule } from '@angular/common/http';
+import { EditUserFormComponent } from './edit-user-form/edit-user-form.component';
 
 //importaciones de angular material
 
@@ -51,7 +52,8 @@ import { MatButtonModule } from '@angular/material/button';
       CreateUserFormComponent,
       PuzzleComponent,
       MemoryComponent,
-      RiddleComponent
+      RiddleComponent,
+      EditUserFormComponent
     ],
     imports: [
       BrowserModule,

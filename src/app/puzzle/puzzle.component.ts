@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core'; // Eliminado AfterViewInit
+import { Component, OnInit, OnDestroy } from '@angular/core'; 
 import { interval, Subscription } from 'rxjs';
 
 // Interfaz que representa una pieza del rompecabezas

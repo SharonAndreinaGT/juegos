@@ -2,6 +2,7 @@ import { Component, input, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { CreateUserFormComponent } from '../create-user-form/create-user-form.component';
+import { EditUserFormComponent } from '../edit-user-form/edit-user-form.component';
 
 @Component({
   selector: 'app-grade-students',
@@ -38,4 +39,19 @@ export class GradeStudentsComponent implements OnInit {
     });
 }
 
+editUser(student: any){
+  const dialogRef = this.dialog.open(EditUserFormComponent, {
+    width: '400px',
+    data: student 
+  });
+
+  dialogRef.afterClosed().subscribe(result => {
+    if (result) {
+      const index = this.students.findIndex(s => s.id === result.id);
+      if (index !== -1) {
+        this.students[index] = result;
+      }
+    }
+  });
+}
 }

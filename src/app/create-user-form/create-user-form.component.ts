@@ -18,7 +18,7 @@ export class CreateUserFormComponent {
     this.studentForm = this.fb.group({
       name: ['', Validators.required],
       lastname: ['', Validators.required],
-      grade: ['', [Validators.required, Validators.min(0), Validators.max(100)]]
+      score: ['', [Validators.required, Validators.min(0), Validators.max(100)]]
     });
   }
 

@@ -51,7 +51,7 @@
           </div>
           
           <div class="colorbutton-btn-container">
-            <button mat-button class="colorbutton-btn" (click)="abrirModal()" >
+            <button mat-button class="colorbutton-btn" (click)="newStudent()" >
               Nuevo Estudiante
             </button>
           </div>
@@ -64,7 +64,7 @@
                     <th>ID</th>
                     <th>Nombre</th>
                     <th>Apellido</th>
-                    <th>Calificación</th>
+                    <th>Puntaje</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
@@ -73,7 +73,7 @@
                     <td>{{ student.id }}</td>
                     <td>{{ student.name }}</td>
                     <td>{{ student.lastname }}</td>
-                    <td>{{ student.grade }}</td>
+                    <td>{{ student.score }}</td>
                     <td>
                       <button class="btn btn-sm btn-icon mr-1">
                         <mat-icon>visibility</mat-icon>

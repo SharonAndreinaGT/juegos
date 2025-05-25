@@ -19,7 +19,7 @@ export class EditUserFormComponent {
       id: [data?.id],
       name: [data?.name || '', Validators.required],
       lastname: [data?.lastname || '', Validators.required],
-      grade: [data?.grade || '', [Validators.required, Validators.min(0), Validators.max(100)]],
+      score: [data?.score || '', [Validators.required, Validators.min(0), Validators.max(100)]],
     });
   }
 

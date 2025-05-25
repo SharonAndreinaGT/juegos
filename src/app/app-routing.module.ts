@@ -14,53 +14,26 @@ import { RiddleComponent } from './riddle/riddle.component';
 //rutas de navegacion
 
 const routes: Routes = [
-  { path: 'welcome', component: WelcomeComponent}, //ruta principal con botones de inicio jugar o administrador
-  { path: 'loginID', component: LoginIDComponent}, //ruta de jugar para ir al componente del estudiante ingresar ID
-  { path: 'login', component: LoginComponent}, // nuevo componente "inicio de sesión"
-  { path: 'main', component: MainComponent}, //ruta siguiente, menu principal del docente
-  { path: 'options', component: GamesOptionsComponent},
-  { path: 'puzzle', component: PuzzleComponent},
-  { path: 'memory', component: MemoryComponent},
-  { path: 'riddle', component: RiddleComponent},
+  { path: 'welcome', component: WelcomeComponent },
+  { path: 'loginID', component: LoginIDComponent },
+  { path: 'login', component: LoginComponent },
+  { path: 'main', component: MainComponent },
+  { path: 'options', component: GamesOptionsComponent },
+  { path: 'puzzle', component: PuzzleComponent },
+  { path: 'memory', component: MemoryComponent },
+  { path: 'riddle', component: RiddleComponent },
 
-  //Rutas de navegacion entre las vistas de primer a tercer grado, redirigidas a un solo componente 
-
-  { path: 'firstGrade',component: GradeStudentsComponent,data: { gradeTitle: 'Primer Grado', 
-      students: [
-        { id: 1, name: 'Ana', lastname: 'Pérez', grade: 90 },
-        { id: 2, name: 'Luis', lastname: 'Martinez', grade: 85 },
-        { id: 3, name: 'Paola', lastname: 'Gonzalez', grade: 90 },
-        //supongo que aquí se consumiria la api para traer los datos reales
-      ],
-    },
-  },
-  { path: 'secondGrade', component: GradeStudentsComponent,data: { gradeTitle: 'Segundo Grado',
-      students: [
-        { id: 1, name: 'María', lastname: 'Gamboa', grade: 95 },
-        { id: 2, name: 'Carlos', lastname: 'Silva', grade: 88 },
-        { id: 3, name: 'Marta', lastname: 'Sosa', grade: 90 },
-      ],
-    },
-  },
-  { path: 'thirdGrade', component: GradeStudentsComponent, data: { gradeTitle: 'Tercer Grado',
-      students: [
-        { id: 1, name: 'Sofía', lastname: 'Blanco', grade: 92 },
-        { id: 2, name: 'Pedro', lastname: 'Mendoza', grade: 89 },
-        { id: 3, name: 'Carolina', lastname: 'Tanco', grade: 90 },
-      ],
-    },
-  },
-
-  //Rutas de navegacion para las vistas de configuracion de los juegos
-
+ 
+  { path: 'firstGrade', component: GradeStudentsComponent, data: { gradeTitle: 'Primer Grado', gradeFilter: 'first' }},
+  { path: 'secondGrade', component: GradeStudentsComponent, data: { gradeTitle: 'Segundo Grado', gradeFilter: 'second' }},
+  { path: 'thirdGrade', component: GradeStudentsComponent, data: { gradeTitle: 'Tercer Grado', gradeFilter: 'third' }},
   { path: 'settings', component: GamesSettingsComponent, data: { title: 'Configuración de Juegos'}},
   { path: 'puzzle', component: GamesSettingsComponent, data: { title: 'Rompecabezas'}},
   { path: 'memory', component: GamesSettingsComponent, data: { title: 'Memoria'}},
   { path: 'words', component: GamesSettingsComponent, data: { title: 'Adivina la Palabra Oculta'}},
-  
+
   { path: '', redirectTo: 'welcome', pathMatch: 'full' },
 ];
-
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],

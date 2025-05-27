@@ -49,7 +49,15 @@
           <div class="welcome-content">
             <h1>{{ gradeTitle }}</h1>
           </div>
-          
+
+            <div class="section-filter-container">
+              <label for="sectionFilter">Filtrar por sección:</label>
+                <select id="sectionFilter" [(ngModel)]="selectedSection" (change)="applySectionFilter()" class="section-filter-select">
+                  <option value="">Todas</option>
+                  <option *ngFor="let sec of availableSections" [value]="sec">{{ sec }}</option>
+                </select>
+            </div>
+
           <div class="colorbutton-btn-container">
             <button mat-button class="colorbutton-btn" (click)="newStudent()" >
               Nuevo Estudiante
@@ -61,19 +69,19 @@
               <table class="table table-striped table-bordered">
                 <thead>
                   <tr>
-                    <th>ID</th>
                     <th>Nombre</th>
                     <th>Apellido</th>
                     <th>Puntaje</th>
+                    <th>Sección</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr *ngFor="let student of students">
-                    <td>{{ student.id }}</td>
                     <td>{{ student.name }}</td>
                     <td>{{ student.lastname }}</td>
                     <td>{{ student.score }}</td>
+                    <td>{{ student.section }}</td>
                     <td>
                       <button class="btn btn-sm btn-icon mr-1">
                         <mat-icon>visibility</mat-icon>

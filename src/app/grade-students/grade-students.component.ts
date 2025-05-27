@@ -15,6 +15,9 @@ export class GradeStudentsComponent implements OnInit {
   gradeTitle: string = '';
   gradeFilter = '';
   students: any[] = [];
+  selectedSection: string = '';
+  availableSections: string[] = [];
+  allStudents: any[] = []; // se guardan todos los estudiantes y se filtra sobre este array
 
   constructor(
     private route: ActivatedRoute,
@@ -32,15 +35,30 @@ export class GradeStudentsComponent implements OnInit {
 
   // Método para obtener estudiantes por grado
   loadStudentsByGrade(grade: string): void {
-    this.userService.getUsersByGrade(grade).subscribe({
-      next: (response) => {
-        this.students = response.data;
-      },
-      error: (err) => {
-        console.error('Error cargando estudiantes:', err);
-      }
-    });
+  this.userService.getUsersByGrade(grade).subscribe({
+    next: (response) => {
+      this.allStudents = response.data;
+      this.extractSections(); // Para llenar el filtro dinámico
+      this.applySectionFilter(); // Para inicializar lista filtrada
+    },
+    error: (err) => {
+      console.error('Error cargando estudiantes:', err);
+    }
+  });
+}
+
+extractSections(): void {
+  const secciones = this.allStudents.map(s => s.section).filter(Boolean);
+  this.availableSections = Array.from(new Set(secciones));
+}
+
+applySectionFilter(): void {
+  if (this.selectedSection) {
+    this.students = this.allStudents.filter(s => s.section === this.selectedSection);
+  } else {
+    this.students = [...this.allStudents]; // todas las secciones
   }
+}
 
   newStudent() {
     const dialogRef = this.dialog.open(CreateUserFormComponent, {
@@ -53,7 +71,7 @@ export class GradeStudentsComponent implements OnInit {
         const newUser = { ...result, grade: this.gradeFilter };
 
         this.userService.createUser(newUser).subscribe(() => {
-          this.loadStudentsByGrade(this.gradeFilter); // ✅ recarga la lista filtrada
+          this.loadStudentsByGrade(this.gradeFilter); // recarga la lista filtrada
         });
       }
     });
@@ -68,7 +86,7 @@ export class GradeStudentsComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.userService.updateUser(result.id, result).subscribe(() => {
-          this.loadStudentsByGrade(this.gradeFilter); // ✅ recarga la lista filtrada
+          this.loadStudentsByGrade(this.gradeFilter); // recarga la lista filtrada
         });
       }
     });

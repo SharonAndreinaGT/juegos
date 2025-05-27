@@ -13,7 +13,7 @@ export class LoginIDComponent {
   constructor(private http: HttpClient, private router: Router) {}
 
   login() {
-    const url = `http://localhost:8055/items/users?filter[name][_eq]=${this.name}`;
+    const url = `http://localhost:8055/items/users?filter[name][_eq]=${this.name.toLowerCase()}`;
 
     this.http.get<any>(url).subscribe({
       next: (respuesta) => {

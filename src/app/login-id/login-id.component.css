@@ -58,7 +58,8 @@
   }
   
   .error-message {
-    color: #dc3545; /* Color de los mensajes de error */
+    color: #f33d4f; /* Color de los mensajes de error */
     margin-top: 10px;
+    padding: 10px;
     text-align: center;
   }

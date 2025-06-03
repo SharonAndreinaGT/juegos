@@ -16,7 +16,7 @@
 }
 
 .content {
-  padding: 20px;
+  padding: 16.5px; /* propiedad para el espacio de los contenedores */
 }
 
 .menu-button{

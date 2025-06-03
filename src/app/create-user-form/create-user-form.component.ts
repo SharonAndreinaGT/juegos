@@ -2,11 +2,10 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 
-
 @Component({
   selector: 'app-create-user-form',
   templateUrl: './create-user-form.component.html',
-  styleUrl: './create-user-form.component.css'
+  styleUrls: ['./create-user-form.component.css']
 })
 export class CreateUserFormComponent {
   studentForm: FormGroup;
@@ -18,19 +17,21 @@ export class CreateUserFormComponent {
     this.studentForm = this.fb.group({
       name: ['', Validators.required],
       lastname: ['', Validators.required],
-      score: ['', [Validators.required, Validators.min(0), Validators.max(100)]]
+      section: ['', Validators.required],
+      score: [0, [Validators.min(0), Validators.max(100)]]
     });
   }
 
-  //funcion para registrar nuevo estudiante
-  registrarEstudiante() {
+  // Función para registrar nuevo estudiante
+  registrarEstudiante(): void {
     if (this.studentForm.valid) {
-      console.log('Estudiante Registrado:', this.studentForm.value);
+      // Devuelve los datos al componente padre (grade-students)
       this.dialogRef.close(this.studentForm.value);
     }
   }
-//funcion para cerrar el modal
-  cerrarModal() {
+
+  // Función para cerrar el modal sin guardar
+  cerrarModal(): void {
     this.dialogRef.close();
   }
 }

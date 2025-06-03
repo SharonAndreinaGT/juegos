@@ -70,8 +70,9 @@ applySectionFilter(): void {
         // Agregamos el grado actual al nuevo estudiante
         const newUser = { ...result, grade: this.gradeFilter };
 
-        this.userService.createUser(newUser).subscribe(() => {
-          this.loadStudentsByGrade(this.gradeFilter); // recarga la lista filtrada
+        this.userService.createUser(newUser).subscribe({
+          next: () => this.loadStudentsByGrade(this.gradeFilter), //Se crea el nuevo estudiante pasandolo por el filtro del grado
+          error: (err) => console.error('Error al crear usuario:', err)
         });
       }
     });

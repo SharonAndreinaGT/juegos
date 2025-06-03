@@ -8,27 +8,27 @@ import { Router } from '@angular/router';
   styleUrls: ['./login-id.component.css']
 })
 export class LoginIDComponent {
-  name: string = '';
+   name: string = '';
+  errorMessage: string = ''; 
 
   constructor(private http: HttpClient, private router: Router) {}
 
   login() {
+    this.errorMessage = ''; 
+
     const url = `http://localhost:8055/items/users?filter[name][_eq]=${this.name.toLowerCase()}`;
 
     this.http.get<any>(url).subscribe({
       next: (respuesta) => {
-        console.log(respuesta)
+        console.log(respuesta);
         if (respuesta.data && respuesta.data.length > 0) {
           // Usuario encontrado
-          this.router.navigate(['/options']); 
+          this.router.navigate(['/options']);
         } else {
-          alert('Nombre no encontrado');
+          // Usuario no encontrado, asigna el mensaje
+          this.errorMessage = 'Nombre no encontrado. Inténtelo de nuevo.';
         }
       },
-      error: (error) => {
-        console.error('Error al consultar:', error);
-        alert('Error al conectarse con el servidor.');
-      }
     });
   }
 }

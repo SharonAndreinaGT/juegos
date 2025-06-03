@@ -5,8 +5,12 @@
         <div class="input-group">
           <label for="name">Ingrese su nombre:</label>
           <input type="text" id="name" [(ngModel)]="name" name="name" required />
-         
         </div>
+
+        <div *ngIf="errorMessage" class="error-message">
+            {{ errorMessage }}
+        </div>
+
         <button type="submit" class="login-button">JUGAR</button> 
       </form>
     </div>

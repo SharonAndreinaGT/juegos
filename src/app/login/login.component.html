@@ -8,7 +8,21 @@
       </div>
       <div class="input-group">
         <label for="password">Contraseña:</label>
-        <input type="password" id="password" name="password" [(ngModel)]="password" required>
+        <div class="password-input-wrapper">
+          <input
+            [type]="showPassword ? 'text' : 'password'" id="password"
+            name="password"
+            [(ngModel)]="password"
+            required
+          >
+          <span
+            class="material-icons password-toggle-icon"
+            (click)="togglePasswordVisibility()" >
+            {{ showPassword ? 'visibility_off' : 'visibility' }} </span>
+        </div>
+      </div>
+      <div *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
       </div>
       <button type="submit" class="login-button">Ingresar</button>
     </form>

@@ -16,6 +16,11 @@
       <input matInput type="number" formControlName="score" required>
     </mat-form-field>
 
+    <mat-form-field class="full-width">
+      <mat-label>Sección</mat-label>
+      <input matInput formControlName="section" required>
+    </mat-form-field>
+
     <div class="button-group">
       <button mat-button type="button" (click)="cancelar()">Cancelar</button>
       <button mat-raised-button color="primary" type="submit" [disabled]="studentForm.invalid">

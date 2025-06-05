@@ -1,9 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core'; 
 import { ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { CreateUserFormComponent } from '../create-user-form/create-user-form.component';
 import { EditUserFormComponent } from '../edit-user-form/edit-user-form.component';
-import { UserService } from '../user.service'; 
+import { UserService } from '../user.service';
+import { MatPaginator } from '@angular/material/paginator'; 
+import { MatTableDataSource } from '@angular/material/table'; 
 
 @Component({
   selector: 'app-grade-students',
@@ -14,10 +16,14 @@ export class GradeStudentsComponent implements OnInit {
 
   gradeTitle: string = '';
   gradeFilter = '';
-  students: any[] = [];
   selectedSection: string = '';
   availableSections: string[] = [];
-  allStudents: any[] = []; // se guardan todos los estudiantes y se filtra sobre este array
+  allStudents: any[] = []; 
+
+  
+  dataSource = new MatTableDataSource<any>(); 
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator; 
 
   constructor(
     private route: ActivatedRoute,
@@ -33,32 +39,40 @@ export class GradeStudentsComponent implements OnInit {
     });
   }
 
+  ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator;
+  }
+
   // Método para obtener estudiantes por grado
   loadStudentsByGrade(grade: string): void {
-  this.userService.getUsersByGrade(grade).subscribe({
-    next: (response) => {
-      this.allStudents = response.data;
-      this.extractSections(); // Para llenar el filtro dinámico
-      this.applySectionFilter(); // Para inicializar lista filtrada
-    },
-    error: (err) => {
-      console.error('Error cargando estudiantes:', err);
-    }
-  });
-}
-
-extractSections(): void {
-  const secciones = this.allStudents.map(s => s.section).filter(Boolean);
-  this.availableSections = Array.from(new Set(secciones));
-}
-
-applySectionFilter(): void {
-  if (this.selectedSection) {
-    this.students = this.allStudents.filter(s => s.section === this.selectedSection);
-  } else {
-    this.students = [...this.allStudents]; // todas las secciones
+    this.userService.getUsersByGrade(grade).subscribe({
+      next: (response) => {
+        this.allStudents = response.data;
+        this.dataSource.data = this.allStudents; 
+        this.extractSections(); // Para llenar el filtro dinámico
+        this.applySectionFilter(); // Para inicializar lista filtrada
+      },
+      error: (err) => {
+        console.error('Error cargando estudiantes:', err);
+      }
+    });
   }
-}
+
+  extractSections(): void {
+    const secciones = this.allStudents.map(s => s.section).filter(Boolean);
+    this.availableSections = Array.from(new Set(secciones));
+  }
+
+  applySectionFilter(): void {
+    if (this.selectedSection) {
+      this.dataSource.data = this.allStudents.filter(s => s.section === this.selectedSection);
+    } else {
+      this.dataSource.data = [...this.allStudents]; 
+    }
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
+  }
 
   newStudent() {
     const dialogRef = this.dialog.open(CreateUserFormComponent, {

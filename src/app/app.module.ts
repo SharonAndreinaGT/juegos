@@ -41,6 +41,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatTabsModule } from '@angular/material/tabs';
 
 
 @NgModule({
@@ -84,6 +85,7 @@ import { MatButtonModule } from '@angular/material/button';
       MatFormFieldModule,
       MatButtonModule,
       FormsModule,
+      MatTabsModule,
       HttpClientModule
     ],
     providers: [

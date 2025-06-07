@@ -10,6 +10,9 @@ import { GamesOptionsComponent } from './games-options/games-options.component';
 import { PuzzleComponent } from './puzzle/puzzle.component';
 import { MemoryComponent } from './memory/memory.component';
 import { RiddleComponent } from './riddle/riddle.component';
+import { PuzzleSettingsComponent } from './puzzle-settings/puzzle-settings.component';
+import { MemorySettingsComponent } from './memory-settings/memory-settings.component';
+import { RiddleSettingsComponent } from './riddle-settings/riddle-settings.component';
 
 //rutas de navegacion
 
@@ -28,9 +31,9 @@ const routes: Routes = [
   { path: 'secondGrade', component: GradeStudentsComponent, data: { gradeTitle: 'Segundo Grado', gradeFilter: 'second' }},
   { path: 'thirdGrade', component: GradeStudentsComponent, data: { gradeTitle: 'Tercer Grado', gradeFilter: 'third' }},
   { path: 'settings', component: GamesSettingsComponent, data: { title: 'Configuración de Juegos'}},
-  { path: 'puzzle', component: GamesSettingsComponent, data: { title: 'Rompecabezas'}},
-  { path: 'memory', component: GamesSettingsComponent, data: { title: 'Memoria'}},
-  { path: 'words', component: GamesSettingsComponent, data: { title: 'Adivina la Palabra Oculta'}},
+  { path: 'puzzleSettings', component: PuzzleSettingsComponent, data: { title: 'Rompecabezas'}},
+  { path: 'memorySettings', component: MemorySettingsComponent, data: { title: 'Memoria'}},
+  { path: 'riddleSettings', component: RiddleSettingsComponent, data: { title: 'Adivina la Palabra Oculta'}},
 
   { path: '', redirectTo: 'welcome', pathMatch: 'full' },
 ];

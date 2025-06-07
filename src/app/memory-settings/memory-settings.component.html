@@ -36,12 +36,13 @@
 
     <mat-divider></mat-divider>
 
-        <button mat-button class="menu-button" routerLink="/welcome">
-            <mat-icon>logout</mat-icon>
-            <span>Salir</span>
-        </button>
-        </mat-nav-list>
-    </mat-sidenav>
+    <button mat-button class="menu-button" routerLink="/welcome">
+        <mat-icon>logout</mat-icon>
+        <span>Salir</span>
+    </button>
+    </mat-nav-list>
+</mat-sidenav>
+
 
     <mat-sidenav-content class="content">
         <mat-card class="welcome-container">
@@ -50,20 +51,7 @@
                     <h1>{{ title }}</h1>
                 </div>
            
-                <div class="image-container">
-                    <div class="image-item">
-                      <span class="span">ROMPECABEZAS</span>
-                      <img src="assets/img/puzzle.jpg" alt="" class="small-image" routerLink="/puzzleSettings">
-                    </div>
-                    <div class="image-item">
-                      <span class="span">MEMORIA</span>
-                      <img src="assets/img/memory.png" alt="" class="small-image" routerLink="/memorySettings">
-                    </div>
-                    <div class="image-item">
-                      <span class="span">ADIVINA LA PALABRA OCULTA</span>
-                      <img src="assets/img/words.png" alt="" class="small-image" routerLink="/riddleSettings">
-                    </div>
-                </div>
+          
                 
             </mat-card-content>
         </mat-card>

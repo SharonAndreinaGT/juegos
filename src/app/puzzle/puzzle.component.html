@@ -5,54 +5,60 @@
         ¡Que comience la diversión!
       </h1>
       <div class="status" *ngIf="!isComplete && timeLeft > 0">
-        <p class="score">Movimientos: {{ score }}</p>
+        <p class="moves">Movimientos: {{ moves }}</p>
         <p class="timer">Tiempo: {{ elapsedTime }}</p>
       </div>
     </div>
 
     <div class="puzzle-wrapper">
-      <div
-        class="puzzle-grid"
-        [style.width.px]="cols * pieceSize"
-        [style.height.px]="rows * pieceSize"
-        [style.grid-template-columns]="'repeat(' + cols + ', 1fr)'"
-        [style.grid-template-rows]="'repeat(' + rows + ', 1fr)'"
-        *ngIf="!isComplete && timeLeft > 0"
-      >
+      <div class="puzzle-container">
+        <div
+          class="puzzle-grid"
+          *ngIf="!isComplete && timeLeft > 0" 
+          [style.grid-template-columns]="'repeat(' + cols + ', ' + pieceSize + 'px)'"
+          [style.grid-template-rows]="'repeat(' + rows + ', ' + pieceSize + 'px)'"
+          [style.width]="(cols * pieceSize) + 'px'"
+          [style.height]="(rows * pieceSize) + 'px'">
+
         <div
           class="puzzle-piece"
           *ngFor="let piece of pieces; let i = index"
-          [style.background-image]="'url(' + imageUrl + ')'"
-          [style.background-position]="piece.bgPosition"
-          [style.width.px]="pieceSize"
-          [style.height.px]="pieceSize"
-          [style.background-size]="(cols * pieceSize) + 'px ' + (rows * pieceSize) + 'px'"
           [draggable]="!isComplete && timeLeft > 0"
           (dragstart)="onDragStart($event, i)"
           (dragover)="onDragOver($event)"
           (drop)="onDrop($event, i)"
+          [style.background-image]="'url(' + imageUrl + ')'"
+          [style.background-position]="piece.bgPosition"
+          [style.background-size]="(cols * pieceSize) + 'px ' + (rows * pieceSize) + 'px'"
+          [style.width]="pieceSize + 'px'"
+          [style.height]="pieceSize + 'px'"
         ></div>
+        </div>
+
+        <div *ngIf="isComplete || timeLeft <= 0" class="game-over-message">
+          <h2 *ngIf="isComplete">¡Rompecabezas completado!</h2>
+          <h2 *ngIf="!isComplete && timeLeft <= 0">
+            ¡Tiempo agotado! ¡Sigue practicando!
+          </h2>
+
+          <p>Movimientos: {{ moves }}</p>
+          <p>Tiempo restante: {{ elapsedTime }}</p>
+
+          <div class="stars-display">
+            <h3>Tu Puntuación:</h3>
+            <span *ngFor="let i of [0, 1, 2]" class="star" [class.filled]="i < stars">
+              &#9733;
+            </span>
+          </div>
+
+          <button *ngIf="!isComplete && timeLeft <= 0" (click)="resetGame()">
+            Volver a intentar
+          </button>
+          <button *ngIf="isComplete" (click)="resetGame()">
+            Jugar de nuevo
+          </button>
+        </div>
       </div>
-
-      <div *ngIf="isComplete || timeLeft <= 0" class="game-over-message">
-        <h2 *ngIf="isComplete">¡Rompecabezas completado!</h2>
-        <h2 *ngIf="!isComplete && timeLeft <= 0">
-          ¡Tiempo agotado! ¡Sigue practicando!
-        </h2>
-
-        <p>Movimientos: {{ score }}</p>
-        <p>Tiempo restante: {{ elapsedTime }}</p>
-
-        <div class="stars-display">
-          <h3>Tu Puntuación:</h3>
-          <span *ngFor="let i of [0, 1, 2]" class="star" [class.filled]="i < stars">
-            &#9733; </span>
-        </div>
-
-        <button *ngIf="!isComplete && timeLeft <= 0" (click)="resetGame()">
-          Volver a intentar
-        </button>
-        </div>
     </div>
   </div>
 </mat-sidenav-container>

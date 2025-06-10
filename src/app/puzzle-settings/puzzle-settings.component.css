@@ -79,3 +79,42 @@
   transform: translateY(-2px); /* Pequeño levantamiento al pasar el mouse */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra para efecto "elevado" */
 }
+
+
+/* Image Preview Styles - Adapted for smaller size and no overflow */
+.image-preview {
+  margin-top: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden; /* Important to clip overflowing images */
+  background-color: #f9f9f9;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px; /* Add some padding around the image */
+  max-width: 250px; /* Control max width of the preview container */
+  height: auto; /* Allow height to adjust naturally */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for the preview */
+}
+
+.image-preview img {
+  max-width: 100%; /* Ensure image doesn't overflow its preview container */
+  max-height: 180px; /* Limit the maximum height of the image */
+  display: block; /* Remove extra space below image */
+  object-fit: contain; /* Scales the image nicely within its content box without cropping */
+  border-radius: 5px; /* Slightly rounded corners for the image itself */
+}
+
+/* Material Design specific overrides */
+.mat-form-field-appearance-outline .mat-form-field-wrapper {
+  margin-bottom: 0; /* Remove default margin */
+}
+
+.mat-form-field-subscript-wrapper {
+  padding: 4px 0 0; /* Adjust hint/error message spacing */
+}
+
+.mat-hint {
+  font-size: 0.85rem;
+  color: #888;
+}

@@ -54,4 +54,37 @@
     font-family: 'Verdana', sans-serif; /* Fuente del texto */
     text-align: center;
 }
-  
+
+.table-responsive {
+  margin-top: 20px;
+  width: 100%;
+}
+
+.table {
+  width: 100%;
+}
+
+.table th{
+  color: #0b185f;
+}
+
+.table th, .table td {
+  vertical-align: middle;
+  text-align: center;
+}
+
+/* Estilos de la cabecera */
+.table thead th {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+  font-weight: bold;
+}
+
+/* Estilos de las filas */
+.table tbody tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.settings-card{
+  background-color: #cfe0ff;
+}

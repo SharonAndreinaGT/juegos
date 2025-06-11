@@ -21,6 +21,7 @@ import { MemorySettingsComponent } from './memory-settings/memory-settings.compo
 import { RiddleSettingsComponent } from './riddle-settings/riddle-settings.component';
 import { ReportComponent } from './report/report.component';
 import { ProgressComponent } from './progress/progress.component';
+import { GamesOptionsComponent } from './games-options/games-options.component';
 
 //importaciones de angular material
 
@@ -64,7 +65,8 @@ import { MatTabsModule } from '@angular/material/tabs';
       MemorySettingsComponent,
       RiddleSettingsComponent,
       ReportComponent,
-      ProgressComponent
+      ProgressComponent,
+      GamesOptionsComponent
     ],
     imports: [
       BrowserModule,

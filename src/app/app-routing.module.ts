@@ -24,7 +24,7 @@ const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'main', component: MainComponent },
   { path: 'options', component: GamesOptionsComponent },
-  { path: 'puzzle', component: PuzzleComponent },
+  { path: 'puzzle/:levelName', component: PuzzleComponent },
   { path: 'memory', component: MemoryComponent },
   { path: 'riddle', component: RiddleComponent },
   { path: 'report', component: ReportComponent },

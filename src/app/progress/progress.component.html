@@ -1,64 +1,115 @@
 <mat-sidenav-container class="container">
-    <mat-sidenav mode="side" opened class="sidenav-bar">
+  <mat-sidenav mode="side" opened class="sidenav-bar">
     <mat-toolbar class="sidenav">
       <span>Administrador</span>
     </mat-toolbar>
-    
+
     <mat-nav-list>
-      <button mat-button class="menu-button" (click)="navigateTo('main')">
+      <button mat-button class="menu-button" routerLink="/main">
         <mat-icon>person</mat-icon>
         <span>Inicio</span>
       </button>
-      <button mat-button class="menu-button" (click)="navigateTo('firstGrade')">
+      <button mat-button class="menu-button" routerLink="/firstGrade">
         <mat-icon>person_add</mat-icon>
         <span>Primer Grado</span>
       </button>
-      <button mat-button class="menu-button" (click)="navigateTo('secondGrade')">
+      <button mat-button class="menu-button" routerLink="/secondGrade">
         <mat-icon>person_add</mat-icon>
         <span>Segundo Grado</span>
       </button>
-      <button mat-button class="menu-button" (click)="navigateTo('thirdGrade')">
+      <button mat-button class="menu-button" routerLink="/thirdGrade">
         <mat-icon>person_add</mat-icon>
         <span>Tercer Grado</span>
       </button>
-      <button mat-button class="menu-button" (click)="navigateTo('progress')">
+      <button mat-button class="menu-button" routerLink="/progress">
         <mat-icon>timeline</mat-icon>
         <span>Progreso</span>
       </button>
-      <button mat-button class="menu-button" (click)="navigateTo('settings')">
+      <button mat-button class="menu-button" routerLink="/settings">
         <mat-icon>settings</mat-icon>
         <span>Configuración Juegos</span>
       </button>
-      <button mat-button class="menu-button" (click)="navigateTo('report')">
+      <button mat-button class="menu-button" routerLink="/report">
         <mat-icon>description</mat-icon>
         <span>Informes</span>
       </button>
 
       <mat-divider></mat-divider>
 
-      <button mat-button class="menu-button" (click)="navigateTo('welcome')">
+      <button mat-button class="menu-button" routerLink="/welcome">
         <mat-icon>logout</mat-icon>
         <span>Salir</span>
       </button>
     </mat-nav-list>
-    </mat-sidenav>
+  </mat-sidenav>
 
-    <mat-sidenav-content class="content">
-    <ng-container >
-      <div class="welcome-container">
-        <mat-card class="welcome-card">
-          <mat-card-content>
-            <div class="welcome-content">
-              <h2>Progreso</h2>
+  <mat-sidenav-content class="content">
+    <mat-card class="welcome-container">
+      <mat-card-content>
+        <div class="welcome-content">
+          <h1>Progreso General</h1>
+        </div>
 
-            </div>
-          </mat-card-content>
+        <mat-card class="settings-card">
+          <div class="table-responsive">
+            <mat-tab-group>
+              <mat-tab label="ROMPECABEZAS">
+
+                <table mat-table [dataSource]="studentProgressData" class="table table-striped table-bordered mat-elevation-z8" *ngIf="!loading">
+
+                  <!-- Nombre -->
+                  <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef> Nombre </th>
+                    <td mat-cell *matCellDef="let student"> {{ student.name }} </td>
+                  </ng-container>
+
+                  <!-- Grado -->
+                  <ng-container matColumnDef="grade">
+                    <th mat-header-cell *matHeaderCellDef> Grado </th>
+                    <td mat-cell *matCellDef="let student"> {{ student.grade || 'No definido' }} </td>
+                  </ng-container>
+
+                  <!-- Puntaje -->
+                  <ng-container matColumnDef="score">
+                    <th mat-header-cell *matHeaderCellDef> Puntaje </th>
+                    <td mat-cell *matCellDef="let student">
+                      {{ student.latestPuzzleResult?.score ?? 'Sin datos' }}
+                    </td>
+                  </ng-container>
+
+                  <!-- Tiempo -->
+                  <ng-container matColumnDef="time">
+                    <th mat-header-cell *matHeaderCellDef> Tiempo (segundos) </th>
+                    <td mat-cell *matCellDef="let student">
+                      {{ student.latestPuzzleResult?.time ?? 'Sin datos' }}
+                    </td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                </table>
+
+                <mat-paginator [pageSize]="6" showFirstLastButtons></mat-paginator>
+
+                <p *ngIf="loading">Cargando datos...</p>
+                <p *ngIf="error">{{ error }}</p>
+              </mat-tab>
+
+              <mat-tab label="MEMORIA">
+                <div></div>
+              </mat-tab>
+
+              <mat-tab label="ADIVINA LA PALABRA OCULTA">
+                <div></div>
+              </mat-tab>
+
+              <mat-tab label="GRÁFICAS">
+                <div></div>
+              </mat-tab>
+            </mat-tab-group>
+          </div>
         </mat-card>
-      </div>
-
-
-    </ng-container>
-
-    <router-outlet></router-outlet>
+      </mat-card-content>
+    </mat-card>
   </mat-sidenav-content>
 </mat-sidenav-container>

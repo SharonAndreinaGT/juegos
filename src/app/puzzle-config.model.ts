@@ -6,3 +6,26 @@ export interface PuzzleConfig {
   cols?: number;           // Número de columnas del rompecabezas
   time_limit?: number;     // Tiempo límite en segundos (0 para ilimitado)
 }
+
+export interface PuzzleResult {
+  id?: string;
+  student_id: string; // Este será el ID (PK) de Directus, aunque sea Integer en DB, Directus API lo envía como string.
+  level_name: string;
+  score: number;
+  stars: number;
+  moves: number;
+  time_taken: number;
+  is_complete: boolean;
+  date_created?: string;
+}
+
+// Interfaz para la estructura del usuario de Directus 
+export interface User {
+  id: string; // El Primary Key de Directus, angular lo maneja como string
+  name: string; // identificador
+  lastname?: string;
+  score?: number;
+  grade?: string;
+  section?: string;
+  status?: string;
+}

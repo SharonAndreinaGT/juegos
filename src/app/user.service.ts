@@ -1,11 +1,14 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
+import { User } from './puzzle-config.model'; 
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
-  private apiUrl = 'http://localhost:8055/items/users';
+  private apiUrl = 'http://localhost:8055/items/users'; 
 
   constructor(private http: HttpClient) {}
 
@@ -30,7 +33,49 @@ export class UserService {
   }
 
   // Obtener un solo usuario por ID
-  getUserById(id: number) {
-    return this.http.get<any>(`${this.apiUrl}/${id}`);
+  getUserById(id: number): Observable<User | null> { // Modificado para devolver User | null
+    console.log(`[UserService] Buscando usuario con ID (PK): ${id}`);
+    return this.http.get<any>(`${this.apiUrl}/${id}`).pipe(
+      map(response => {
+        if (response.data) {
+          const user: User = response.data;
+          console.log('[UserService] Usuario encontrado por ID:', user);
+          return user;
+        } else {
+          console.log('[UserService] No se encontró ningún usuario con ese ID.');
+          return null;
+        }
+      }),
+      catchError(error => {
+        console.error('[UserService] Error al buscar usuario por ID:', error);
+        return of(null); // Devuelve null en caso de error
+      })
+    );
+  }
+
+  /**
+   * Nuevo método: Busca un usuario por su 'name' en la colección 'users' de Directus.
+   * Si lo encuentra, devuelve el objeto User (incluyendo su 'id' PK).
+   */
+  getUserByName(userName: string): Observable<User | null> {
+    console.log(`[UserService] Buscando usuario con nombre: ${userName}`);
+    return this.http.get<any>(
+      `${this.apiUrl}?filter[name][_eq]=${userName}`
+    ).pipe(
+      map(response => {
+        if (response.data && response.data.length > 0) {
+          const user: User = response.data[0];
+          console.log('[UserService] Usuario encontrado:', user);
+          return user; // Devuelve el primer usuario encontrado
+        } else {
+          console.log('[UserService] No se encontró ningún usuario con ese nombre.');
+          return null; // No se encontró ningún usuario
+        }
+      }),
+      catchError(error => {
+        console.error('[UserService] Error al buscar usuario por nombre:', error);
+        return of(null); // Devuelve null en caso de error
+      })
+    );
   }
 }

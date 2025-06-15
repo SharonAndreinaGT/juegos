@@ -5,6 +5,7 @@ export interface PuzzleConfig {
   rows?: number;           // Número de filas del rompecabezas
   cols?: number;           // Número de columnas del rompecabezas
   time_limit?: number;     // Tiempo límite en segundos (0 para ilimitado)
+  isActive?: boolean; //para saber que nivl está activo
 }
 
 export interface PuzzleResult {
@@ -14,7 +15,7 @@ export interface PuzzleResult {
   score: number;
   stars: number;
   moves: number;
-  time_taken: number;
+  time: number;
   is_complete: boolean;
   date_created?: string;
 }

@@ -42,8 +42,7 @@
       </button>
     </mat-nav-list>
   </mat-sidenav>
-
-
+  
   <mat-sidenav-content class="content">
     <mat-card class="welcome-container">
       <mat-card-content class="">
@@ -82,8 +81,8 @@
                              placeholder="2 (para 4 piezas)"
                              min="2" max="2"
                              [(ngModel)]="level1Config.rows"
-                             name="level1Rows"> 
-                            <mat-hint>Este nivel es de 2x2 = 4 piezas.</mat-hint>
+                             name="level1Rows">
+                      <mat-hint>Este nivel es de 2x2 = 4 piezas.</mat-hint>
                     </mat-form-field>
                   </div>
 
@@ -97,6 +96,14 @@
                              name="level1TimeLimit">
                       <mat-hint>Establece 0 para un juego sin límite de tiempo</mat-hint>
                     </mat-form-field>
+                  </div>
+
+                  <div class="form-group">
+                    <mat-slide-toggle
+                      [checked]="level1Config.isActive"
+                      (change)="onLevelActiveChange('level1', $event.checked)">
+                      Nivel Activo
+                    </mat-slide-toggle>
                   </div>
 
                   <button mat-raised-button color="primary" (click)="saveLevelConfig('level1')">
@@ -150,6 +157,14 @@
                     </mat-form-field>
                   </div>
 
+                  <div class="form-group">
+                    <mat-slide-toggle
+                      [checked]="level2Config.isActive"
+                      (change)="onLevelActiveChange('level2', $event.checked)">
+                      Nivel Activo
+                    </mat-slide-toggle>
+                  </div>
+
                   <button mat-raised-button color="primary" (click)="saveLevelConfig('level2')">
                     Guardar Configuración
                   </button>
@@ -199,6 +214,14 @@
                              name="level3TimeLimit">
                       <mat-hint>Establece 0 para un juego sin límite de tiempo</mat-hint>
                     </mat-form-field>
+                  </div>
+
+                  <div class="form-group">
+                    <mat-slide-toggle
+                      [checked]="level3Config.isActive"
+                      (change)="onLevelActiveChange('level3', $event.checked)">
+                      Nivel Activo
+                    </mat-slide-toggle>
                   </div>
 
                   <button mat-raised-button color="primary" (click)="saveLevelConfig('level3')">

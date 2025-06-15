@@ -23,6 +23,7 @@ import { ReportComponent } from './report/report.component';
 import { ProgressComponent } from './progress/progress.component';
 import { GamesOptionsComponent } from './games-options/games-options.component';
 
+
 //importaciones de angular material
 
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -45,6 +46,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+
 
 
 @NgModule({
@@ -92,6 +95,7 @@ import { MatTabsModule } from '@angular/material/tabs';
       MatButtonModule,
       FormsModule,
       MatTabsModule,
+      MatSlideToggleModule,
       HttpClientModule
     ],
     providers: [

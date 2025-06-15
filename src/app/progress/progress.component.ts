@@ -12,6 +12,7 @@ import { MatTableDataSource } from '@angular/material/table';
 interface StudentProgress {
   id: string;
   name: string;
+  lastname: string;
   grade?: string;
   latestPuzzleResult: PuzzleResult | null;
 }
@@ -24,9 +25,9 @@ interface StudentProgress {
 export class ProgressComponent implements OnInit, AfterViewInit {
 
   // Definimos las columnas que usará la tabla
-  displayedColumns: string[] = ['name', 'grade', 'score', 'time'];
+  displayedColumns: string[] = ['name', 'lastname','grade', 'score', 'time'];
 
-  // Usamos MatTableDataSource para aprovechar la paginación, orden y filtrado
+  // MatTableDataSource  para la paginación, orden y filtrado
   studentProgressData = new MatTableDataSource<StudentProgress>([]);
 
   loading = true;
@@ -73,6 +74,7 @@ export class ProgressComponent implements OnInit, AfterViewInit {
               return {
                 id: user.id,
                 name: user.name,
+                lastname: user.lastname,
                 grade: user.grade,
                 latestPuzzleResult: latestResult
               } as StudentProgress;
@@ -82,6 +84,7 @@ export class ProgressComponent implements OnInit, AfterViewInit {
               return of({
                 id: user.id,
                 name: user.name,
+                lastname: user.lastname,
                 grade: user.grade,
                 latestPuzzleResult: null
               } as StudentProgress);

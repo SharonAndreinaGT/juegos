@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-// import { ActivatedRoute } from '@angular/router'; // No necesitas ActivatedRoute aquí para esta lógica
 import { PuzzleService } from '../puzzle.service';
 import { PuzzleConfig } from '../puzzle-config.model';
 import { SharedDataService } from '../sharedData.service';
@@ -7,16 +6,16 @@ import { SharedDataService } from '../sharedData.service';
 @Component({
   selector: 'app-puzzle-settings',
   templateUrl: './puzzle-settings.component.html',
-  styleUrl: './puzzle-settings.component.css'
+  styleUrls: ['./puzzle-settings.component.css'] // Corrected `styleUrl` to `styleUrls` as it's an array
 })
 export class PuzzleSettingsComponent implements OnInit {
   title = 'Rompecabezas';
 
   // Modelos para la configuración de cada nivel.
-  // Inicializamos con valores por defecto. Las propiedades son opcionales en la interfaz.
-  level1Config: PuzzleConfig = { level_name: 'Nivel1', rows: 2, cols: 2, time_limit: 180 };
-  level2Config: PuzzleConfig = { level_name: 'Nivel2', rows: 3, cols: 3, time_limit: 120 };
-  level3Config: PuzzleConfig = { level_name: 'Nivel3', rows: 4, cols: 4, time_limit: 90 };
+  // Inicializamos con valores por defecto y agregamos 'isActive'.
+  level1Config: PuzzleConfig = { level_name: 'Nivel1', rows: 2, cols: 2, time_limit: 180, isActive: false };
+  level2Config: PuzzleConfig = { level_name: 'Nivel2', rows: 3, cols: 3, time_limit: 120, isActive: false };
+  level3Config: PuzzleConfig = { level_name: 'Nivel3', rows: 4, cols: 4, time_limit: 90, isActive: false };
 
   // Para previsualización de imágenes seleccionadas localmente
   level1ImagePreview: string | ArrayBuffer | null = null;
@@ -30,14 +29,17 @@ export class PuzzleSettingsComponent implements OnInit {
 
   constructor(
     private puzzleService: PuzzleService,
-    private sharedDataService: SharedDataService // Inyectamos el SharedDataService
+    private sharedDataService: SharedDataService
   ) {}
 
   ngOnInit(): void {
     // Cargar la configuración existente para cada nivel al iniciar el componente
-    this.loadLevelConfig('Nivel1');
-    this.loadLevelConfig('Nivel2');
-    this.loadLevelConfig('Nivel3');
+    this.loadAllLevelConfigs();
+  }
+
+  loadAllLevelConfigs(): void {
+    const levels = ['Nivel1', 'Nivel2', 'Nivel3'];
+    levels.forEach(levelName => this.loadLevelConfig(levelName));
   }
 
   /**
@@ -47,15 +49,14 @@ export class PuzzleSettingsComponent implements OnInit {
   loadLevelConfig(levelName: string): void {
     this.puzzleService.getPuzzleConfigByLevel(levelName).subscribe(
       (response: any) => {
-        const configData: PuzzleConfig | undefined = response.data?.[0]; // Usar optional chaining para seguridad
-        console.log(`[PuzzleSettingsComponent] Respuesta de Directus para ${levelName}:`, response); // Debug: ver la respuesta completa
-        console.log(`[PuzzleSettingsComponent] Datos de configuración procesados para ${levelName}:`, configData); // Debug: ver el objeto extraído
+        const configData: PuzzleConfig | undefined = response.data?.[0];
+        console.log(`[PuzzleSettingsComponent] Respuesta de Directus para ${levelName}:`, response);
+        console.log(`[PuzzleSettingsComponent] Datos de configuración procesados para ${levelName}:`, configData);
 
         if (configData) {
-          // Asignar los datos cargados a la configuración correspondiente
           switch (levelName) {
             case 'Nivel1':
-              this.level1Config = { ...this.level1Config, ...configData }; // Fusionar para no perder valores por defecto si no vienen
+              this.level1Config = { ...this.level1Config, ...configData };
               this.level1ImagePreview = configData.imageUrl ? this.puzzleService.getDirectusFileUrl(configData.imageUrl) : null;
               break;
             case 'Nivel2':
@@ -68,6 +69,11 @@ export class PuzzleSettingsComponent implements OnInit {
               break;
           }
           console.log(`[PuzzleSettingsComponent] Configuración de ${levelName} cargada:`, configData);
+
+          // Si el nivel cargado está activo, actualiza el servicio compartido
+          if (configData.isActive) {
+            this.sharedDataService.setCurrentPuzzleLevel(configData.level_name!);
+          }
         } else {
           console.log(`[PuzzleSettingsComponent] No se encontró configuración para ${levelName}. Se usarán valores por defecto.`);
         }
@@ -113,7 +119,7 @@ export class PuzzleSettingsComponent implements OnInit {
         case 'level1':
           this.level1ImagePreview = null;
           this.level1ImageFile = null;
-          this.level1Config.imageUrl = ''; // Borrar la referencia de imagen en el modelo
+          this.level1Config.imageUrl = '';
           break;
         case 'level2':
           this.level2ImagePreview = null;
@@ -128,6 +134,47 @@ export class PuzzleSettingsComponent implements OnInit {
       }
     }
   }
+
+  /**
+   * Actualiza el estado 'isActive' de un nivel y asegura que solo uno esté activo.
+   * @param level El nivel cuya propiedad 'isActive' ha cambiado.
+   * @param event El evento de cambio del slide toggle.
+   */
+  onLevelActiveChange(level: 'level1' | 'level2' | 'level3', isActive: boolean): void {
+    let configToUpdate: PuzzleConfig;
+    switch (level) {
+      case 'level1':
+        configToUpdate = this.level1Config;
+        break;
+      case 'level2':
+        configToUpdate = this.level2Config;
+        break;
+      case 'level3':
+        configToUpdate = this.level3Config;
+        break;
+      default:
+        return;
+    }
+
+    // Desactivar todos los demás niveles si este se está activando
+    if (isActive) {
+      if (level !== 'level1') this.level1Config.isActive = false;
+      if (level !== 'level2') this.level2Config.isActive = false;
+      if (level !== 'level3') this.level3Config.isActive = false;
+      this.sharedDataService.setCurrentPuzzleLevel(configToUpdate.level_name!);
+    } else {
+      // Si se desactiva el nivel actual y es el que estaba activo, limpiar el nivel activo en sharedDataService
+      if (this.sharedDataService.getCurrentPuzzleLevel() === configToUpdate.level_name) {
+        this.sharedDataService.setCurrentPuzzleLevel(''); 
+      }
+    }
+    configToUpdate.isActive = isActive;
+
+    // Aunque el slide toggle actualiza el modelo, es buena práctica llamar a saveLevelConfig
+    // para persistir este cambio en la base de datos de inmediato.
+    this.saveLevelConfig(level);
+  }
+
 
   /**
    * Guarda la configuración de un nivel específico en Directus.
@@ -163,27 +210,27 @@ export class PuzzleSettingsComponent implements OnInit {
         const uploadResponse = await this.puzzleService.uploadImage(imageFile).toPromise();
 
         if (uploadResponse && uploadResponse.data && uploadResponse.data.id) {
-          // Asigna el ID del archivo de Directus a configToSave.imageUrl
           configToSave.imageUrl = uploadResponse.data.id;
           console.log('[PuzzleSettingsComponent] Imagen subida, ID:', configToSave.imageUrl);
         } else {
           console.warn('[PuzzleSettingsComponent] La subida de imagen no devolvió un ID válido. La configuración se guardará sin la nueva imagen.');
-          configToSave.imageUrl = ''; // O null, dependiendo de la interfaz y si Directus lo acepta
+          configToSave.imageUrl = '';
         }
       }
 
-      // Paso 2: Guardar la configuración (con el ID de la imagen o el existente) en Directus
+      // Paso 2: Desactivar todos los demás niveles antes de guardar la configuración del nivel actual
+      // Esto se hace en el backend para asegurar la consistencia.
+      if (configToSave.isActive) {
+        await this.deactivateOtherLevels(configToSave.level_name!);
+      }
+
+      // Paso 3: Guardar la configuración (con el ID de la imagen o el existente) en Directus
       console.log(`[PuzzleSettingsComponent] Guardando configuración para ${configToSave.level_name}:`, configToSave);
 
-     
-      // Declaramos 'savedConfig' para que TypeScript sepa que PUEDE ser 'undefined'.
-      // El método .toPromise() de un Observable puede resolver a 'undefined' si el Observable
-      // completa sin emitir ningún valor.
       const savedConfig: PuzzleConfig | undefined = await this.puzzleService.savePuzzleConfig(configToSave).toPromise();
 
-      // Verificamos si 'savedConfig' tiene un valor antes de intentar usarlo.
       if (savedConfig) {
-        // Paso 3: Actualizar el estado del componente con la configuración guardada por Directus
+        // Paso 4: Actualizar el estado del componente con la configuración guardada por Directus
         switch (level) {
           case 'level1':
             this.level1Config = { ...savedConfig };
@@ -204,14 +251,16 @@ export class PuzzleSettingsComponent implements OnInit {
         console.log(`[PuzzleSettingsComponent] Configuración de ${configToSave.level_name} guardada exitosamente:`, savedConfig);
         alert(`¡Configuración de ${configToSave.level_name} guardada exitosamente!`);
 
-        // Establecer este nivel como el nivel de rompecabezas actual en el servicio compartido.
-        // Solo lo hacemos si savedConfig.level_name es una cadena válida.
-        if (savedConfig.level_name) {
+        // Si este nivel se acaba de activar, establecerlo como el nivel de rompecabezas actual en el servicio compartido.
+        if (savedConfig.isActive && savedConfig.level_name) {
           this.sharedDataService.setCurrentPuzzleLevel(savedConfig.level_name);
           console.log(`[PuzzleSettingsComponent] Nivel de rompecabezas actual establecido a: ${savedConfig.level_name}`);
+        } else if (!savedConfig.isActive && this.sharedDataService.getCurrentPuzzleLevel() === savedConfig.level_name) {
+            // Si el nivel se desactiva y era el activo, limpiar el nivel activo
+            this.sharedDataService.setCurrentPuzzleLevel('');
         }
+
       } else {
-        // Manejar el caso en que 'savedConfig' sea 'undefined' (ej. el backend no devolvió datos válidos)
         console.error(`[PuzzleSettingsComponent] La operación de guardado de la configuración para ${configToSave.level_name} no devolvió datos válidos.`);
         alert(`Error al guardar la configuración de ${configToSave.level_name}: no se recibieron datos válidos.`);
       }
@@ -219,6 +268,39 @@ export class PuzzleSettingsComponent implements OnInit {
     } catch (error) {
       console.error(`[PuzzleSettingsComponent] Error al guardar la configuración de ${configToSave.level_name}:`, error);
       alert(`Error al guardar la configuración de ${configToSave.level_name}. Por favor, inténtalo de nuevo.`);
+    }
+  }
+
+  /**
+   * Desactiva todos los niveles de rompecabezas excepto el especificado.
+   * Esto debe actualizar la base de datos a través de PuzzleService.
+   */
+  private async deactivateOtherLevels(activeLevelName: string): Promise<void> {
+    const allLevelNames = ['Nivel1', 'Nivel2', 'Nivel3'];
+    const levelsToDeactivate = allLevelNames.filter(name => name !== activeLevelName);
+
+    for (const levelName of levelsToDeactivate) {
+      let configToUpdate: PuzzleConfig | undefined;
+      switch (levelName) {
+        case 'Nivel1': configToUpdate = this.level1Config; break;
+        case 'Nivel2': configToUpdate = this.level2Config; break;
+        case 'Nivel3': configToUpdate = this.level3Config; break;
+      }
+
+      if (configToUpdate && configToUpdate.isActive) {
+        console.log(`[PuzzleSettingsComponent] Desactivando ${levelName}...`);
+        configToUpdate.isActive = false;
+        // Solo guardamos si ya tiene un ID, lo que significa que existe en Directus.
+        // Si no tiene ID, significa que nunca se ha guardado, así que no hay nada que actualizar en Directus.
+        if (configToUpdate.id) {
+          try {
+            await this.puzzleService.savePuzzleConfig(configToUpdate).toPromise();
+            console.log(`[PuzzleSettingsComponent] ${levelName} desactivado en Directus.`);
+          } catch (error) {
+            console.error(`[PuzzleSettingsComponent] Error al desactivar ${levelName} en Directus:`, error);
+          }
+        }
+      }
     }
   }
 }

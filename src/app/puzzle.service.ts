@@ -1,9 +1,9 @@
 
-import { HttpClient, HttpHeaders } from '@angular/common/http'; // Asegúrate de importar HttpHeaders
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators'; // Asegúrate de importar map
-import { PuzzleConfig, PuzzleResult } from './puzzle-config.model'; // Asegúrate de que PuzzleResult esté importado
+import { map } from 'rxjs/operators';
+import { PuzzleConfig, PuzzleResult } from './puzzle-config.model';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +15,6 @@ export class PuzzleService {
   private directusFilesUrl = 'http://localhost:8055/files';
 
   // Colección para guardar los resultados de los rompecabezas
-  // ¡VERIFICA QUE ESTA SEA LA COLECCIÓN CORRECTA EN TU DIRECTUS PARA LOS RESULTADOS!
   private puzzleResultsCollection = 'puzzle_results';
   // URL base de Directus (útil para construir otras URLs)
   private directusBaseUrl = 'http://localhost:8055';
@@ -25,12 +24,23 @@ export class PuzzleService {
 
   /**
    * Obtiene la configuración del rompecabezas por el nombre del nivel.
-   * @param levelName El nombre del nivel (ej. "Nivel 1").
+   * @param levelName El nombre del nivel (ej. "Nivel1").
    * @returns Un Observable que emite la respuesta de Directus (que contiene un array de PuzzleConfig en `data`).
    */
   getPuzzleConfigByLevel(levelName: string): Observable<any> {
-    // Directus usa el filtro `_eq` para igualdad
-    return this.http.get<any>(`${this.apiUrl}?filter[level_name][_eq]=${(levelName)}`);
+    // Directus usa el filtro `_eq` para igualdad. Se solicita el ID también.
+    return this.http.get<any>(`${this.apiUrl}?filter[level_name][_eq]=${(levelName)}&fields=*,id`);
+  }
+
+  /**
+   * Obtiene todas las configuraciones de rompecabezas.
+   * Útil para la lógica de desactivación de otros niveles.
+   * @returns Un Observable que emite un array de PuzzleConfig.
+   */
+  getAllPuzzleConfigs(): Observable<PuzzleConfig[]> {
+    return this.http.get<any>(`${this.apiUrl}?fields=*,id`).pipe(
+      map(response => response.data || [])
+    );
   }
 
   /**
@@ -43,10 +53,16 @@ export class PuzzleService {
   savePuzzleConfig(config: PuzzleConfig): Observable<PuzzleConfig> {
     if (config.id) {
       // Actualizar configuración existente
-      return this.http.patch<PuzzleConfig>(`${this.apiUrl}/${config.id}`, config);
+      console.log(`[PuzzleService] Actualizando configuración con ID: ${config.id}`, config);
+      return this.http.patch<any>(`${this.apiUrl}/${config.id}`, config).pipe(
+        map(response => response.data)
+      );
     } else {
       // Crear nueva configuración
-      return this.http.post<PuzzleConfig>(this.apiUrl, config);
+      console.log('[PuzzleService] Creando nueva configuración:', config);
+      return this.http.post<any>(this.apiUrl, config).pipe(
+        map(response => response.data)
+      );
     }
   }
 
@@ -57,10 +73,8 @@ export class PuzzleService {
    */
   uploadImage(file: File): Observable<any> {
     const formData = new FormData();
-    formData.append('storage', 'local'); // O el storage que uses en Directus (ej. 's3')
-    // Opcional: Si tienes carpetas en Directus, puedes especificar un ID de carpeta aquí:
-    // formData.append('folder', 'tu_id_de_carpeta_en_directus');
-    formData.append('file', file, file.name); // 'file' es el nombre de campo que espera Directus para el archivo
+    formData.append('storage', 'local');
+    formData.append('file', file, file.name);
     return this.http.post<any>(this.directusFilesUrl, formData);
   }
 
@@ -70,10 +84,8 @@ export class PuzzleService {
    * @returns La URL completa del archivo.
    */
   getDirectusFileUrl(fileId: string): string {
-    return `http://localhost:8055/assets/${fileId}`; // ✅ Correcto
+    return `http://localhost:8055/assets/${fileId}`;
   }
-
-  // --- NUEVOS MÉTODOS AÑADIDOS A CONTINUACIÓN ---
 
   /**
    * Guarda un resultado de rompecabezas en la colección 'puzzle_results'.
@@ -84,13 +96,13 @@ export class PuzzleService {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     console.log('[PuzzleService] Enviando resultado de rompecabezas a Directus:', result);
     return this.http.post<any>(
-      `${this.directusBaseUrl}/items/${this.puzzleResultsCollection}`, // Usamos directusBaseUrl y puzzleResultsCollection
+      `${this.directusBaseUrl}/items/${this.puzzleResultsCollection}`,
       result,
       { headers: headers }
     ).pipe(
       map(response => {
         console.log('[PuzzleService] Respuesta de Directus al guardar resultado:', response);
-        return response.data; // Directus devuelve el objeto guardado dentro de 'data'
+        return response.data;
       })
     );
   }
@@ -104,11 +116,11 @@ export class PuzzleService {
   getStudentPuzzleResults(studentId: string): Observable<PuzzleResult[]> {
     console.log(`[PuzzleService] Obteniendo resultados para estudiante ID: ${studentId}`);
     return this.http.get<any>(
-      `${this.directusBaseUrl}/items/${this.puzzleResultsCollection}?filter[student_id][_eq]=${studentId}&sort=-date_created`
+      `${this.directusBaseUrl}/items/${this.puzzleResultsCollection}?filter[student_id][_eq]=${studentId}` //por esta condicion no se mostraba el puntaje ni el tiempo, &sort=-date_created
     ).pipe(
       map(response => {
         console.log('[PuzzleService] Resultados de rompecabezas obtenidos:', response.data);
-        return response.data || []; // Devuelve el array de resultados dentro de 'data', o un array vacío si no hay
+        return response.data || [];
       })
     );
   }

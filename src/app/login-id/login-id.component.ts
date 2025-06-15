@@ -1,34 +1,51 @@
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { SharedDataService } from '../sharedData.service';
+import { User } from '../puzzle-config.model';
 
 @Component({
   selector: 'app-login-id',
   templateUrl: './login-id.component.html',
   styleUrls: ['./login-id.component.css']
 })
-export class LoginIDComponent {
-   name: string = '';
-  errorMessage: string = ''; 
 
-  constructor(private http: HttpClient, private router: Router) {}
+export class LoginIDComponent {
+  name: string = '';
+  errorMessage: string = '';
+
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private sharedDataService: SharedDataService // Inyecta el SharedDataService
+  ) {}
 
   login() {
-    this.errorMessage = ''; 
+    this.errorMessage = '';
 
+    // Convertimos el nombre a minúsculas para la búsqueda.
+    // ASEGÚRATE de que el campo 'name' en Directus también esté en minúsculas
+    // o manejes la sensibilidad a mayúsculas y minúsculas de otra forma.
     const url = `http://localhost:8055/items/users?filter[name][_eq]=${this.name.toLowerCase()}`;
 
     this.http.get<any>(url).subscribe({
       next: (respuesta) => {
-        console.log(respuesta);
+        console.log('[LoginIDComponent] Respuesta de login:', respuesta);
         if (respuesta.data && respuesta.data.length > 0) {
           // Usuario encontrado
-          this.router.navigate(['/options']);
+          const loggedInUser: User = respuesta.data[0]; // Obtén el objeto User completo
+          // Usa el método de tu SharedDataService para guardar el ID del estudiante
+          this.sharedDataService.setLoggedInStudentId(loggedInUser.id);
+          this.router.navigate(['/options']); // Navega a la página de opciones
         } else {
-          // Usuario no encontrado, asigna el mensaje
+          // Usuario no encontrado
           this.errorMessage = 'Nombre no encontrado. Inténtelo de nuevo.';
         }
       },
+      error: (err) => {
+        console.error('[LoginIDComponent] Error en la petición de login:', err);
+        this.errorMessage = 'Error de conexión. Inténtelo de nuevo más tarde.';
+      }
     });
   }
 }

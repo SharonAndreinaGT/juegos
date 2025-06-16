@@ -5,8 +5,8 @@
         ¡Que comience la diversión!
       </h1>
       <div class="status" *ngIf="!isComplete && timeLeft > 0">
-        <p class="moves">Movimientos: {{ moves }}</p>
-        <p class="timer">Tiempo: {{ elapsedTime }}</p>
+        <p class="moves">Movimientos: <span>{{ moves }}</span></p>
+        <p class="timer">Tiempo: <span>{{ elapsedTime }}</span></p>
       </div>
     </div>
 

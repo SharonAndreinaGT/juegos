@@ -22,6 +22,7 @@ import { RiddleSettingsComponent } from './riddle-settings/riddle-settings.compo
 import { ReportComponent } from './report/report.component';
 import { ProgressComponent } from './progress/progress.component';
 import { GamesOptionsComponent } from './games-options/games-options.component';
+import { MemoryCardComponent } from './memory-card/memory-card.component';
 
 
 //importaciones de angular material
@@ -69,7 +70,8 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
       RiddleSettingsComponent,
       ReportComponent,
       ProgressComponent,
-      GamesOptionsComponent
+      GamesOptionsComponent,
+      MemoryCardComponent
     ],
     imports: [
       BrowserModule,

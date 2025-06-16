@@ -45,11 +45,16 @@
 
 .moves,
 .timer {
-  font-size: 1.1rem;
-  font-weight: bold;
-  margin: 0;
-  color: #333;
+
+  font-size: 1.2em;
+  font-weight: 500;
+
+  span {
+    font-weight: bold;
+    color: #3f51b5;
+  }
 }
+
 
 .puzzle-wrapper {
   display: flex;

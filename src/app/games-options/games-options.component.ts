@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core'; 
 import { Router } from '@angular/router';
 import { SharedDataService } from '../sharedData.service';
+import { MemoryGameStateService } from '../memory-game-state.service';
+import { LevelConfig } from '../memory-settings/memory-settings.component';
 
 @Component({
   selector: 'app-games-options',
@@ -11,13 +13,13 @@ export class GamesOptionsComponent implements OnInit {
   
   currentPuzzleLevel: string = 'Nivel1'; // iniciando con el valor por defecto
 
-  //iniciando con el valor por defecto
-  defaultMemoryLevel: string = 'Nivel 1'; 
+  activeLevel: LevelConfig | null = null; 
 
   // inyecta el servicio que se supone que va a conectar los datos para los niveles
   constructor(
     private router: Router,
-    private sharedDataService: SharedDataService
+    private sharedDataService: SharedDataService,
+    private memoryGameStateService: MemoryGameStateService 
   ) {}
 
 
@@ -27,6 +29,25 @@ export class GamesOptionsComponent implements OnInit {
       this.currentPuzzleLevel = level;
       console.log(`[GamesOptionsComponent] Current puzzle level updated to: ${this.currentPuzzleLevel}`);
     });
+
+  
+    // Suscripción para obtener el nivel activo de memoria
+    this.memoryGameStateService.activeLevel$.subscribe(level => {
+      this.activeLevel = level; // Asigna el nivel a la propiedad declarada
+      console.log(level)
+      if (level) {
+        console.log(`[GamesOptionsComponent] Nivel de memoria activo cargado: ${level.level_name}`);
+      } else {
+        console.log(`[GamesOptionsComponent] No hay nivel de memoria activo establecido.`);
+      }
+    });
+
+    // para obtener el nivel al inicio si ya está cargado
+    // Aunque la suscripción anterior lo hará, esto asegura que 'activeLevel' tenga un valor inicial
+    this.activeLevel = this.memoryGameStateService.getActiveLevel();
+    if (this.activeLevel) {
+      console.log(`[GamesOptionsComponent] Nivel de memoria inicial (desde servicio): ${this.activeLevel.level_name}`);
+    }
   }
 
  
@@ -35,9 +56,8 @@ export class GamesOptionsComponent implements OnInit {
   }
 
   gamesMemory(): void {
-    // ¡Aquí está el cambio! Pasamos explícitamente el nivel como parámetro.
-    this.router.navigate(['/memory', this.defaultMemoryLevel]); 
-    console.log(`[GamesOptionsComponent] Navigating to /memory/${this.defaultMemoryLevel}`);
+    this.router.navigate(['/memory']);
+    console.log(`[GamesOptionsComponent] Navigating to /memory (MemoryComponent will get active level from service).`);
   }
 
   gamesRiddle(): void {

@@ -1,0 +1,11 @@
+<div class="memory-card" [class.flipped]="card.isFlipped" [class.matched]="card.isMatched" (click)="onCardClick()">
+  <div class="card-inner">
+    <div class="card-face card-front">
+      <mat-icon>help_outline</mat-icon>
+    </div>
+    <div class="card-face card-back">
+      <img *ngIf="card.imageUrl" [src]="card.imageUrl" [alt]="card.value">
+      <span *ngIf="!card.imageUrl">{{ card.value }}</span> 
+    </div>
+  </div>
+</div>

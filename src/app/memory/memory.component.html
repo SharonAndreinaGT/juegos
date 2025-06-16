@@ -1,9 +1,23 @@
 <mat-sidenav-container class="container">
-  
-    <ng-container >
-      <div class="welcome-container">
-          
+  <ng-container>
+    <div class="game-container">
+      <div class="game-header">
+        <h2 class="game-title">Juego de Memoria</h2>
       </div>
-    </ng-container>
-  
-  </mat-sidenav-container>
+
+      <div class="game-board">
+        <app-memory-card
+          *ngFor="let card of cards"
+          [card]="card"
+          (cardClick)="onCardClick(card)"
+        ></app-memory-card>
+      </div>
+
+      <div class="game-footer">
+        <div class="intent-display">Intentos: <span>{{ intent }}</span></div>
+        <div class="time-display">Tiempo: <span>{{ formatTime(elapsedTime) }}</span></div>
+        <button mat-raised-button color="warn" class="colorbutton-btn" (click)="resetGame()" *ngIf="!gameStarted && (matchedPairs === totalPairs || intentExceeded || timeExceeded)">Volver a Jugar</button>
+      </div>
+    </div>
+  </ng-container>
+</mat-sidenav-container>

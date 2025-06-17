@@ -1,11 +1,12 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms'; // No necesitamos FormArray directamente en el formGroup, lo manejamos con selectedFilesByLevel
+import { FormBuilder, FormGroup, Validators } from '@angular/forms'; 
 import { MatSnackBar } from '@angular/material/snack-bar'; // Para mostrar mensajes al guardar
 import { MatSlideToggleChange } from '@angular/material/slide-toggle'; // Para el evento del slide toggle
 import { MemoryGameStateService } from '../memory-game-state.service';
+import { MemoryConfig } from '../memory-config-model';
+import { MemoryService } from '../memory.service';
 
-// --- Tu interfaz LevelConfig (asegúrate de que está definida así) ---
 export interface LevelConfig {
   level_name: string;
   card_count: number; 
@@ -44,9 +45,9 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private snackBar: MatSnackBar,
     // --- NUEVA LÍNEA: Inyectar el servicio de estado del juego ---
-    private gameStateService: MemoryGameStateService 
+    private gameStateService: MemoryGameStateService,
+    private memoryService: MemoryService
   ) {
-    // ... Tu inicialización de level1Form, level2Form, level3Form aquí (ya la tienes) ...
     this.level1Form = this.fb.group({
       level_name: ['Nivel1', Validators.required],
       card_count: [this.LEVEL_CARD_COUNTS.level1, [Validators.required, Validators.min(this.LEVEL_CARD_COUNTS.level1), Validators.pattern('^[0-9]*$')]],
@@ -77,11 +78,11 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // Si necesitas limpiar suscripciones, hazlo aquí.
+    //limpiar suscripciones
   }
 
   getLevelForm(levelKey: string): FormGroup {
-    // ... Tu código existente ...
+
     switch (levelKey) {
       case 'level1': return this.level1Form;
       case 'level2': return this.level2Form;
@@ -95,7 +96,6 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
   }
 
   onFileSelected(event: any, levelKey: string): void {
-    // ... Tu código existente para manejo de archivos ...
     const files = event.target.files;
     if (files && files.length > 0) {
       const requiredPairs = this.LEVEL_CARD_COUNTS[levelKey as keyof typeof this.LEVEL_CARD_COUNTS] / 2;
@@ -129,14 +129,12 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
   }
 
   removeImage(levelKey: string, index: number): void {
-    // ... Tu código existente ...
     this.selectedFilesByLevel[levelKey].splice(index, 1);
     this.selectedFilesByLevel[levelKey].forEach((img, i) => img.id = i);
     this.updateImageValidation(levelKey);
   }
 
   updateImageValidation(levelKey: string): void {
-    // ... Tu código existente ...
     const imagesCount = this.selectedFilesByLevel[levelKey].length;
     const requiredPairs = this.LEVEL_CARD_COUNTS[levelKey as keyof typeof this.LEVEL_CARD_COUNTS] / 2;
     const levelFormGroup = this.getLevelForm(levelKey);
@@ -212,11 +210,13 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
       this.snackBar.open(`Configuración del Nivel ${levelKey.replace('level', '')} guardada exitosamente.`, 'Cerrar', { duration: 3000 });
       console.log(`Configuración del Nivel ${levelKey.replace('level', '')} Guardada:`, configToSave);
 
-      // --- NUEVA LÓGICA: Si este nivel se acaba de activar, lo enviamos al servicio de estado ---
+      // Si este nivel se acaba de activar, lo enviamos al servicio de estado ---
       if (configToSave.isActive) {
         this.gameStateService.setActiveLevel(configToSave); 
       }
 
+      //se llama el metodo del service y se manda la configuracion al backend
+      await this.memoryService.saveMemoryConfig(configToSave).toPromise();
     } catch (error) {
       console.error(`Error al guardar la configuración del Nivel ${levelKey.replace('level', '')}:`, error);
       this.snackBar.open(`Error al guardar la configuración del Nivel ${levelKey.replace('level', '')}.`, 'Cerrar', { duration: 5000 });

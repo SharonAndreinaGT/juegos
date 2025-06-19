@@ -74,6 +74,7 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    console.log('Inicialización de componentes de configuración de memoria');
     this.loadSettings(); 
   }
 
@@ -139,6 +140,8 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
     const requiredPairs = this.LEVEL_CARD_COUNTS[levelKey as keyof typeof this.LEVEL_CARD_COUNTS] / 2;
     const levelFormGroup = this.getLevelForm(levelKey);
 
+      console.log(`Validación de imagen para ${levelKey}:`, { imagesCount, requiredPairs });
+
     if (imagesCount !== requiredPairs) {
       levelFormGroup.setErrors({ notEnoughImages: true });
     } else {
@@ -183,7 +186,9 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
             levelForm.setErrors(null); 
         }
     }
+  console.log(`Intentando guardar configuración para ${levelKey}:`, { levelFormValue: levelForm.value, levelFormValidity: levelForm.valid });
 
+    console.log(levelForm)
     if (levelForm.invalid) {
       this.snackBar.open('Por favor, completa todos los campos requeridos para el nivel seleccionado.', 'Cerrar', { duration: 5000 });
       levelForm.markAllAsTouched(); 
@@ -224,38 +229,48 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
   }
 
   // Cargar la configuración al iniciar el componente
-  loadSettings(): void {
-    const savedConfig = localStorage.getItem('memoryGameLevelsConfig');
-    if (savedConfig) {
-      const parsedConfig: { [key: string]: LevelConfig } = JSON.parse(savedConfig);
+loadSettings(): void {
+  const savedConfig = localStorage.getItem('memoryGameLevelsConfig');
+  if (savedConfig) {
+    const parsedConfig: { [key: string]: LevelConfig } = JSON.parse(savedConfig);
 
-      ['level1', 'level2', 'level3'].forEach(levelKey => {
-        if (parsedConfig[levelKey]) {
-          const levelData = parsedConfig[levelKey];
-          const levelForm = this.getLevelForm(levelKey);
+      console.log('Configuración cargada desde localStorage:', parsedConfig);
 
-          levelForm.patchValue({
-            level_name: levelData.level_name,
-            card_count: levelData.card_count, 
-            time_limit: levelData.time_limit,
-            intent: levelData.intent,
-            isActive: levelData.isActive
-          });
+    ['level1', 'level2', 'level3'].forEach(levelKey => {
+      const levelData = parsedConfig[levelKey];
+      if (levelData) {
+        const levelForm = this.getLevelForm(levelKey);
 
+        levelForm.patchValue({
+          level_name: levelData.level_name,
+          card_count: levelData.card_count, 
+          time_limit: levelData.time_limit,
+          intent: levelData.intent,
+          isActive: levelData.isActive
+        });
+
+        // Verifica si 'images' es un arreglo antes de intentar mapear
+        if (Array.isArray(levelData.images)) {
           this.selectedFilesByLevel[levelKey] = levelData.images.map(img => ({
             id: img.id,
-            file: null, 
+            file: null,
             preview: img.url
           }));
-          this.updateImageValidation(levelKey); 
-
-          // --- NUEVA LÓGICA: Si este nivel estaba activo al cargar, también lo establecemos en el servicio de estado. ---
-          if (levelData.isActive) {
-            this.gameStateService.setActiveLevel(levelData); 
-          }
+        } else {
+          // Si 'images' no es un arreglo, establece un arreglo vacío
+          this.selectedFilesByLevel[levelKey] = [];
+          console.log(`Advertencia: 'images' no está definido o no es un arreglo en la configuración del nivel '${levelKey}'.`);
         }
-      });
-      this.snackBar.open('Configuración cargada.', 'Cerrar', { duration: 2000 });
-    }
+        
+        this.updateImageValidation(levelKey); 
+
+        // --- NUEVA LÓGICA: Si este nivel estaba activo al cargar, también lo establecemos en el servicio de estado. ---
+        if (levelData.isActive) {
+          this.gameStateService.setActiveLevel(levelData); 
+        }
+      }
+    });
+    this.snackBar.open('Configuración cargada.', 'Cerrar', { duration: 2000 });
   }
+}
 }

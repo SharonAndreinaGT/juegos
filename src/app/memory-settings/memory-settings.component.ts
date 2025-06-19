@@ -7,14 +7,6 @@ import { MemoryGameStateService } from '../memory-game-state.service';
 import { MemoryConfig } from '../memory-config-model';
 import { MemoryService } from '../memory.service';
 
-export interface LevelConfig {
-  level_name: string;
-  card_count: number; 
-  time_limit: number; 
-  intent: number; 
-  images: { id: number, url: string, file?: File }[]; 
-  isActive: boolean; 
-}
 
 @Component({
   selector: 'app-memory-settings',
@@ -169,7 +161,6 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
 
     // Guardar la configuración del nivel actual
     // Lo hacemos de forma asíncrona para no bloquear el UI.
-    console.log(`Intentando guardar configuración para ${levelKey}:`, { levelFormValue: currentLevelForm.value, levelFormValidity: currentLevelForm.valid });
     this.saveLevelConfig(levelKey);
   }
 
@@ -196,17 +187,17 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const configToSave: LevelConfig = {
-      level_name: levelForm.get('level_name')?.value,
-      card_count: levelForm.get('card_count')?.value,
-      time_limit: levelForm.get('time_limit')?.value,
-      intent: levelForm.get('intent')?.value,
-      isActive: levelForm.get('isActive')?.value,
-      images: this.selectedFilesByLevel[levelKey].map(img => ({
-        id: img.id,
-        url: img.preview 
-      }))
-    };
+  const configToSave: MemoryConfig = {
+    level_name: levelForm.get('level_name')?.value,
+    card_count: levelForm.get('card_count')?.value,
+    time_limit: levelForm.get('time_limit')?.value,
+    intent: levelForm.get('intent')?.value,
+    isActive: levelForm.get('isActive')?.value,
+    images: this.selectedFilesByLevel[levelKey].map(img => ({
+      id: img.id,
+      url: img.preview
+    }))
+  };
 
     try {
       const allLevelsConfig = JSON.parse(localStorage.getItem('memoryGameLevelsConfig') || '{}');
@@ -217,23 +208,27 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
       console.log(`Configuración del Nivel ${levelKey.replace('level', '')} Guardada:`, configToSave);
 
       // Si este nivel se acaba de activar, lo enviamos al servicio de estado ---
-      if (configToSave.isActive) {
-        this.gameStateService.setActiveLevel(configToSave); 
-      }
+    if (configToSave.isActive) {
+      this.gameStateService.setActiveLevel(configToSave);
+    }
 
-      //se llama el metodo del service y se manda la configuracion al backend
-      await this.memoryService.saveMemoryConfig(configToSave).toPromise();
+      console.log(configToSave)
+     // Enviar la configuración al backend usando MemoryService
+      const savedConfig = await this.memoryService.saveMemoryConfig(configToSave).toPromise();
+      this.snackBar.open(`Configuración del Nivel ${levelKey.replace('level', '')} guardada exitosamente.`, 'Cerrar', { duration: 3000 });
+      console.log(`Configuración del Nivel ${levelKey.replace('level', '')} Guardada:`, savedConfig);
     } catch (error) {
+      // Manejo de errores al guardar la configuración
       console.error(`Error al guardar la configuración del Nivel ${levelKey.replace('level', '')}:`, error);
       this.snackBar.open(`Error al guardar la configuración del Nivel ${levelKey.replace('level', '')}.`, 'Cerrar', { duration: 5000 });
     }
-  }
+}
 
   // Cargar la configuración al iniciar el componente
 loadSettings(): void {
   const savedConfig = localStorage.getItem('memoryGameLevelsConfig');
   if (savedConfig) {
-    const parsedConfig: { [key: string]: LevelConfig } = JSON.parse(savedConfig);
+    const parsedConfig: { [key: string]: MemoryConfig } = JSON.parse(savedConfig);
 
       console.log('Configuración cargada desde localStorage:', parsedConfig);
 

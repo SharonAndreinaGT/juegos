@@ -169,6 +169,7 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
 
     // Guardar la configuración del nivel actual
     // Lo hacemos de forma asíncrona para no bloquear el UI.
+    console.log(`Intentando guardar configuración para ${levelKey}:`, { levelFormValue: currentLevelForm.value, levelFormValidity: currentLevelForm.valid });
     this.saveLevelConfig(levelKey);
   }
 

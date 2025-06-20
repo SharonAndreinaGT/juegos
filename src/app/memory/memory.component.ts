@@ -76,6 +76,7 @@ export class MemoryComponent implements OnInit {
     this.intentExceeded = false;
     this.timeExceeded = false;
     this.elapsedTime = 0;
+    
 
     const images = MemoryConfig.images;
     this.totalPairs = images!.length; // El número de pares es la cantidad de imágenes únicas

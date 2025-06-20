@@ -7,7 +7,7 @@ import { MemoryConfig } from '../memory-config-model'; // Importa MemoryConfig
 
 // --- Tu interfaz Card (si ya la tienes, mantenla así) ---
 export interface Card {
-  id: number;
+  id?: number | null;
   imageUrl: string;
   isFlipped: boolean;
   isMatched: boolean;

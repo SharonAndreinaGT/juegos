@@ -5,5 +5,5 @@ export class MemoryConfig {
   time_limit?: number;
   intent?: number | undefined;
   isActive?: boolean;
-  images?: { id: number; url: string }[];
+  images?: { id?: number | null; url: string }[];
 }

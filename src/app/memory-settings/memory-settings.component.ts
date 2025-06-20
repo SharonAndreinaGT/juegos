@@ -20,7 +20,7 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
   level2Form: FormGroup;
   level3Form: FormGroup;
 
-  selectedFilesByLevel: { [key: string]: { id: number, file: File | null, preview: string }[] } = {
+  selectedFilesByLevel: { [key: string]: { id?: number | null, file: File | null, preview: string }[] } = {
     'level1': [],
     'level2': [],
     'level3': []
@@ -194,7 +194,6 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
     intent: levelForm.get('intent')?.value,
     isActive: levelForm.get('isActive')?.value,
     images: this.selectedFilesByLevel[levelKey].map(img => ({
-      id: img.id,
       url: img.preview
     }))
   };
@@ -248,7 +247,6 @@ loadSettings(): void {
         // Verifica si 'images' es un arreglo antes de intentar mapear
         if (Array.isArray(levelData.images)) {
           this.selectedFilesByLevel[levelKey] = levelData.images.map(img => ({
-            id: img.id,
             file: null,
             preview: img.url
           }));

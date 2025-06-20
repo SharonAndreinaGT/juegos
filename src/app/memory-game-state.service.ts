@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-// Importamos la interfaz LevelConfig desde el archivo donde está definida
-import { LevelConfig } from './memory-settings/memory-settings.component';
+// Importamos la interfaz MemoryConfig desde el archivo donde está definida
+import { MemoryConfig } from './memory-config-model';
 
 @Injectable({
   providedIn: 'root'
@@ -10,10 +10,10 @@ export class MemoryGameStateService {
   // BehaviorSubject para el nivel activo.
   // Permite que cualquier componente que se suscriba reciba el valor actual y los futuros cambios.
   // inicia con 'null' ya que al principio no hay ningún nivel activo cargado.
-  private activeLevelSource = new BehaviorSubject<LevelConfig | null>(null);
+  private activeLevelSource = new BehaviorSubject<MemoryConfig | null>(null);
   
   // Exponemos el BehaviorSubject como un Observable público para que los componentes puedan suscribirse.
-  activeLevel$: Observable<LevelConfig | null> = this.activeLevelSource.asObservable();
+  activeLevel$: Observable<MemoryConfig | null> = this.activeLevelSource.asObservable();
 
   constructor() {
     // Cuando el servicio se inicializa (normalmente al cargar la aplicación),
@@ -26,7 +26,7 @@ export class MemoryGameStateService {
    * Se llamará desde MemorySettingsComponent cuando un nivel se activa.
    * @param level La configuración completa del nivel a establecer como activo.
    */
-  setActiveLevel(level: LevelConfig): void {
+  setActiveLevel(level: MemoryConfig): void {
     // Emitimos el nuevo nivel activo a todos los suscriptores.
     this.activeLevelSource.next(level);
     
@@ -40,7 +40,7 @@ export class MemoryGameStateService {
    * Útil para cuando un componente necesita el valor inmediatamente y no suscribirse a cambios.
    * @returns La configuración del nivel activo o null si no hay ninguno.
    */
-  getActiveLevel(): LevelConfig | null {
+  getActiveLevel(): MemoryConfig | null {
     return this.activeLevelSource.getValue();
   }
 
@@ -52,8 +52,8 @@ export class MemoryGameStateService {
     const savedActiveLevel = localStorage.getItem('memoryGameActiveLevel');
     if (savedActiveLevel) {
       try {
-        // la cadena JSON a un objeto LevelConfig
-        const level: LevelConfig = JSON.parse(savedActiveLevel);
+        // la cadena JSON a un objeto MemoryConfig
+        const level: MemoryConfig = JSON.parse(savedActiveLevel);
         // Establecemos este nivel como el activo, notificando a los suscriptores
         this.activeLevelSource.next(level);
       } catch (e) {

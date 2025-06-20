@@ -3,7 +3,7 @@ export class MemoryConfig {
   level_name?: string;
   card_count?: number;
   time_limit?: number;
-  intent?: number;
+  intent?: number | undefined;
   isActive?: boolean;
   images?: { id: number; url: string }[];
 }

@@ -3,7 +3,7 @@ import { MatSnackBar } from '@angular/material/snack-bar'; // Necesitas MatSnack
 
 // --- NUEVAS LÍNEAS ---
 import { MemoryGameStateService } from '../memory-game-state.service';
-import { LevelConfig } from '../memory-settings/memory-settings.component'; // Importa LevelConfig
+import { MemoryConfig } from '../memory-config-model'; // Importa MemoryConfig
 
 // --- Tu interfaz Card (si ya la tienes, mantenla así) ---
 export interface Card {
@@ -20,7 +20,7 @@ export interface Card {
 })
 export class MemoryComponent implements OnInit {
   cards: Card[] = [];
-  activeLevel: LevelConfig | null = null; // Variable para guardar la configuración del nivel activo
+  activeLevel: MemoryConfig | null = null; // Variable para guardar la configuración del nivel activo
 
   // Variables para el estado del juego (asegúrate de que las tienes inicializadas como necesites)
   intent: number = 0; // Intentos actuales
@@ -67,7 +67,7 @@ export class MemoryComponent implements OnInit {
 
   // --- LÓGICA DEL JUEGO (asegúrate de que las funciones existan en tu componente) ---
 
-  initializeGame(levelConfig: LevelConfig): void {
+  initializeGame(MemoryConfig: MemoryConfig): void {
     this.stopGameTimer(); // Detener cualquier temporizador previo
     this.cards = [];
     this.flippedCards = [];
@@ -77,12 +77,12 @@ export class MemoryComponent implements OnInit {
     this.timeExceeded = false;
     this.elapsedTime = 0;
 
-    const images = levelConfig.images;
-    this.totalPairs = images.length; // El número de pares es la cantidad de imágenes únicas
-    this.intent = levelConfig.intent; // Usar el número de intentos configurado
+    const images = MemoryConfig.images;
+    this.totalPairs = images!.length; // El número de pares es la cantidad de imágenes únicas
+    this.intent = MemoryConfig.intent!; // Usar el número de intentos configurado
 
     let cardData: Card[] = [];
-    images.forEach((image) => {
+    images!.forEach((image) => {
       // Crear dos cartas por cada imagen
       cardData.push({
         id: image.id,
@@ -120,7 +120,7 @@ export class MemoryComponent implements OnInit {
     }
     this.timer = setInterval(() => {
         this.elapsedTime++;
-        if (this.activeLevel && this.activeLevel.time_limit > 0 && this.elapsedTime >= this.activeLevel.time_limit) {
+        if (this.activeLevel && this.activeLevel.time_limit! > 0 && this.elapsedTime >= this.activeLevel.time_limit!) {
             this.timeExceeded = true;
             this.stopGameTimer();
             this.gameStarted = false;
@@ -146,7 +146,7 @@ export class MemoryComponent implements OnInit {
 
     if (this.flippedCards.length === 2) {
       // Comprobar si excedimos los intentos antes de comparar
-      if (this.activeLevel && this.activeLevel.intent > 0) {
+      if (this.activeLevel && this.activeLevel.intent! > 0) {
         this.intent--; // Reduce intento solo si no es ilimitado
         if (this.intent < 0) this.intent = 0; // Asegura que no baja de 0
         if (this.intent === 0) {

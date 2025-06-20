@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { SharedDataService } from '../sharedData.service';
 import { MemoryGameStateService } from '../memory-game-state.service';
-import { LevelConfig } from '../memory-settings/memory-settings.component';
+import { MemoryConfig } from '../memory-config-model';
 
 @Component({
   selector: 'app-games-options',
@@ -13,7 +13,7 @@ export class GamesOptionsComponent implements OnInit {
   
   currentPuzzleLevel: string = 'Nivel1'; // iniciando con el valor por defecto
 
-  activeLevel: LevelConfig | null = null; 
+  activeLevel: MemoryConfig | null = null; 
 
   // inyecta el servicio que se supone que va a conectar los datos para los niveles
   constructor(

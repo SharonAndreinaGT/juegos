@@ -48,7 +48,7 @@ export class MemoryComponent implements OnInit {
 
   // --- LÓGICA DEL JUEGO (asegúrate de que las funciones existan en tu componente) ---
   loadActiveMemoryConfig(): void {
-    const activeLevelName = 'Nivel1'; // Reemplaza esto con la lógica para obtener el nivel activo
+    const activeLevelName = 'Nivel2'; // Reemplaza esto con la lógica para obtener el nivel activo
 
     this.memoryService.getMemoryConfigByLevel(activeLevelName).subscribe(
       (response: any) => {
@@ -159,8 +159,9 @@ initializeGame(config: MemoryConfig): void {
         }
       }
 
+      console.log(this.flippedCards)
       // Comparar las dos cartas volteadas
-      if (this.flippedCards[0].id === this.flippedCards[1].id) {
+      if (this.flippedCards[0].imageUrl === this.flippedCards[1].imageUrl) {
         // Coincidencia
         this.flippedCards[0].isMatched = true;
         this.flippedCards[1].isMatched = true;

@@ -187,18 +187,26 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
       return;
     }
 
-  const configToSave: MemoryConfig = {
-    level_name: levelForm.get('level_name')?.value,
-    card_count: levelForm.get('card_count')?.value,
-    time_limit: levelForm.get('time_limit')?.value,
-    intent: levelForm.get('intent')?.value,
-    isActive: levelForm.get('isActive')?.value,
-    images: this.selectedFilesByLevel[levelKey].map(img => ({
-      url: img.preview
-    }))
-  };
+   // Obtener los archivos de imagen del nivel actual que necesitan ser cargados
+    const imageFiles = this.selectedFilesByLevel[levelKey]
+      .map(fileItem => fileItem.file)
+      .filter(file => file != null) as File[];
 
     try {
+      const imageUploads = imageFiles.map(file => this.memoryService.uploadImage(file).toPromise());
+      const imageResponses = await Promise.all(imageUploads);
+
+      const images = imageResponses.map(response => ({ url: response.data.full_url }));
+
+      const configToSave: MemoryConfig = {
+        level_name: levelForm.get('level_name')?.value,
+        card_count: levelForm.get('card_count')?.value,
+        time_limit: levelForm.get('time_limit')?.value,
+        intent: levelForm.get('intent')?.value,
+        isActive: levelForm.get('isActive')?.value,
+        images: images
+      };
+      
       const allLevelsConfig = JSON.parse(localStorage.getItem('memoryGameLevelsConfig') || '{}');
       allLevelsConfig[levelKey] = configToSave;
 
@@ -225,6 +233,7 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
 
   // Cargar la configuración al iniciar el componente
 loadSettings(): void {
+  console.log('Intentando cargar configuración desde localStorage...', localStorage);
   const savedConfig = localStorage.getItem('memoryGameLevelsConfig');
   if (savedConfig) {
     const parsedConfig: { [key: string]: MemoryConfig } = JSON.parse(savedConfig);

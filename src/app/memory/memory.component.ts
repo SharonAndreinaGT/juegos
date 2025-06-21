@@ -84,8 +84,8 @@ initializeGame(config: MemoryConfig): void {
   // Preparar las cartas con las imágenes de la configuración
   if (config.images && config.images.length > 0) {
     let cardData: Card[] = config.images.flatMap((imageConfig) => [
-      { imageUrl: imageConfig.url, isFlipped: false, isMatched: false },
-      { imageUrl: imageConfig.url, isFlipped: false, isMatched: false }
+      { imageUrl: imageConfig, isFlipped: false, isMatched: false },
+      { imageUrl: imageConfig, isFlipped: false, isMatched: false }
     ]);
 
     this.cards = this.shuffle(cardData);

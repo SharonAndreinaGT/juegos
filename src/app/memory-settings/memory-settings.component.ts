@@ -194,9 +194,16 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
 
     try {
       const imageUploads = imageFiles.map(file => this.memoryService.uploadImage(file).toPromise());
+      console.log(imageUploads)
       const imageResponses = await Promise.all(imageUploads);
+      console.log(imageResponses)
 
-      const images = imageResponses.map(response => ({ url: response.data.full_url }));
+      const imageUrls = imageResponses.map(response => {
+        const fileId = response.data.id;
+        return `http://localhost:8055/assets/${fileId}`;
+      });
+
+      console.log('URLs de imágenes a guardar:', imageUrls);
 
       const configToSave: MemoryConfig = {
         level_name: levelForm.get('level_name')?.value,
@@ -204,7 +211,7 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
         time_limit: levelForm.get('time_limit')?.value,
         intent: levelForm.get('intent')?.value,
         isActive: levelForm.get('isActive')?.value,
-        images: images
+        images: imageUrls
       };
       
       const allLevelsConfig = JSON.parse(localStorage.getItem('memoryGameLevelsConfig') || '{}');
@@ -257,7 +264,7 @@ loadSettings(): void {
         if (Array.isArray(levelData.images)) {
           this.selectedFilesByLevel[levelKey] = levelData.images.map(img => ({
             file: null,
-            preview: img.url
+            preview: img
           }));
         } else {
           // Si 'images' no es un arreglo, establece un arreglo vacío

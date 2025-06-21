@@ -4,6 +4,7 @@ import { MatSnackBar } from '@angular/material/snack-bar'; // Necesitas MatSnack
 // --- NUEVAS LÍNEAS ---
 import { MemoryGameStateService } from '../memory-game-state.service';
 import { MemoryConfig } from '../memory-config-model'; // Importa MemoryConfig
+import { MemoryService } from '../memory.service';
 
 // --- Tu interfaz Card (si ya la tienes, mantenla así) ---
 export interface Card {
@@ -37,72 +38,71 @@ export class MemoryComponent implements OnInit {
   constructor(
     // --- NUEVA LÍNEA: Inyectar el servicio de estado del juego ---
     private gameStateService: MemoryGameStateService,
+    private memoryService: MemoryService,
     private snackBar: MatSnackBar // Inyectar MatSnackBar para notificaciones
   ) { }
 
   ngOnInit(): void {
-    // --- NUEVA LÓGICA: Suscribirse a los cambios del nivel activo ---
-    this.gameStateService.activeLevel$.subscribe(level => {
-      if (level) {
-        this.activeLevel = level;
-        console.log('Nivel activo cargado en MemoryComponent:', this.activeLevel);
-        this.initializeGame(this.activeLevel); // Inicializar el juego con la nueva configuración
-      } else {
-        console.warn('No hay nivel activo seleccionado. Por favor, configura uno en los ajustes.');
-        // Puedes añadir aquí una lógica para redirigir al usuario o mostrar un mensaje en la UI
-        this.snackBar.open('Por favor, configura y activa un nivel en la sección de ajustes.', 'Cerrar', { duration: 5000 });
-      }
-    });
-
-    // Opcional: También obtener el valor actual del BehaviorSubject en caso de que ya se haya emitido
-    // antes de que este componente se suscriba (por ejemplo, si el servicio ya se inicializó).
-    if (this.gameStateService.getActiveLevel()) {
-      this.activeLevel = this.gameStateService.getActiveLevel();
-      // Aseguramos que activeLevel no es null antes de pasarlo a initializeGame
-      if (this.activeLevel) {
-          this.initializeGame(this.activeLevel); 
-      }
-    }
+    this.loadActiveMemoryConfig();
   }
 
   // --- LÓGICA DEL JUEGO (asegúrate de que las funciones existan en tu componente) ---
+  loadActiveMemoryConfig(): void {
+    const activeLevelName = 'Nivel1'; // Reemplaza esto con la lógica para obtener el nivel activo
 
-  initializeGame(MemoryConfig: MemoryConfig): void {
-    this.stopGameTimer(); // Detener cualquier temporizador previo
-    this.cards = [];
-    this.flippedCards = [];
-    this.matchedPairs = 0;
-    this.gameStarted = false;
-    this.intentExceeded = false;
-    this.timeExceeded = false;
-    this.elapsedTime = 0;
-    
-
-    const images = MemoryConfig.images;
-    this.totalPairs = images!.length; // El número de pares es la cantidad de imágenes únicas
-    this.intent = MemoryConfig.intent!; // Usar el número de intentos configurado
-
-    let cardData: Card[] = [];
-    images!.forEach((image) => {
-      // Crear dos cartas por cada imagen
-      cardData.push({
-        id: image.id,
-        imageUrl: image.url, // Ya es la Data URL o URL del backend
-        isFlipped: false,
-        isMatched: false
-      });
-      cardData.push({
-        id: image.id,
-        imageUrl: image.url,
-        isFlipped: false,
-        isMatched: false
-      });
-    });
-
-    // Mezclar las cartas
-    this.cards = this.shuffle(cardData);
-    this.startGameTimer(); // Iniciar el temporizador
+    this.memoryService.getMemoryConfigByLevel(activeLevelName).subscribe(
+      (response: any) => {
+        const configData: MemoryConfig | undefined = response.data?.[0];
+          console.log('ConfigData recibida de Directus:', configData); // Imprime la configuración recibida
+        if (configData) {
+          this.activeLevel = configData;
+          this.initializeGame(this.activeLevel); // Inicializar el juego con la nueva configuración
+        } else {
+          this.snackBar.open('No se encontró configuración para el nivel activo. Por favor, configura uno en los ajustes.', 'Cerrar', { duration: 5000 });
+        }
+      },
+      (error) => {
+        this.snackBar.open('Error al cargar la configuración del nivel activo. Por favor, comprueba la conexión con Directus.', 'Cerrar', { duration: 5000 });
+      }
+    );
   }
+
+initializeGame(config: MemoryConfig): void {
+  // Restablecer el estado del juego
+  this.stopGameTimer();
+  this.cards = [];
+  this.flippedCards = [];
+  this.matchedPairs = 0;
+  this.gameStarted = false;
+  this.intentExceeded = false;
+  this.timeExceeded = false;
+  this.elapsedTime = 0;
+
+  // Configurar el juego con los valores de la configuración cargada
+  this.intent = config.intent ?? 1; // Usa el número de intentos de la configuración o un valor predeterminado
+  
+  // Preparar las cartas con las imágenes de la configuración
+  if (config.images && config.images.length > 0) {
+    let cardData: Card[] = config.images.flatMap((imageConfig) => [
+      { imageUrl: imageConfig.url, isFlipped: false, isMatched: false },
+      { imageUrl: imageConfig.url, isFlipped: false, isMatched: false }
+    ]);
+
+    this.cards = this.shuffle(cardData);
+    this.totalPairs = cardData.length / 2; // El número total de pares es la mitad del total de cartas
+  } else {
+    // Si no hay imágenes, muestra un mensaje de error o maneja el caso adecuadamente
+    console.error('No se encontraron imágenes en la configuración del nivel.');
+  }
+
+  // Iniciar el temporizador del juego si hay un límite de tiempo
+  if (config.time_limit && config.time_limit > 0) {
+    this.startGameTimer(config.time_limit);
+  }
+
+  // Iniciar el juego
+  this.gameStarted = true;
+}
 
   shuffle(array: any[]): any[] {
     let currentIndex = array.length, randomIndex;
@@ -114,7 +114,7 @@ export class MemoryComponent implements OnInit {
     return array;
   }
 
-  startGameTimer(): void {
+  startGameTimer(timeLimit: number): void {
     this.gameStarted = true;
     if (this.timer) {
         clearInterval(this.timer); // Asegurarse de limpiar cualquier temporizador anterior

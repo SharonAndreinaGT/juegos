@@ -14,6 +14,11 @@ export class MemoryService {
 
   constructor(private http: HttpClient) { }
 
+  // Obtiene la configuración del juego de memoria por el nombre del nivel
+  getMemoryConfigByLevel(levelName: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}?filter[level_name][_eq]=${levelName}&fields=*,id`);
+  }
+
   //metodo para guardar la configuracion del juego 
   saveMemoryConfig(config: MemoryConfig): Observable<MemoryConfig> {
     if (config.id) {

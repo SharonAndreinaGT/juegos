@@ -19,6 +19,16 @@ export class MemoryService {
     return this.http.get<any>(`${this.apiUrl}?filter[level_name][_eq]=${levelName}&fields=*,id`);
   }
 
+  // Obtiene la configuración activa del juego de memoria (isActive: true)
+  getActiveMemoryConfig(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}?filter[isActive][_eq]=true&fields=*,id`);
+  }
+
+  // Obtiene todas las configuraciones del juego de memoria
+  getAllMemoryConfigs(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}?fields=*,id`);
+  }
+
   //metodo para guardar la configuracion del juego 
   saveMemoryConfig(config: MemoryConfig): Observable<MemoryConfig> {
     if (config.id) {

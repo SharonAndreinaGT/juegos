@@ -48,17 +48,18 @@ export class MemoryComponent implements OnInit {
 
   // --- LÓGICA DEL JUEGO (asegúrate de que las funciones existan en tu componente) ---
   loadActiveMemoryConfig(): void {
-    const activeLevelName = 'Nivel1'; // Reemplaza esto con la lógica para obtener el nivel activo
-
-    this.memoryService.getMemoryConfigByLevel(activeLevelName).subscribe(
+    // Obtener la configuración activa (isActive: true) desde la base de datos
+    this.memoryService.getActiveMemoryConfig().subscribe(
       (response: any) => {
-        const configData: MemoryConfig | undefined = response.data?.[0];
-          console.log('ConfigData recibida de Directus:', configData); // Imprime la configuración recibida
-        if (configData) {
-          this.activeLevel = configData;
-          this.initializeGame(this.activeLevel); // Inicializar el juego con la nueva configuración
+        // Obtener el primer registro activo (debería ser solo uno)
+        const activeConfig = response.data?.[0];
+        console.log('Configuración activa encontrada:', activeConfig);
+        
+        if (activeConfig) {
+          this.activeLevel = activeConfig;
+          this.initializeGame(activeConfig); // Inicializar el juego con la nueva configuración
         } else {
-          this.snackBar.open('No se encontró configuración para el nivel activo. Por favor, configura uno en los ajustes.', 'Cerrar', { duration: 5000 });
+          this.snackBar.open('No se encontró un nivel activo. Por favor, activa un nivel en los ajustes.', 'Cerrar', { duration: 5000 });
         }
       },
       (error) => {

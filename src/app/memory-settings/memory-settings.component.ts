@@ -236,6 +236,31 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
       } else {
         console.log('Creando nueva configuración');
       }
+
+      // Si este nivel se va a activar, desactivar todos los demás niveles primero
+      if (configToSave.isActive) {
+        try {
+          // Obtener todas las configuraciones existentes
+          const allConfigs = await this.memoryService.getAllMemoryConfigs().toPromise();
+          
+          // Desactivar todos los niveles excepto el actual
+          const deactivationPromises = allConfigs.data
+            .filter((config: MemoryConfig) => config.id !== configToSave.id && config.isActive)
+            .map((config: MemoryConfig) => {
+              const deactivatedConfig = { ...config, isActive: false };
+              return this.memoryService.saveMemoryConfig(deactivatedConfig).toPromise();
+            });
+
+          if (deactivationPromises.length > 0) {
+            await Promise.all(deactivationPromises);
+            console.log('Otros niveles desactivados exitosamente');
+          }
+        } catch (error) {
+          console.error('Error al desactivar otros niveles:', error);
+          this.snackBar.open('Error al desactivar otros niveles. Por favor, inténtalo de nuevo.', 'Cerrar', { duration: 5000 });
+          return;
+        }
+      }
       
       const allLevelsConfig = JSON.parse(localStorage.getItem('memoryGameLevelsConfig') || '{}');
       allLevelsConfig[levelKey] = configToSave;

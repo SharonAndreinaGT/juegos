@@ -48,7 +48,7 @@ export class MemoryComponent implements OnInit {
 
   // --- LÓGICA DEL JUEGO (asegúrate de que las funciones existan en tu componente) ---
   loadActiveMemoryConfig(): void {
-    const activeLevelName = 'Nivel2'; // Reemplaza esto con la lógica para obtener el nivel activo
+    const activeLevelName = 'Nivel1'; // Reemplaza esto con la lógica para obtener el nivel activo
 
     this.memoryService.getMemoryConfigByLevel(activeLevelName).subscribe(
       (response: any) => {

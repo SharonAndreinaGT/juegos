@@ -193,26 +193,49 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
       .filter(file => file != null) as File[];
 
     try {
-      const imageUploads = imageFiles.map(file => this.memoryService.uploadImage(file).toPromise());
-      console.log(imageUploads)
-      const imageResponses = await Promise.all(imageUploads);
-      console.log(imageResponses)
+      let imageUrls: string[] = [];
+      
+      // Solo subir imágenes si hay archivos nuevos
+      if (imageFiles.length > 0) {
+        const imageUploads = imageFiles.map(file => this.memoryService.uploadImage(file).toPromise());
+        console.log(imageUploads)
+        const imageResponses = await Promise.all(imageUploads);
+        console.log(imageResponses)
 
-      const imageUrls = imageResponses.map(response => {
-        const fileId = response.data.id;
-        return `http://localhost:8055/assets/${fileId}`;
-      });
+        imageUrls = imageResponses.map(response => {
+          const fileId = response.data.id;
+          return `http://localhost:8055/assets/${fileId}`;
+        });
+      } else {
+        // Si no hay archivos nuevos, usar las URLs existentes
+        imageUrls = this.selectedFilesByLevel[levelKey]
+          .map(fileItem => fileItem.preview)
+          .filter(preview => preview && preview.startsWith('http'));
+      }
 
       console.log('URLs de imágenes a guardar:', imageUrls);
 
+      const levelName = levelForm.get('level_name')?.value;
+      
+      // Verificar si ya existe un registro con el mismo level_name
+      const existingConfig = await this.memoryService.getMemoryConfigByLevel(levelName).toPromise();
+      
       const configToSave: MemoryConfig = {
-        level_name: levelForm.get('level_name')?.value,
+        level_name: levelName,
         card_count: levelForm.get('card_count')?.value,
         time_limit: levelForm.get('time_limit')?.value,
         intent: levelForm.get('intent')?.value,
         isActive: levelForm.get('isActive')?.value,
         images: imageUrls
       };
+
+      // Si existe un registro, asignar el ID para que se actualice en lugar de crear
+      if (existingConfig && existingConfig.data && existingConfig.data.length > 0) {
+        configToSave.id = existingConfig.data[0].id;
+        console.log(`Actualizando configuración existente con ID: ${configToSave.id}`);
+      } else {
+        console.log('Creando nueva configuración');
+      }
       
       const allLevelsConfig = JSON.parse(localStorage.getItem('memoryGameLevelsConfig') || '{}');
       allLevelsConfig[levelKey] = configToSave;

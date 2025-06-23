@@ -267,23 +267,23 @@ initializeGame(config: MemoryConfig): void {
   private checkGameEnd(): void {
     if (!this.gameStarted && (this.matchedPairs === this.totalPairs || this.intentExceeded || this.timeExceeded)) {
       this.calculateScoreAndStars();
-      // Aquí podrías guardar el resultado en la base de datos o enviarlo a un servicio.
-      // Por ejemplo:
-      // const result: MemoryResult = {
-      //   studentId: this.currentStudentId,
-      //   levelId: this.activeLevel?.id, // Asumiendo que MemoryConfig tiene un ID
-      //   score: this.score,
-      //   stars: this.stars,
-      //   elapsedTime: this.elapsedTime,
-      //   matchedPairs: this.matchedPairs,
-      //   totalPairs: this.totalPairs,
-      //   intentRemaining: this.intent,
-      //   completed: this.matchedPairs === this.totalPairs
-      // };
-      // this.memoryService.saveMemoryResult(result).subscribe(
-      //   () => console.log('Resultado del juego guardado con éxito'),
-      //   (error) => console.error('Error al guardar el resultado del juego', error)
-      // );
+      // guardar el resultado en directus
+        const result: MemoryResult = {
+        student_id: this.currentStudentId,
+        level_id: this.activeLevel?.id, // Asumiendo que MemoryConfig tiene un ID
+        score: this.score,
+        stars: this.stars,
+        elapsedTime: this.elapsedTime,
+        matchedPairs: this.matchedPairs,
+        totalPairs: this.totalPairs,
+        intentRemaining: this.intent,
+        completed: this.matchedPairs === this.totalPairs
+      };
+        console.log('Resultado del juego:', result);
+        this.memoryService.saveMemoryResult(result).subscribe(
+        () => console.log('Resultado del juego guardado con éxito'),
+        (error) => console.error('Error al guardar el resultado del juego', error)
+      );
     }
   }
 

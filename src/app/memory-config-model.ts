@@ -9,12 +9,13 @@ export class MemoryConfig {
 }
 
 export interface MemoryResult {
-  id?: string;
-  level_name: string;
+  level_id?: string;
   score: number;
-  flips: number;       // Puede ser el número total de pares de volteos, o intentos restantes si se agotan
   stars: number;
-  time: number;
-  is_complete: boolean;
-  student_id: string;
+  elapsedTime: number;
+  matchedPairs: number;
+  totalPairs: number;
+  intentRemaining: number;
+  completed: boolean;
+  student_id: string | null;
 }

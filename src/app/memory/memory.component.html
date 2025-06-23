@@ -1,23 +1,50 @@
 <mat-sidenav-container class="container">
-  <ng-container>
-    <div class="game-container">
-      <div class="game-header">
+  <div class="game-container">
+      <div class="header">
         <h2 class="game-title">Juego de Memoria</h2>
-      </div>
-
-      <div class="game-board">
-        <app-memory-card
-          *ngFor="let card of cards"
-          [card]="card"
-          (cardClick)="onCardClick(card)"
-        ></app-memory-card>
-      </div>
-
-      <div class="game-footer">
+      <div class="status" >
         <div class="intent-display">Intentos: <span>{{ intent }}</span></div>
         <div class="time-display">Tiempo: <span>{{ formatTime(elapsedTime) }}</span></div>
-        <button mat-raised-button color="warn" class="colorbutton-btn" (click)="resetGame()" *ngIf="!gameStarted && (matchedPairs === totalPairs || intentExceeded || timeExceeded)">Volver a Jugar</button>
       </div>
     </div>
-  </ng-container>
+   
+    
+    <div class="memory-wrapper">
+      <div class="memory-wrapper">
+        <div class="game-board"
+          *ngIf="gameStarted && matchedPairs !== totalPairs && !intentExceeded && !timeExceeded">
+          <app-memory-card
+            *ngFor="let card of cards"
+            [card]="card"
+            (cardClick)="onCardClick(card)"
+          ></app-memory-card>
+        </div>
+         
+        <!-- Mensaje de fin de juego (Similar al de puzzle) -->
+        <div *ngIf="!gameStarted && (matchedPairs === totalPairs || intentExceeded || timeExceeded)" class="game-over-message">
+          <h2 *ngIf="matchedPairs === totalPairs">¡Memoria completada!</h2>
+          <h2 *ngIf="matchedPairs !== totalPairs && (intentExceeded || timeExceeded)">
+            ¡Juego terminado! ¡Sigue practicando!
+          </h2>
+
+          <p>Pares encontrados: {{ matchedPairs }} / {{ totalPairs }}</p>
+          <p>Tiempo transcurrido: {{ formatTime(elapsedTime) }}</p>
+
+          <div class="stars-display">
+            <h3>Tu Puntuación:</h3>
+            <span *ngFor="let i of [0, 1, 2]" class="star" [class.filled]="i < stars">
+              &#9733; <!-- Carácter Unicode de estrella -->
+            </span>
+          </div>
+
+          <button *ngIf="matchedPairs !== totalPairs && (intentExceeded || timeExceeded)" (click)="resetGame()">
+            Volver a intentar
+          </button>
+          <button *ngIf="matchedPairs === totalPairs" (click)="resetGame()">
+            Jugar de nuevo
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </mat-sidenav-container>

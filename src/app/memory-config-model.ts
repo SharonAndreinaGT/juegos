@@ -7,3 +7,14 @@ export class MemoryConfig {
   isActive?: boolean;
   images?: string[];
 }
+
+export interface MemoryResult {
+  id?: string;
+  level_name: string;
+  score: number;
+  flips: number;       // Puede ser el número total de pares de volteos, o intentos restantes si se agotan
+  stars: number;
+  time: number;
+  is_complete: boolean;
+  student_id: string;
+}

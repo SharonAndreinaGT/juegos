@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { MemoryConfig } from './memory-config-model';
+import { MemoryConfig, MemoryResult } from './memory-config-model';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +10,7 @@ import { MemoryConfig } from './memory-config-model';
 export class MemoryService {
   private apiUrl = 'http://localhost:8055/items/memory';    
   private directusFilesUrl = 'http://localhost:8055/files';
-
+  private memoryResultsApiUrl = 'http://localhost:8055/items/memory_results';
 
   constructor(private http: HttpClient) { }
 
@@ -55,4 +55,11 @@ export class MemoryService {
     return this.http.post<any>(this.directusFilesUrl, formData);
   }
 
+  //metodo ara guardar y enviar el resultado
+  saveMemoryResult(result: MemoryResult): Observable<MemoryResult> {
+    console.log('[MemoryService] Guardando resultado del juego de memoria:', result);
+    return this.http.post<MemoryResult>(this.memoryResultsApiUrl, result).pipe(
+      map(response => response)
+    );
+  }
 }

@@ -3,8 +3,9 @@ import { MatSnackBar } from '@angular/material/snack-bar'; // Necesitas MatSnack
 
 // --- NUEVAS LÍNEAS ---
 import { MemoryGameStateService } from '../memory-game-state.service';
-import { MemoryConfig } from '../memory-config-model'; // Importa MemoryConfig
+import { MemoryConfig, MemoryResult } from '../memory-config-model'; // Importa MemoryConfig
 import { MemoryService } from '../memory.service';
+import { SharedDataService } from '../sharedData.service';
 
 // --- Tu interfaz Card (si ya la tienes, mantenla así) ---
 export interface Card {
@@ -32,17 +33,37 @@ export class MemoryComponent implements OnInit {
   intentExceeded: boolean = false; // Indica si se acabaron los intentos
   timeExceeded: boolean = false; // Indica si se acabó el tiempo
   
+  //variables del score y studentID
+  score: number = 0;
+  stars: number = 0;
+  currentStudentId: string | null = null;
+
   private timer: any; // Para el temporizador del juego
   private flippedCards: Card[] = []; // Para las cartas volteadas actualmente
 
   constructor(
-    // --- NUEVA LÍNEA: Inyectar el servicio de estado del juego ---
+    //  Inyectar el servicio de estado del juego ---
+    private sharedDataService: SharedDataService,
     private gameStateService: MemoryGameStateService,
     private memoryService: MemoryService,
     private snackBar: MatSnackBar // Inyectar MatSnackBar para notificaciones
   ) { }
 
+/*************  ✨ Windsurf Command ⭐  *************/
+  /**
+   * ngOnInit
+   *
+   * Se llama justo antes de que el componente se vuelva a dibujar.
+   * En este caso, se llama a loadActiveMemoryConfig() para obtener la configuración
+   * del nivel activo cuando se inicia el componente.
+   */
+/*******  42785c72-6dab-4d7d-b731-0b90d52fc6d7  *******/
   ngOnInit(): void {
+    this.sharedDataService.loggedInStudentId$.subscribe((studentId: string | null) => {
+      this.currentStudentId = studentId;
+      console.log(`[MemoryComponent] ID de estudiante obtenido del servicio compartido: ${this.currentStudentId}`);
+    });
+
     this.loadActiveMemoryConfig();
   }
 
@@ -78,6 +99,8 @@ initializeGame(config: MemoryConfig): void {
   this.intentExceeded = false;
   this.timeExceeded = false;
   this.elapsedTime = 0;
+  this.score = 0; // Reiniciar el score
+  this.stars = 0; // Reiniciar las estrellas
 
   // Configurar el juego con los valores de la configuración cargada
   this.intent = config.intent ?? 1; // Usa el número de intentos de la configuración o un valor predeterminado
@@ -151,11 +174,12 @@ initializeGame(config: MemoryConfig): void {
       if (this.activeLevel && this.activeLevel.intent! > 0) {
         this.intent--; // Reduce intento solo si no es ilimitado
         if (this.intent < 0) this.intent = 0; // Asegura que no baja de 0
-        if (this.intent === 0) {
+        if (this.intent === 0 && this.matchedPairs !== this.totalPairs) { // Solo si los intentos se agotan y no se han encontrado todos los pares
             this.intentExceeded = true;
             this.stopGameTimer();
             this.gameStarted = false;
             this.snackBar.open('¡Se acabaron los intentos!', 'Cerrar', { duration: 3000 });
+            this.checkGameEnd(); // Llamar a checkGameEnd cuando se agotan los intentos
             return; // No procesar más si los intentos se agotaron
         }
       }
@@ -172,7 +196,7 @@ initializeGame(config: MemoryConfig): void {
         if (this.matchedPairs === this.totalPairs) {
           this.stopGameTimer();
           this.gameStarted = false;
-          this.snackBar.open('¡Felicidades, has encontrado todos los pares!', 'Cerrar', { duration: 5000 });
+          this.checkGameEnd(); // Llamar a checkGameEnd cuando se completa el juego
         }
       } else {
         // No coinciden, voltearlas de nuevo después de un breve retraso
@@ -182,6 +206,84 @@ initializeGame(config: MemoryConfig): void {
           this.flippedCards = []; // Limpiar para el siguiente par
         }, 1000);
       }
+    }
+}
+
+  // Nueva función para calcular el score y las estrellas
+  private calculateScoreAndStars(): void {
+    const maxScore = 20;
+    const maxStars = 3;
+
+    // Lógica de puntuación
+    // Si se completó el juego
+    if (this.matchedPairs === this.totalPairs) {
+      // Base de la puntuación: 10 puntos por completar el juego
+      this.score = 10;
+
+      // Penalización por intentos restantes: Si quedan intentos, bonificar
+      if (this.activeLevel && this.activeLevel.intent! > 0) {
+        const initialIntent = this.activeLevel.intent!;
+        const intentsUsed = initialIntent - this.intent;
+        // Bonificación por pocos intentos usados
+        if (intentsUsed <= initialIntent / 2) {
+          this.score += 5; // Más puntos por eficiencia
+        } else if (intentsUsed <= initialIntent * 0.75) {
+          this.score += 2; // Puntos por un uso moderado
+        }
+      }
+
+      // Penalización por tiempo restante: Si se completó rápido, bonificar
+      if (this.activeLevel && this.activeLevel.time_limit! > 0) {
+        const timeRemaining = this.activeLevel.time_limit! - this.elapsedTime;
+        if (timeRemaining >= this.activeLevel.time_limit! * 0.5) {
+          this.score += 5; // Más puntos por rapidez
+        } else if (timeRemaining >= this.activeLevel.time_limit! * 0.25) {
+          this.score += 2; // Puntos por una finalización razonable
+        }
+      }
+
+      // Asegurarse de que el puntaje no exceda el máximo
+      this.score = Math.min(this.score, maxScore);
+
+    } else {
+      // Si no se completó (tiempo agotado o intentos agotados)
+      this.score = 0; // Sin puntaje si no se completó
+    }
+
+    // Convertir el score (0-20) a estrellas (0-3)
+    if (this.score >= 15) {
+      this.stars = 3;
+    } else if (this.score >= 10) {
+      this.stars = 2;
+    } else if (this.score >= 5) {
+      this.stars = 1;
+    } else {
+      this.stars = 0;
+    }
+    console.log(`Puntaje del juego: ${this.score}, Estrellas: ${this.stars}`);
+  }
+
+  // Nueva función para manejar el fin del juego
+  private checkGameEnd(): void {
+    if (!this.gameStarted && (this.matchedPairs === this.totalPairs || this.intentExceeded || this.timeExceeded)) {
+      this.calculateScoreAndStars();
+      // Aquí podrías guardar el resultado en la base de datos o enviarlo a un servicio.
+      // Por ejemplo:
+      // const result: MemoryResult = {
+      //   studentId: this.currentStudentId,
+      //   levelId: this.activeLevel?.id, // Asumiendo que MemoryConfig tiene un ID
+      //   score: this.score,
+      //   stars: this.stars,
+      //   elapsedTime: this.elapsedTime,
+      //   matchedPairs: this.matchedPairs,
+      //   totalPairs: this.totalPairs,
+      //   intentRemaining: this.intent,
+      //   completed: this.matchedPairs === this.totalPairs
+      // };
+      // this.memoryService.saveMemoryResult(result).subscribe(
+      //   () => console.log('Resultado del juego guardado con éxito'),
+      //   (error) => console.error('Error al guardar el resultado del juego', error)
+      // );
     }
   }
 

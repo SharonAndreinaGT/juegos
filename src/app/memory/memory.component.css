@@ -9,17 +9,18 @@
 }
 
 .game-container {
-  width: 450px; 
-  max-width: 90%;
+  width: 600px; /* Aumentamos el ancho a 600px */
   height: auto;
   border-radius: 10px;
-  background-color: #f0f8ffeb;
-  padding: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  background-color: #f0f8ffeb;
+  padding: 70px;
+  justify-content: flex-start;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Sutil sombra para resaltar */
+
 }
 
 .game-header {
@@ -31,10 +32,26 @@
   border-bottom: 1px solid #eee;
 }
 
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 40px;
+}
+
 .game-title {
   margin: 0;
   font-size: 2em;
   color: #3f51b5;
+}
+
+.status {
+  display: flex;
+  gap: 18px;
+  background-color: #e0f2f7;
+  padding: 8px 15px;
+  border-radius: 5px;
 }
 
 .game-board {
@@ -49,6 +66,15 @@
   justify-content: center;
   align-items: center;
   grid-auto-rows: minmax(100px, auto); /* Ajustar según el minmax de las columnas */
+}
+
+.memory-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 90%;
+  flex-grow: 1; 
+  justify-content: center;
 }
 
 .memory-card {
@@ -194,4 +220,75 @@ button {
     min-width: 90px;
     padding: 8px 15px;
   }
+}
+
+.game-over-message {
+  text-align: center;
+  padding: 30px;
+  background-color: #ffffff;
+  border: 2px solid #006dbb;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  max-width: 450px; 
+  width: 90%; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  box-sizing: border-box; 
+}
+
+.game-over-message h2 {
+  font-size: 2.2rem; 
+  color: #006dbb;
+  margin-bottom: 10px;
+}
+
+.game-over-message p {
+  font-size: 1.1rem;
+  margin: 5px 0;
+  color: #555;
+}
+
+.stars-display {
+  font-size: 2.5em;
+  margin: 15px 0; 
+  display: flex;
+  gap: 5px;
+}
+
+.stars-display h3 {
+  font-size: 1.3rem; 
+  color: #333;
+  margin-bottom: 8px; 
+}
+
+.stars-display .star {
+  transition: color 0.3s ease-in-out;
+}
+
+.stars-display .star.filled {
+  color: gold;
+  text-shadow: 0 0 5px rgba(255, 215, 0, 0.7);
+}
+
+.game-over-message button {
+  background-color: #006dbb;
+  color: white;
+  padding: 10px 20px; 
+  border: none;
+  border-radius: 5px;
+  font-size: 1em; 
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+  margin-top: 15px; 
+}
+
+.game-over-message button:hover {
+  background-color: #005691;
+  transform: translateY(-2px);
+}
+
+.game-over-message button:active {
+  transform: translateY(0);
 }

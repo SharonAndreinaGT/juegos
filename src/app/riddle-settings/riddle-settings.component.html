@@ -1,87 +1,196 @@
 <mat-sidenav-container class="container">
-    <mat-sidenav mode="side" opened class="sidenav-bar">
-        <mat-toolbar class="sidenav">
-            <span>Administrador</span>
-        </mat-toolbar>
+  <mat-sidenav mode="side" opened class="sidenav-bar">
+    <mat-toolbar class="sidenav">
+      <span>Administrador</span>
+    </mat-toolbar>
 
     <mat-nav-list>
-        <button mat-button class="menu-button" routerLink="/main">
-            <mat-icon>person</mat-icon>
-            <span>Inicio</span>
-        </button>
-        <button mat-button class="menu-button" routerLink="/firstGrade">
-            <mat-icon>person_add</mat-icon>
-            <span>Primer Grado</span>
-        </button>
-        <button mat-button class="menu-button" routerLink="/secondGrade">
-            <mat-icon>person_add</mat-icon>
-            <span>Segundo Grado</span>
-        </button>
-        <button mat-button class="menu-button" routerLink="/thirdGrade">
-            <mat-icon>person_add</mat-icon>
-            <span>Tercer Grado</span>
-        </button>
-        <button mat-button class="menu-button" routerLink="/">
-            <mat-icon>timeline</mat-icon>
-            <span>Progreso</span>
-        </button>
-        <button mat-button class="menu-button" routerLink="/settings">
-            <mat-icon>settings</mat-icon>
-            <span>Configuración Juegos</span>
-        </button>
-        <button mat-button class="menu-button" routerLink="/">
-            <mat-icon>description</mat-icon>
-            <span>Informes</span>
-        </button>
+      <button mat-button class="menu-button" routerLink="/main">
+        <mat-icon>person</mat-icon>
+        <span>Inicio</span>
+      </button>
+      <button mat-button class="menu-button" routerLink="/firstGrade">
+        <mat-icon>person_add</mat-icon>
+        <span>Primer Grado</span>
+      </button>
+      <button mat-button class="menu-button" routerLink="/secondGrade">
+        <mat-icon>person_add</mat-icon>
+        <span>Segundo Grado</span>
+      </button>
+      <button mat-button class="menu-button" routerLink="/thirdGrade">
+        <mat-icon>person_add</mat-icon>
+        <span>Tercer Grado</span>
+      </button>
+      <button mat-button class="menu-button" routerLink="/progress">
+        <mat-icon>timeline</mat-icon>
+        <span>Progreso</span>
+      </button>
+      <button mat-button class="menu-button" routerLink="/settings">
+        <mat-icon>settings</mat-icon>
+        <span>Configuración Juegos</span>
+      </button>
+      <button mat-button class="menu-button" routerLink="/report">
+        <mat-icon>description</mat-icon>
+        <span>Informes</span>
+      </button>
 
-    <mat-divider></mat-divider>
+      <mat-divider></mat-divider>
 
-    <button mat-button class="menu-button" routerLink="/welcome">
+      <button mat-button class="menu-button" routerLink="/welcome">
         <mat-icon>logout</mat-icon>
         <span>Salir</span>
-    </button>
+      </button>
     </mat-nav-list>
-</mat-sidenav>
+  </mat-sidenav>
 
+  <mat-sidenav-content class="content">
+    <mat-card class="welcome-container">
+      <mat-card-content class="">
+        <div class="welcome-content">
+          <h1>{{ title }}</h1>
+        </div>
 
-    <mat-sidenav-content class="content">
-        <mat-card class="welcome-container">
-            <mat-card-content class="">
-                <div class="welcome-content">
-                    <h1>{{ title }}</h1>
+        <mat-card class="settings-card">
+          <mat-card-content>
+            <mat-tab-group dynamicHeight (selectedTabChange)="onTabChange($event)">
+              <mat-tab label="Nivel 1">
+                <div class="tab-content-form">
+                  <h2 class="h2">Fácil</h2>
+                  <form [formGroup]="level1Form">
+                    <mat-form-field appearance="fill" class="full-width">
+                      <mat-label>Máximo de Intentos</mat-label>
+                      <input matInput type="number" formControlName="maxIntents">
+                      <mat-error *ngIf="level1Form.get('maxIntents')?.hasError('required')">Los intentos son obligatorios</mat-error>
+                      <mat-error *ngIf="level1Form.get('maxIntents')?.hasError('min')">Debe ser al menos 1</mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="fill" class="full-width">
+                      <mat-label>Cantidad de Palabras por Nivel</mat-label>
+                      <input matInput type="number" formControlName="wordsPerLevel">
+                      <mat-error *ngIf="level1Form.get('wordsPerLevel')?.hasError('required')">La cantidad de palabras es obligatoria</mat-error>
+                      <mat-error *ngIf="level1Form.get('wordsPerLevel')?.hasError('min')">Debe ser al menos 1</mat-error>
+                    </mat-form-field>
+
+                    <h3>Palabras para Nivel 1</h3>
+                    <div class="word-input-container">
+                      <mat-form-field appearance="fill" class="word-input-field">
+                        <mat-label>Añadir Nueva Palabra</mat-label>
+                        <input matInput [(ngModel)]="newWordInput" [ngModelOptions]="{standalone: true}" placeholder="Ej: GATO">
+                      </mat-form-field>
+                      <button mat-raised-button color="accent" (click)="addWord(level1Config)" class="add-word-button">
+                        <mat-icon>add</mat-icon> Añadir
+                      </button>
+                    </div>
+
+                    <div class="word-list">
+                      <div *ngIf="level1Config.words.length === 0" class="no-words-message">
+                        No hay palabras configuradas para este nivel.
+                      </div>
+                      <div *ngFor="let wordObj of level1Config.words; let i = index" class="word-item mat-elevation-z1">
+                        <span>{{ wordObj.word }}</span>
+                        <button mat-icon-button color="warn" (click)="removeWord(level1Config, i)" class="remove-word-button">
+                          <mat-icon>close</mat-icon>
+                        </button>
+                      </div>
+                    </div>
+                  </form>
                 </div>
-                
-                <div>
-                   <mat-tab-group>
-                        <mat-tab label="Nivel 1 "> 
-                            <h2 class="h2">Fácil</h2>
-                            <div>
+              </mat-tab>
 
-                            </div>
-                        </mat-tab>
+              <mat-tab label="Nivel 2">
+                <div class="tab-content-form">
+                  <h2 class="h2">Medio</h2>
+                  <form [formGroup]="level2Form">
+                    <mat-form-field appearance="fill" class="full-width">
+                      <mat-label>Máximo de Intentos</mat-label>
+                      <input matInput type="number" formControlName="maxIntents">
+                      <mat-error *ngIf="level2Form.get('maxIntents')?.hasError('required')">Los intentos son obligatorios</mat-error>
+                      <mat-error *ngIf="level2Form.get('maxIntents')?.hasError('min')">Debe ser al menos 1</mat-error>
+                    </mat-form-field>
 
-                        <mat-tab label="Nivel 2">
-                             <h2 class="h2">Medio</h2> 
-                            <div>
+                    <mat-form-field appearance="fill" class="full-width">
+                      <mat-label>Cantidad de Palabras por Nivel</mat-label>
+                      <input matInput type="number" formControlName="wordsPerLevel">
+                      <mat-error *ngIf="level2Form.get('wordsPerLevel')?.hasError('required')">La cantidad de palabras es obligatoria</mat-error>
+                      <mat-error *ngIf="level2Form.get('wordsPerLevel')?.hasError('min')">Debe ser al menos 1</mat-error>
+                    </mat-form-field>
 
-                            </div>
-                        </mat-tab>
+                    <h3>Palabras para Nivel 2</h3>
+                    <div class="word-input-container">
+                      <mat-form-field appearance="fill" class="word-input-field">
+                        <mat-label>Añadir Nueva Palabra</mat-label>
+                        <input matInput [(ngModel)]="newWordInput" [ngModelOptions]="{standalone: true}" placeholder="Ej: ORDENADOR">
+                      </mat-form-field>
+                      <button mat-raised-button color="accent" (click)="addWord(level2Config)" class="add-word-button">
+                        <mat-icon>add</mat-icon> Añadir
+                      </button>
+                    </div>
 
-                        <mat-tab label="Nivel 3">
-                             <h2 class="h2">Difícil</h2> 
-                            <div>
-    
-                            </div>
-                        </mat-tab>
-                    </mat-tab-group>
-
-                     <button class="colorbutton-btn">Guardar</button>
+                    <div class="word-list">
+                      <div *ngIf="level2Config.words.length === 0" class="no-words-message">
+                        No hay palabras configuradas para este nivel.
+                      </div>
+                      <div *ngFor="let wordObj of level2Config.words; let i = index" class="word-item mat-elevation-z1">
+                        <span>{{ wordObj.word }}</span>
+                        <button mat-icon-button color="warn" (click)="removeWord(level2Config, i)" class="remove-word-button">
+                          <mat-icon>close</mat-icon>
+                        </button>
+                      </div>
+                    </div>
+                  </form>
                 </div>
-          
-          
-                
-            </mat-card-content>
+              </mat-tab>
+
+              <mat-tab label="Nivel 3">
+                <div class="tab-content-form">
+                  <h2 class="h2">Difícil</h2>
+                  <form [formGroup]="level3Form">
+                    <mat-form-field appearance="fill" class="full-width">
+                      <mat-label>Máximo de Intentos</mat-label>
+                      <input matInput type="number" formControlName="maxIntents">
+                      <mat-error *ngIf="level3Form.get('maxIntents')?.hasError('required')">Los intentos son obligatorios</mat-error>
+                      <mat-error *ngIf="level3Form.get('maxIntents')?.hasError('min')">Debe ser al menos 1</mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="fill" class="full-width">
+                      <mat-label>Cantidad de Palabras por Nivel</mat-label>
+                      <input matInput type="number" formControlName="wordsPerLevel">
+                      <mat-error *ngIf="level3Form.get('wordsPerLevel')?.hasError('required')">La cantidad de palabras es obligatoria</mat-error>
+                      <mat-error *ngIf="level3Form.get('wordsPerLevel')?.hasError('min')">Debe ser al menos 1</mat-error>
+                    </mat-form-field>
+
+                    <h3>Palabras para Nivel 3</h3>
+                    <div class="word-input-container">
+                      <mat-form-field appearance="fill" class="word-input-field">
+                        <mat-label>Añadir Nueva Palabra (con pista)</mat-label>
+                        <input matInput [(ngModel)]="newWordInput" [ngModelOptions]="{standalone: true}" placeholder="Ej: ORDENADOR (Máquina electrónica)">
+                        <mat-hint>Para el Nivel 3, añade también una pista. Formato: PALABRA (Pista)</mat-hint>
+                      </mat-form-field>
+                      <button mat-raised-button color="accent" (click)="addWord(level3Config)" class="add-word-button">
+                        <mat-icon>add</mat-icon> Añadir
+                      </button>
+                    </div>
+
+                    <div class="word-list">
+                      <div *ngIf="level3Config.words.length === 0" class="no-words-message">
+                        No hay palabras configuradas para este nivel.
+                      </div>
+                      <div *ngFor="let wordObj of level3Config.words; let i = index" class="word-item mat-elevation-z1">
+                        <span>{{ wordObj.word }}</span>
+                        <span *ngIf="wordObj.hint" class="word-hint"> ({{ wordObj.hint }})</span>
+                        <button mat-icon-button color="warn" (click)="removeWord(level3Config, i)" class="remove-word-button">
+                          <mat-icon>close</mat-icon>
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </mat-tab>
+            </mat-tab-group>
+            <button mat-raised-button color="primary" class="colorbutton-btn" (click)="saveSettings()">Guardar Configuración de Niveles</button>
+          </mat-card-content>
         </mat-card>
-    </mat-sidenav-content>
-
+      </mat-card-content>
+    </mat-card>
+  </mat-sidenav-content>
 </mat-sidenav-container>

@@ -1,81 +1,219 @@
-/*Css del contendor principal*/
+/* --- Estilos generales del contenedor principal --- */
 .container {
-    background: rgba(128, 128, 128, 0.402);
-  }
-  
+  /* Fondo del contenedor principal, como se ve en la imagen */
+  background: rgba(128, 128, 128, 0.402);
+  /* Altura fija para que ocupe toda la vista y el botón tenga un punto de referencia */
+  height: 100vh;
+  /* Usamos flexbox para organizar la barra lateral y el contenido */
+  display: flex;
+}
+
+/* --- Estilos de la barra lateral (sidenav) --- */
 .sidenav {
-    background-color: #9fd3f3d9;
-    border-radius: 0px;
+  /* Color de la barra superior del menú */
+  background-color: #9fd3f3d9;
+  border-radius: 0px;
 }
-  
+
 .sidenav-bar {
-    width: 200px;
-    margin: 16px;
-    border-right: none;
-    border-radius: 10px;
-    background-color: #f0f8ff;
+  width: 200px;
+  margin: 16px;
+  border-right: none;
+  border-radius: 10px;
+  background-color: #f0f8ff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Añadimos una sombra para que se parezca a la imagen */
+  /* Aseguramos que la barra lateral ocupe el espacio vertical disponible */
+  align-self: stretch;
 }
-  
+
+/* --- Estilos de los botones del menú de navegación --- */
+.mat-nav-list {
+  padding: 8px 0;
+}
+
+.menu-button {
+  width: 100%;
+  margin-right: 8px;
+  display: flex;
+  font-size: 1rem;
+  justify-content: flex-start;
+  padding: 10px 16px; /* Añadimos padding para que parezca un botón */
+  font-weight: 500;
+  transition: background-color 0.2s ease-in-out;
+  align-items: center; /* Alinea el icono y el texto */
+  border-radius: 0;
+}
+
+.menu-button:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.menu-button mat-icon {
+  margin-right: 12px;
+  color: #616161;
+}
+
+/* --- Estilos del contenido principal --- */
 .content {
   padding: 16.5px;
-}
-  
-.menu-button {
-    width: 100%;
-    margin-right: 8px;
-    display: flex;
-    font-size: 1rem;
-    justify-content: flex-start;
+  /* Permite que ocupe el espacio restante horizontalmente */
+  flex-grow: 1;
+  /* Para organizar el contenido y la tarjeta principal */
+  display: flex;
+  flex-direction: column;
+  /* El overflow se gestionará dentro de la tarjeta de contenido para que el scroll sea interno */
+  overflow: hidden; 
 }
 
-.welcome-card {
-    background-color: #f0f8ff;
-}
-  
+/* Contenedor principal de la tarjeta de contenido */
 .welcome-container {
-    height: calc(100vh - 65px);
-    border-radius: 10px;
-    margin: 16px;
-    margin-left: 20px;
-    display: flex;
-    background-color: #f0f8ff;
+  /* Dimensiones y posición de la tarjeta principal, como en tu ejemplo */
+  /* Ajustamos la altura para dejar espacio en la parte inferior para el botón */
+  height: calc(100vh - 65px - 30px); /* Restamos 30px extra para un margen inferior */
+  border-radius: 10px;
+  margin: 16px;
+  margin-left: 20px;
+  display: flex;
+  flex-direction: column; /* Para organizar el contenido verticalmente */
+  background-color: #f0f8ff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  /* Posicionamiento relativo para que el botón esté anclado a este contenedor */
+  position: relative;
+  /* Habilitamos el scroll para el contenido interno si es necesario */
+  overflow-y: auto; 
 }
-  
+
+/* Contenedor del título "Memoria" */
 .welcome-content h1 {
-    font-size: 2.5em;
-    color: #3f51b5;
-    margin-bottom: 20px;
-    font-family: 'Arial', sans-serif;
+  /* Estilos del título "Memoria" */
+  font-size: 2.5em;
+  color: #3f51b5;
+  margin-bottom: 20px;
+  font-family: 'Arial', sans-serif;
+  font-weight: bold;
 }
 
-.h2{
-    color: #3f51b5;
-    margin-bottom: 20px;
-    font-family: 'Arial', sans-serif;
+/* Estilos de los títulos de las secciones de nivel */
+.h2 {
+  color: #3f51b5;
+  margin-bottom: 20px;
+  font-family: 'Arial', sans-serif;
 }
 
-/* CSS para el botón */
+/* --- Estilos de las pestañas --- */
+.mat-tab-group {
+  margin-top: 0;
+  background-color: transparent; /* Fondo transparente */
+  border: none;
+  /* Flexbox para que las pestañas ocupen el espacio restante */
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.mat-tab-header {
+  border-bottom: 1px solid #ccc;
+  padding: 0 24px;
+}
+
+.mat-tab-label-active {
+  color: #3f51b5 !important;
+  font-weight: bold;
+}
+
+.mat-ink-bar {
+  background-color: #3f51b5 !important;
+}
+
+.word-input-container {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.word-input-field {
+  flex-grow: 1;
+}
+
+.add-word-button {
+  height: 56px;
+  padding: 0 20px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.word-list {
+  margin-top: 15px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 10px;
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: #f9f9f9;
+}
+
+.no-words-message {
+  padding: 15px;
+  text-align: center;
+  color: #757575;
+  font-style: italic;
+}
+
+.word-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  background-color: #ffffff;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: all 0.2s ease-in-out;
+}
+
+.word-item:hover {
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.word-item span {
+  font-weight: 500;
+  color: #333;
+}
+
+.word-hint {
+  font-size: 0.85em;
+  color: #666;
+  margin-left: 8px;
+}
+
+.remove-word-button {
+  min-width: 36px;
+  padding: 0;
+}
+
+/* --- Estilos del botón de guardar (posicionamiento absoluto) --- */
 .colorbutton-btn {
-  padding: 10px 20px; 
+  padding: 10px 20px;
   border: 2px solid #3f51b5;
   border-radius: 20px;
   background-color: #cfe0ff;
   color: #3f51b5;
   font-weight: bold;
   font-family: 'Verdana', sans-serif;
-  transition: border-color 0.3s ease, background-color 0.3s ease, transform 0.3s ease; /* Añadimos transiciones */
+  transition: border-color 0.3s ease, background-color 0.3s ease, transform 0.3s ease;
   outline: none;
   cursor: pointer;
-
-  /* POSICIONAMIENTO*/
-  position: absolute; /* Posicionamiento absoluto */
-  bottom: 20px;
+  
+  /* POSICIONAMIENTO ABSOLUTO y lo bajamos un poco */
+  position: absolute;
+  bottom: 10px; /* Reducimos el valor para que baje más */
   right: 30px; 
 }
 
 .colorbutton-btn:hover {
   background-color: #bbd3ff; 
   border-color: #303f9f; 
-  transform: translateY(-2px); /* Pequeño levantamiento al pasar el mouse */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra para efecto "elevado" */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }

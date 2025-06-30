@@ -48,8 +48,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-
-
+import { MatChipsModule } from '@angular/material/chips';
 
 @NgModule({
     declarations: [
@@ -98,6 +97,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
       FormsModule,
       MatTabsModule,
       MatSlideToggleModule,
+      MatChipsModule,
       HttpClientModule
     ],
     providers: [

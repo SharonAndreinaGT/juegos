@@ -6,11 +6,148 @@
   min-height: 100vh;
 }
 
-.welcome-container {
-  width: 500px;
-  height: auto;
-  border-radius: 10px;
-  background-color: #f0f8ffeb;
-  padding: 300px; 
-  margin: 0 auto; 
+.game-container {
+  background-color: #ffffff; /* Fondo blanco para el contenedor del juego */
+  border-radius: 15px; /* Bordes redondeados */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); /* Sombra suave */
+  padding: 40px; /* Espaciado interno */
+  width: 100%; /* Ancho completo */
+  max-width: 650px; /* Ancho máximo para el juego */
+  text-align: center; /* Centra el texto */
+  display: flex;
+  flex-direction: column; /* Organiza los elementos en columna */
+  gap: 25px; /* Espaciado entre elementos */
+}
+
+/* Título del juego */
+.game-title {
+  font-size: 2.5em; /* Tamaño de fuente grande */
+  color: #4a4a4a; /* Color oscuro */
+  margin-bottom: 20px; /* Margen inferior */
+  font-weight: 700; /* Negrita */
+  letter-spacing: 1px; /* Espaciado entre letras */
+}
+
+/* Sección de visualización del juego */
+.game-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px; /* Espaciado entre la palabra y los intentos */
+}
+
+/* Estilo para la palabra a adivinar */
+.word-display {
+  font-size: 3.5em; /* Tamaño de fuente muy grande */
+  font-weight: bold; /* Negrita */
+  letter-spacing: 8px; /* Espaciado generoso entre letras/guiones bajos */
+  color: #2c3e50; /* Color oscuro */
+  text-transform: uppercase; /* Convierte a mayúsculas */
+  white-space: nowrap; /* Evita que la palabra se rompa en varias líneas */
+  overflow-x: auto; /* Permite desplazamiento horizontal si la palabra es muy larga */
+  padding-bottom: 5px; /* Pequeño padding inferior */
+}
+
+/* Estilo para el texto de intentos restantes */
+.guesses-left {
+  font-size: 1.2em; /* Tamaño de fuente */
+  color: #555; /* Color gris */
+  font-weight: 500; /* Peso de fuente */
+}
+
+/* Contenedor de mensajes del juego */
+.game-message-container {
+  margin-top: 30px; /* Margen superior */
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* Espaciado entre mensaje y botón */
+  align-items: center; /* Centra los elementos */
+}
+
+/* Estilo para los mensajes de ganar/perder */
+.game-message {
+  font-size: 1.8em; /* Tamaño de fuente grande */
+  font-weight: bold; /* Negrita */
+  margin: 0; /* Sin margen */
+  padding: 10px 0; /* Padding vertical */
+}
+
+.game-message.won {
+  color: #28a745; /* Verde para ganar */
+}
+
+.game-message.lost {
+  color: #dc3545; /* Rojo para perder */
+}
+
+/* Estilo para el botón "Jugar de Nuevo" */
+.play-again-button {
+  background-color: #007bff; /* Azul */
+  color: white; /* Texto blanco */
+  border: none; /* Sin borde */
+  border-radius: 8px; /* Bordes redondeados */
+  padding: 15px 30px; /* Espaciado interno */
+  font-size: 1.2em; /* Tamaño de fuente */
+  font-weight: bold; /* Negrita */
+  cursor: pointer; /* Cursor de puntero */
+  transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s; /* Transición suave */
+  box-shadow: 0 6px 12px rgba(0, 123, 255, 0.2); /* Sombra */
+  letter-spacing: 0.5px; /* Espaciado entre letras */
+}
+
+.play-again-button:hover {
+  background-color: #0056b3; /* Azul más oscuro al pasar el ratón */
+  transform: translateY(-3px); /* Pequeño levantamiento */
+  box-shadow: 0 8px 16px rgba(0, 123, 255, 0.3); /* Sombra más grande */
+}
+
+.play-again-button:active {
+  background-color: #004085; /* Azul aún más oscuro al hacer clic */
+  transform: translateY(0); /* Vuelve a la posición original */
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2); /* Sombra más pequeña */
+}
+
+/* Media queries para responsividad */
+@media (max-width: 768px) {
+  .game-container {
+    padding: 25px; /* Menos padding en pantallas pequeñas */
+    max-width: 95%; /* Ocupa más ancho */
+  }
+
+  .game-title {
+    font-size: 2em; /* Título más pequeño */
+  }
+
+  .word-display {
+    font-size: 2.5em; /* Palabra más pequeña */
+    letter-spacing: 5px; /* Menos espaciado */
+  }
+
+  .game-message {
+    font-size: 1.5em; /* Mensaje más pequeño */
+  }
+
+  .play-again-button {
+    font-size: 1em; /* Botón de reiniciar más pequeño */
+    padding: 12px 25px; /* Menos padding */
+  }
+}
+
+@media (max-width: 480px) {
+  .game-container {
+    padding: 15px;
+  }
+
+  .game-title {
+    font-size: 1.8em;
+  }
+
+  .word-display {
+    font-size: 2em;
+    letter-spacing: 4px;
+  }
+
+  .game-message {
+    font-size: 1.3em;
+  }
 }

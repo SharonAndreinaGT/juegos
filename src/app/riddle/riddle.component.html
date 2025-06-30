@@ -1,10 +1,21 @@
+<!-- Contenedor principal del juego -->
 <mat-sidenav-container class="container">
-  
-    <ng-container >
-      <div class="welcome-container">
-          
-      </div>
-    </ng-container>
-  
+  <div class="game-container">
+    <h1 class="game-title">Adivinar la Palabra Oculta</h1>
+
+    <!-- Sección para mostrar el estado del juego y la palabra a adivinar -->
+    <div class="game-display">
+      <p class="word-display">{{ displayWord }}</p>
+      <p class="guesses-left">Intentos restantes: {{ maxIncorrectGuesses - incorrectGuesses }}</p>
+    </div>
+
+    <!-- Mensajes del juego y botón para reiniciar -->
+    <div *ngIf="gameStatus !== 'playing'" class="game-message-container">
+      <p class="game-message" [class.won]="gameStatus === 'won'" [class.lost]="gameStatus === 'lost'">
+        {{ message }}
+      </p>
+      <button (click)="initializeGame()" class="play-again-button">Jugar de Nuevo</button>
+    </div>
+  </div>
 </mat-sidenav-container>
 

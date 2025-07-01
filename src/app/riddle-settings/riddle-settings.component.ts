@@ -12,35 +12,32 @@ import { MatTabChangeEvent } from '@angular/material/tabs';
 export class RiddleSettingsComponent implements OnInit {
   title = 'Configuración del Juego de Adivinar la Palabra';
 
-  // Define explicit configurations for each level. These will be updated from the service.
   level1Config!: RiddleLevel;
   level2Config!: RiddleLevel;
   level3Config!: RiddleLevel;
 
-  // Forms for each level
   level1Form!: FormGroup;
   level2Form!: FormGroup;
   level3Form!: FormGroup;
 
-  // Property for the input to add a new word (common for all tabs)
   newWordInput: string = '';
 
   constructor(private riddleService: RiddleService, private fb: FormBuilder) { }
 
   ngOnInit(): void {
-    // Subscribe to the levels$ observable to get the initial configurations
+    // Suscríbete al observable para obtener las configuraciones iniciales
     this.riddleService.levels$.subscribe((levels: RiddleLevel[]) => {
-      // Find and assign the correct config object for each level
-      this.level1Config = levels.find(lvl => lvl.level_number === 1) || { level_number: 1, level_name: 'Fácil', max_intents: 5, words_level: 5, words: [] };
-      this.level2Config = levels.find(lvl => lvl.level_number === 2) || { level_number: 2, level_name: 'Medio', max_intents: 4, words_level: 6, words: [] };
-      this.level3Config = levels.find(lvl => lvl.level_number === 3) || { level_number: 3, level_name: 'Difícil', max_intents: 3, words_level: 7, words: [] };
+      // Encuentra y asigna el objeto de configuración correcto para cada nivel
+      this.level1Config = levels.find(lvl => lvl.level_number === 1) || { level_number: 1, level_name: 'Fácil', max_intents: 5, words_level: 5, words: [], isActive: false };
+      this.level2Config = levels.find(lvl => lvl.level_number === 2) || { level_number: 2, level_name: 'Medio', max_intents: 4, words_level: 6, words: [], isActive: false };
+      this.level3Config = levels.find(lvl => lvl.level_number === 3) || { level_number: 3, level_name: 'Difícil', max_intents: 3, words_level: 7, words: [], isActive: false };
       
       this.initForms();
     });
   }
 
   initForms(): void {
-    // Initialize a separate form group for each level's settings
+    // Inicializa un grupo de formulario separado para cada configuración de nivel
     this.level1Form = this.fb.group({
       maxIntents: [this.level1Config.max_intents, [Validators.required, Validators.min(1)]],
       wordsPerLevel: [this.level1Config.words_level, [Validators.required, Validators.min(1)]],
@@ -58,6 +55,23 @@ export class RiddleSettingsComponent implements OnInit {
   }
 
   /**
+   * Toggles the active status of a level. When one is activated, others are deactivated.
+   * This is the core logic for the level switch.
+   * @param levelToActivate The RiddleLevel object to be activated.
+   */
+  toggleLevelActive(levelToActivate: RiddleLevel): void {
+    // Desactivar todos los niveles primero
+    this.level1Config.isActive = false;
+    this.level2Config.isActive = false;
+    this.level3Config.isActive = false;
+    
+    // Activa solo el nivel seleccionado.
+    levelToActivate.isActive = true;
+    
+    console.log(`Nivel ${levelToActivate.level_number} ha sido activado.`);
+  }
+
+  /**
    * Adds a word (and an optional hint for Level 3) to the list of the specified level.
    * @param levelConfig The RiddleLevel object to which the word will be added.
    */
@@ -70,7 +84,6 @@ export class RiddleSettingsComponent implements OnInit {
       return;
     }
 
-    // If it's Level 3, try to parse the hint from "PALABRA (PISTA)" format
     if (levelConfig.level_number === 3 && value.includes('(') && value.includes(')')) {
       const match = value.match(/(.*?)\((.*)\)/);
       if (match && match.length === 3) {
@@ -79,10 +92,9 @@ export class RiddleSettingsComponent implements OnInit {
       }
     }
 
-    // Ensure the word is not duplicated
     if (!levelConfig.words.some((w: RiddleWord) => w.word === value)) {
       levelConfig.words.push({ word: value, hint: hint });
-      this.newWordInput = ''; // Clear the input after adding
+      this.newWordInput = '';
     } else {
       alert(`La palabra "${value}" ya existe en el nivel ${levelConfig.level_number}.`);
     }
@@ -108,12 +120,11 @@ export class RiddleSettingsComponent implements OnInit {
   }
 
   /**
-   * Saves the settings by updating the service with the current form values.
+   * Saves the settings by updating the service with the current form values and active status.
    */
   saveSettings(): void {
     let allFormsValid = true;
 
-    // Check the validity of each form
     if (this.level1Form.invalid) {
       allFormsValid = false;
       this.level1Form.markAllAsTouched();
@@ -141,7 +152,7 @@ export class RiddleSettingsComponent implements OnInit {
       this.level3Config.max_intents = this.level3Form.value.maxIntents;
       this.level3Config.words_level = this.level3Form.value.wordsPerLevel;
 
-      // Collect all level configurations to send to the service
+      // Collect all level configurations to send to the service, including the isActive status
       const updatedLevelsForService: RiddleLevel[] = [
         this.level1Config,
         this.level2Config,

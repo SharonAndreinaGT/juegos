@@ -1,7 +1,7 @@
 import { Component, OnInit, HostListener, OnDestroy } from '@angular/core';
 import { RiddleLevel } from '../riddle.model';
 import { RiddleService } from '../riddle.service';
-import { Subscription } from 'rxjs'; // Import Subscription to manage the subscription
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-riddle',
@@ -18,56 +18,43 @@ export class RiddleComponent implements OnInit, OnDestroy {
   maxIncorrectGuesses: number = 7;
   gameStatus: 'playing' | 'won' | 'lost' = 'playing';
   message: string = '';
-  currentLevel: number = 1;
   
-  // Propiedad para almacenar la configuración del nivel actual, obtenida del servicio
-  currentLevelConfig!: RiddleLevel; 
-  private levelsSubscription!: Subscription; // Property to hold the subscription
+  // Propiedad para almacenar la configuración del nivel activo, no un número de nivel.
+  activeLevelConfig!: RiddleLevel; 
+
+  private levelsSubscription!: Subscription;
 
   constructor(private riddleService: RiddleService) { }
 
   ngOnInit(): void {
-    // 1. Nos suscribimos al observable de niveles del servicio.
-    // Guardamos la suscripción en una propiedad para poder desuscribirnos en ngOnDestroy.
+    // 1. Nos suscribimos al observable de niveles para obtener la configuración guardada.
     this.levelsSubscription = this.riddleService.levels$.subscribe((levels: RiddleLevel[]) => {
-      // 2. Buscamos la configuración del nivel actual.
-      this.currentLevelConfig = levels.find(lvl => lvl.level_number === this.currentLevel) || 
-        { level_number: this.currentLevel, level_name: 'Nivel', max_intents: 5, words_level: 5, words: [] };
-
-      // 3. Actualizamos las propiedades del juego con la nueva configuración.
-      this.maxIncorrectGuesses = this.currentLevelConfig.max_intents;
+      // 2. Buscamos el nivel que ha sido marcado como activo.
+      const activeLevel = levels.find(lvl => lvl.isActive);
       
-      // Mapeamos el array de objetos { word: '...' } a un array de strings ['...']
-      this.words = this.currentLevelConfig.words.map(wordObj => wordObj.word);
-
-      // 4. Inicializamos el juego con la nueva configuración.
-      this.initializeGame();
+      if (activeLevel) {
+        // Si encontramos un nivel activo, usamos su configuración.
+        this.activeLevelConfig = activeLevel;
+        // 3. Inicializamos el juego con la configuración del nivel activo.
+        this.initializeGame();
+      } else {
+        // Si no hay ningún nivel activo, mostramos un mensaje de error.
+        this.gameStatus = 'lost';
+        this.message = 'No hay ningún nivel activo. Por favor, activa un nivel en la configuración del docente.';
+        this.words = []; // Aseguramos que no haya palabras
+        this.secretWord = '';
+        this.displayWord = '';
+        console.warn('Ningún nivel está activo.');
+      }
     });
   }
-  
+
   ngOnDestroy(): void {
-    // Es crucial desuscribirse para evitar fugas de memoria.
     if (this.levelsSubscription) {
       this.levelsSubscription.unsubscribe();
     }
   }
 
-  /**
-   * Cambia el nivel de juego y reinicia el juego con la nueva configuración.
-   * Este método ahora obtiene la configuración a través del servicio sin acceder a `.value`.
-   * @param level El número del nivel al que se desea cambiar (1, 2 o 3).
-   */
-  changeLevel(level: number): void {
-    // Actualizamos el nivel actual.
-    this.currentLevel = level;
-    // La suscripción en ngOnInit se encargará de actualizar la configuración automáticamente.
-    // Para forzar la actualización, podemos volver a inicializar el juego.
-    // Simplemente llamamos a initializeGame() para que use el nuevo valor de this.currentLevel
-    // que será capturado por la suscripción al servicio.
-    // Esto asegura que la lógica de inicialización se ejecute con la configuración del nuevo nivel.
-    this.initializeGame();
-  }
-  
   /**
    * Escucha eventos de teclado en todo el documento para la entrada de letras.
    * @param event El evento de teclado.
@@ -75,34 +62,39 @@ export class RiddleComponent implements OnInit, OnDestroy {
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
     const key = event.key.toUpperCase();
-
     if (this.gameStatus === 'playing' && key.length === 1 && key >= 'A' && key <= 'Z') {
       this.checkGuess(key);
     }
   }
 
   /**
-   * Inicializa un nuevo juego:
-   * - Reinicia contadores y estados.
-   * - Selecciona una nueva palabra secreta del array de palabras del nivel actual.
-   * - Prepara la palabra a mostrar con guiones bajos.
+   * Inicializa un nuevo juego con la configuración del nivel activo.
    */
   initializeGame(): void {
+    // Reiniciamos los estados del juego.
     this.guessedLetters.clear();
     this.incorrectGuesses = 0;
     this.gameStatus = 'playing';
     this.message = '';
+    
+    // Configuramos el juego con los valores del nivel activo.
+    this.maxIncorrectGuesses = this.activeLevelConfig.max_intents;
+    
+    // Mapeamos los objetos de palabras a un array de strings.
+    this.words = this.activeLevelConfig.words.map(wordObj => wordObj.word);
 
+    // Seleccionamos una palabra al azar si hay palabras disponibles.
     if (this.words && this.words.length > 0) {
       const randomIndex = Math.floor(Math.random() * this.words.length);
       this.secretWord = this.words[randomIndex].toUpperCase();
       this.updateDisplayWord();
     } else {
+      // Si no hay palabras, mostramos un mensaje de error.
       this.secretWord = '';
       this.displayWord = 'NO HAY PALABRAS CONFIGURADAS';
       this.gameStatus = 'lost';
-      this.message = 'Por favor, configura palabras para este nivel en la sección de Ajustes.';
-      console.warn('No hay palabras disponibles para el nivel', this.currentLevelConfig.level_name);
+      this.message = 'No hay palabras disponibles para el nivel activo. Por favor, añade palabras en la configuración.';
+      console.warn('No hay palabras disponibles para el nivel activo', this.activeLevelConfig.level_name);
     }
   }
 

@@ -11,6 +11,7 @@ export interface RiddleLevel {
   max_intents: number; // Número máximo de intentos permitidos para este nivel.
   words_level: number; // Cantidad de palabras que se mostrarán por partida en este nivel.
   words: RiddleWord[]; // Array de palabras disponibles para este nivel, incluyendo sus pistas.
+  isActive: boolean;
 }
 
 // Define la estructura general de la configuración de todo el juego.

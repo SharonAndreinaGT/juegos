@@ -80,6 +80,12 @@
                       <button mat-raised-button color="accent" (click)="addWord(level1Config)" class="add-word-button">
                         <mat-icon>add</mat-icon> Añadir
                       </button>
+                        <mat-slide-toggle
+                          color="primary"
+                          [checked]="level1Config.isActive"
+                          (change)="toggleLevelActive(level1Config)">
+                          Activo
+                        </mat-slide-toggle>
                     </div>
 
                     <div class="word-list">
@@ -124,6 +130,12 @@
                       <button mat-raised-button color="accent" (click)="addWord(level2Config)" class="add-word-button">
                         <mat-icon>add</mat-icon> Añadir
                       </button>
+                       <mat-slide-toggle
+                          color="primary"
+                          [checked]="level2Config.isActive"
+                          (change)="toggleLevelActive(level2Config)">
+                          Activo
+                        </mat-slide-toggle>
                     </div>
 
                     <div class="word-list">
@@ -169,6 +181,12 @@
                       <button mat-raised-button color="accent" (click)="addWord(level3Config)" class="add-word-button">
                         <mat-icon>add</mat-icon> Añadir
                       </button>
+                       <mat-slide-toggle
+                          color="primary"
+                          [checked]="level3Config.isActive"
+                          (change)="toggleLevelActive(level3Config)">
+                          Activo
+                        </mat-slide-toggle>
                     </div>
 
                     <div class="word-list">

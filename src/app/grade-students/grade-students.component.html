@@ -71,21 +71,16 @@
                 <tr>
                   <th>Nombre</th>
                   <th>Apellido</th>
-                  <th>Puntaje</th>
                   <th>Sección</th>
-                  <th>Acciones</th>
+                  <th>Editar</th>
                 </tr>
               </thead>
               <tbody>
                 <tr *ngFor="let student of dataSource.connect() | async">
                   <td>{{ student.name }}</td>
                   <td>{{ student.lastname }}</td>
-                  <td>{{ student.score }}</td>
                   <td>{{ student.section }}</td>
                   <td>
-                    <button class="btn btn-sm btn-icon mr-1">
-                      <mat-icon>visibility</mat-icon>
-                    </button>
                     <button class="btn btn-sm btn-icon" (click)="editUser(student)">
                       <mat-icon>edit</mat-icon>
                     </button>

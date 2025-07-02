@@ -4,6 +4,7 @@ import { PuzzleService } from '../puzzle.service';
 import { SharedDataService } from '../sharedData.service';
 import { PuzzleConfig, PuzzleResult, User } from '../puzzle-config.model';
 import { ActivatedRoute } from '@angular/router'; 
+import { Router } from '@angular/router';
 
 interface PuzzlePiece {
   index: number;
@@ -42,6 +43,7 @@ export class PuzzleComponent implements OnInit, OnDestroy {
     private puzzleService: PuzzleService,
     private sharedDataService: SharedDataService,
     private route: ActivatedRoute,
+    private router: Router,
     private el: ElementRef,
     private renderer: Renderer2
   ) {}
@@ -265,5 +267,9 @@ export class PuzzleComponent implements OnInit, OnDestroy {
 
   resetGame(): void {
     this.loadPuzzleConfiguration();
+  }
+
+  options(): void {
+    this.router.navigate(['/options']);
   }
 }

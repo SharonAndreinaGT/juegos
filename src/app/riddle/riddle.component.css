@@ -1,153 +1,223 @@
+/* Contenedor principal de la aplicación */
 .container {
-  background: rgba(128, 128, 128, 0.402);
+  background: rgba(128, 128, 128, 0.402); /* Fondo semitransparente gris */
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+ 
+  box-sizing: border-box;
 }
 
+/* Contenedor general del juego de adivinar la palabra */
 .game-container {
-  background-color: #ffffff; /* Fondo blanco para el contenedor del juego */
-  border-radius: 15px; /* Bordes redondeados */
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); /* Sombra suave */
-  padding: 40px; /* Espaciado interno */
-  width: 100%; /* Ancho completo */
-  max-width: 650px; /* Ancho máximo para el juego */
-  text-align: center; /* Centra el texto */
-  display: flex;
-  flex-direction: column; /* Organiza los elementos en columna */
-  gap: 25px; /* Espaciado entre elementos */
-}
-
-/* Título del juego */
-.game-title {
-  font-size: 2.5em; /* Tamaño de fuente grande */
-  color: #4a4a4a; /* Color oscuro */
-  margin-bottom: 20px; /* Margen inferior */
-  font-weight: 700; /* Negrita */
-  letter-spacing: 1px; /* Espaciado entre letras */
-}
-
-/* Sección de visualización del juego */
-.game-display {
+  width: 700px; 
+  height: auto;
+  border-radius: 10px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 15px; /* Espaciado entre la palabra y los intentos */
+  background-color: #f0f8ffeb; 
+  padding: 80px; 
+  justify-content: flex-start; /* Alinea el contenido al inicio */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Sutil sombra para resaltar */
 }
 
-/* Estilo para la palabra a adivinar */
+/* Header que contiene el título del juego y el estado (intentos/palabra) */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 40px; /* Espacio entre el header y el contenido del juego */
+  padding: 0 10px; 
+}
+
+.game-title {
+  margin: 0;
+  font-size: 2.5em; /* Tamaño del título del juego */
+  color: #3f51b5; /* Color primario de Angular Material */
+  font-weight: bold; /* Hacer el título más impactante */
+  margin-right: 20px; 
+}
+
+/* Estilos para el display de estado (intentos restantes, palabra X de Y) */
+.status {
+  display: flex;
+  gap: 18px; /* Espacio entre "Intentos" y "Palabra X de Y" */
+  background-color: #e0f2f7; /* Fondo para el bloque de estado */
+  padding: 8px 15px;
+  border-radius: 5px;
+  align-items: center; /* Centra verticalmente el contenido */
+  flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
+}
+
+
+.status span {
+  font-weight: bold;
+  color: #3f51b5; /* Color de énfasis para los números */
+}
+
+/* Wrapper para la palabra a adivinar y la pista */
+.riddle-wrapper {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 50px; /* Espacio antes de la pantalla de fin de juego si aparece */
+}
+
 .word-display {
-  font-size: 3.5em; /* Tamaño de fuente muy grande */
-  font-weight: bold; /* Negrita */
-  letter-spacing: 8px; /* Espaciado generoso entre letras/guiones bajos */
-  color: #2c3e50; /* Color oscuro */
-  text-transform: uppercase; /* Convierte a mayúsculas */
-  white-space: nowrap; /* Evita que la palabra se rompa en varias líneas */
-  overflow-x: auto; /* Permite desplazamiento horizontal si la palabra es muy larga */
-  padding-bottom: 5px; /* Pequeño padding inferior */
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 3em; /* Tamaño grande para la palabra oculta */
+  letter-spacing: 5px; /* Mucho espaciado entre letras */
+  margin-bottom: 20px;
+  color: #333;
+  font-weight: bold;
+  word-break: break-all; /* Útil para palabras muy largas */
+  white-space: nowrap; /* Intentar mantener la palabra en una sola línea */
+  overflow-x: auto; /* Si la palabra es muy larga, permitir scroll horizontal */
+  padding-bottom: 5px; /* Pequeño padding si hay scroll */
 }
 
-/* Estilo para el texto de intentos restantes */
-.guesses-left {
-  font-size: 1.2em; /* Tamaño de fuente */
-  color: #555; /* Color gris */
-  font-weight: 500; /* Peso de fuente */
+.word-hint {
+  font-style: italic;
+  color: #888;
+  margin-top: 15px;
+  font-size: 1.2em; /* Tamaño de la pista */
+  max-width: 80%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-/* Contenedor de mensajes del juego */
-.game-message-container {
-  margin-top: 30px; /* Margen superior */
+/* ----------------------------------------------------------- */
+/* Estilos para el mensaje de fin de juego (cualitativo y estrellas) */
+/* ----------------------------------------------------------- */
+.game-over-message {
+  text-align: center;
+  padding: 30px;
+  background-color: #ffffff;
+  border: 2px solid #006dbb; /* Borde azul */
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  max-width: 450px;
+  width: 90%; /* Responsive */
   display: flex;
   flex-direction: column;
-  gap: 15px; /* Espaciado entre mensaje y botón */
-  align-items: center; /* Centra los elementos */
+  align-items: center;
+  gap: 15px; /* Espacio entre elementos dentro del mensaje */
+  box-sizing: border-box;
 }
 
-/* Estilo para los mensajes de ganar/perder */
-.game-message {
-  font-size: 1.8em; /* Tamaño de fuente grande */
-  font-weight: bold; /* Negrita */
-  margin: 0; /* Sin margen */
-  padding: 10px 0; /* Padding vertical */
+.game-over-message h2 {
+  font-size: 2.5rem; /* Tamaño del título de fin de juego */
+  color: #006dbb;
+  margin-bottom: 10px;
 }
 
-.game-message.won {
-  color: #28a745; /* Verde para ganar */
+.game-over-message p {
+  font-size: 1.2rem; /* Tamaño del texto de información */
+  margin: 5px 0;
+  color: #555;
 }
 
-.game-message.lost {
-  color: #dc3545; /* Rojo para perder */
+.game-over-message strong {
+    color: #d32f2f; /* Rojo para la palabra revelada */
+    font-weight: bold;
 }
 
-/* Estilo para el botón "Jugar de Nuevo" */
-.play-again-button {
-  background-color: #007bff; /* Azul */
-  color: white; /* Texto blanco */
-  border: none; /* Sin borde */
-  border-radius: 8px; /* Bordes redondeados */
-  padding: 15px 30px; /* Espaciado interno */
-  font-size: 1.2em; /* Tamaño de fuente */
-  font-weight: bold; /* Negrita */
-  cursor: pointer; /* Cursor de puntero */
-  transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s; /* Transición suave */
-  box-shadow: 0 6px 12px rgba(0, 123, 255, 0.2); /* Sombra */
-  letter-spacing: 0.5px; /* Espaciado entre letras */
+.stars-display {
+  font-size: 2.8em; /* Tamaño general de las estrellas */
+  margin: 20px 0; /* Espacio alrededor de las estrellas */
+  display: flex;
+  gap: 5px; /* Espacio entre cada estrella */
+  justify-content: center; /* Centra las estrellas si hay pocas */
 }
 
-.play-again-button:hover {
-  background-color: #0056b3; /* Azul más oscuro al pasar el ratón */
-  transform: translateY(-3px); /* Pequeño levantamiento */
-  box-shadow: 0 8px 16px rgba(0, 123, 255, 0.3); /* Sombra más grande */
+.stars-display h3 {
+  font-size: 1.4rem; /* Título "Tu Puntuación" */
+  color: #333;
+  margin-bottom: 8px;
 }
 
-.play-again-button:active {
-  background-color: #004085; /* Azul aún más oscuro al hacer clic */
-  transform: translateY(0); /* Vuelve a la posición original */
-  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2); /* Sombra más pequeña */
+.stars-display .star {
+  transition: color 0.3s ease-in-out;
 }
 
-/* Media queries para responsividad */
+.stars-display .star.filled {
+  color: gold; /* Estrella rellenada */
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.8); /* Sombra brillante */
+}
+
+.game-over-message button {
+  background-color: #006dbb; /* Botón azul */
+  color: white;
+  padding: 10px 20px; /* Más padding para el botón */
+  border: none;
+  border-radius: 5px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+  margin-top: 15px; /* Espacio arriba del botón */
+}
+
+.game-over-message button:hover {
+  background-color: #005691;
+  transform: translateY(-2px);
+}
+
+.game-over-message button:active {
+  transform: translateY(0);
+}
+
+/* ----------------------------------------------------------- */
+/* Media Queries para Responsiveness */
+/* ----------------------------------------------------------- */
 @media (max-width: 768px) {
   .game-container {
-    padding: 25px; /* Menos padding en pantallas pequeñas */
-    max-width: 95%; /* Ocupa más ancho */
-  }
-
-  .game-title {
-    font-size: 2em; /* Título más pequeño */
-  }
-
-  .word-display {
-    font-size: 2.5em; /* Palabra más pequeña */
-    letter-spacing: 5px; /* Menos espaciado */
-  }
-
-  .game-message {
-    font-size: 1.5em; /* Mensaje más pequeño */
-  }
-
-  .play-again-button {
-    font-size: 1em; /* Botón de reiniciar más pequeño */
-    padding: 12px 25px; /* Menos padding */
-  }
-}
-
-@media (max-width: 480px) {
-  .game-container {
     padding: 15px;
+    width: 95%;
   }
-
   .game-title {
     font-size: 1.8em;
   }
-
   .word-display {
-    font-size: 2em;
+    font-size: 3em;
+    letter-spacing: 6px;
+  }
+  .game-over-message h2 {
+    font-size: 2rem;
+  }
+  .game-over-message p {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 500px) {
+  .game-title {
+    font-size: 1.5em;
+  }
+  .status {
+    gap: 10px;
+    font-size: 1em;
+  }
+  .word-display {
+    font-size: 2.5em;
     letter-spacing: 4px;
   }
-
-  .game-message {
-    font-size: 1.3em;
+  .word-hint {
+    font-size: 1em;
+  }
+  .game-over-message h2 {
+    font-size: 1.8rem;
+  }
+  .game-over-message p {
+    font-size: 1rem;
+  }
+  .stars-display {
+    font-size: 1.8em;
+  }
+  .game-over-message button {
+    padding: 8px 15px;
+    font-size: 0.9em;
   }
 }

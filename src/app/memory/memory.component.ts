@@ -6,8 +6,8 @@ import { MemoryGameStateService } from '../memory-game-state.service';
 import { MemoryConfig, MemoryResult } from '../memory-config-model'; // Importa MemoryConfig
 import { MemoryService } from '../memory.service';
 import { SharedDataService } from '../sharedData.service';
+import { Router } from '@angular/router';
 
-// --- Tu interfaz Card (si ya la tienes, mantenla así) ---
 export interface Card {
   id?: number | null;
   imageUrl: string;
@@ -45,6 +45,7 @@ export class MemoryComponent implements OnInit {
     //  Inyectar el servicio de estado del juego ---
     private sharedDataService: SharedDataService,
     private gameStateService: MemoryGameStateService,
+    private router: Router,
     private memoryService: MemoryService,
     private snackBar: MatSnackBar // Inyectar MatSnackBar para notificaciones
   ) { }
@@ -300,5 +301,9 @@ initializeGame(config: MemoryConfig): void {
     } else {
       this.snackBar.open('No se pudo reiniciar el juego. No hay un nivel activo cargado.', 'Cerrar', { duration: 3000 });
     }
+  }
+
+  options(): void {
+    this.router.navigate(['/options']);
   }
 }

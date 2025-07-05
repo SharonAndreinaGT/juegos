@@ -40,6 +40,31 @@ export class ChartComponent implements OnInit {
     private memoryService: MemoryService
   ) {}
 
+  actualizarDistribucionPorGrado(countFirst: number, countSecond: number, countThird: number) {
+    this.pieChartData = {
+      ...this.pieChartData,
+      datasets: [{
+        ...this.pieChartData.datasets[0],
+        data: [countFirst, countSecond, countThird]
+      }]
+    };
+  }
+
+  getDistribucionPorGrado() {
+    this.userService.getUsers().subscribe({
+      next: (response) => {
+        const users = response.data || [];
+        const countFirst = users.filter((u: any) => u.grade === 'first').length;
+        const countSecond = users.filter((u: any) => u.grade === 'second').length;
+        const countThird = users.filter((u: any) => u.grade === 'third').length;
+        this.actualizarDistribucionPorGrado(countFirst, countSecond, countThird);
+      },
+      error: () => {
+        this.actualizarDistribucionPorGrado(0, 0, 0);
+      }
+    });
+  }
+
   ngOnInit(): void {
     Chart.register();
     this.getTotalEstudiantes();
@@ -47,6 +72,7 @@ export class ChartComponent implements OnInit {
     this.getPromedioScore();
     this.getTiempoPromedio();
     this.getRendimientoPorGrado();
+    this.getDistribucionPorGrado();
   }
 
   getTotalEstudiantes() {

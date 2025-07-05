@@ -160,4 +160,13 @@ export class PuzzleService {
       map(response => (response.data || []).map((item: any) => ({ student_id: item.student_id, score: item.score })))
     );
   }
+
+  /**
+   * Obtiene todos los scores y created_at de puzzle_results
+   */
+  getAllPuzzleScoresWithDate(): Observable<{ score: number, created_at: string }[]> {
+    return this.http.get<any>(`${this.directusBaseUrl}/items/${this.puzzleResultsCollection}?fields=score,created_at&limit=-1`).pipe(
+      map(response => (response.data || []).map((item: any) => ({ score: item.score, created_at: item.created_at })))
+    );
+  }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ElementRef, Renderer2 } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, Renderer2, ViewChild } from '@angular/core';
 import { interval, Subscription } from 'rxjs';
 import { PuzzleService } from '../puzzle.service';
 import { SharedDataService } from '../sharedData.service';
@@ -17,6 +17,8 @@ interface PuzzlePiece {
   styleUrls: ['./puzzle.component.css']
 })
 export class PuzzleComponent implements OnInit, OnDestroy {
+
+  @ViewChild('winSound') winSound!: ElementRef<HTMLAudioElement>;
 
   rows = 3;
   cols = 3;
@@ -175,8 +177,31 @@ export class PuzzleComponent implements OnInit, OnDestroy {
     this.isComplete = this.pieces.every((piece, index) => piece.index === index);
     if (this.isComplete) {
       this.stopTimer();
+      this.playWinSound();
       this.calculateScoreAndStars();
       this.saveGameResult();
+    }
+  }
+
+  playWinSound(): void {
+    try {
+      if (this.winSound && this.winSound.nativeElement) {
+        this.winSound.nativeElement.currentTime = 0; // Reiniciar el audio
+        this.winSound.nativeElement.volume = 0.7; // Volumen al 70%
+        const playPromise = this.winSound.nativeElement.play();
+        
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              console.log('Sonido de victoria reproducido exitosamente');
+            })
+            .catch(error => {
+              console.log('No se pudo reproducir el sonido de victoria:', error);
+            });
+        }
+      }
+    } catch (error) {
+      console.error('Error al reproducir el sonido de victoria:', error);
     }
   }
 

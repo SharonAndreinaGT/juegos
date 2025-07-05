@@ -124,4 +124,31 @@ export class PuzzleService {
       })
     );
   }
+
+  /**
+   * Obtiene el total de partidas jugadas (conteo de registros en puzzle_results)
+   */
+  getTotalPuzzleResults(): Observable<number> {
+    return this.http.get<any>(`${this.directusBaseUrl}/items/${this.puzzleResultsCollection}?meta=filter_count`).pipe(
+      map(response => response.meta?.filter_count ?? (response.data?.length ?? 0))
+    );
+  }
+
+  /**
+   * Obtiene todos los scores de puzzle_results
+   */
+  getAllPuzzleScores(): Observable<number[]> {
+    return this.http.get<any>(`${this.directusBaseUrl}/items/${this.puzzleResultsCollection}?fields=score&limit=-1`).pipe(
+      map(response => (response.data || []).map((item: any) => item.score))
+    );
+  }
+
+  /**
+   * Obtiene todos los tiempos (time) de puzzle_results
+   */
+  getAllPuzzleTimes(): Observable<number[]> {
+    return this.http.get<any>(`${this.directusBaseUrl}/items/${this.puzzleResultsCollection}?fields=time&limit=-1`).pipe(
+      map(response => (response.data || []).map((item: any) => item.time))
+    );
+  }
 }

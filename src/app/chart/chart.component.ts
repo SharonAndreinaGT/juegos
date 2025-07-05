@@ -3,6 +3,8 @@ import { Router } from '@angular/router';
 import { Chart, ChartConfiguration, ChartData, ChartType } from 'chart.js';
 import { NgChartsModule } from 'ng2-charts';
 import { UserService } from '../user.service';
+import { PuzzleService } from '../puzzle.service';
+import { MemoryService } from '../memory.service';
 
 @Component({
   selector: 'app-chart',
@@ -15,12 +17,31 @@ export class ChartComponent implements OnInit {
   loadingEstudiantes = true;
   errorEstudiantes = false;
 
-  constructor(private router: Router, private userService: UserService) {}
+  totalPartidas: number | null = null;
+  loadingPartidas = true;
+  errorPartidas = false;
+
+  promedioScore: number | null = null;
+  loadingScore = true;
+  errorScore = false;
+
+  tiempoPromedio: string | null = null;
+  loadingTiempo = true;
+  errorTiempo = false;
+
+  constructor(
+    private router: Router,
+    private userService: UserService,
+    private puzzleService: PuzzleService,
+    private memoryService: MemoryService
+  ) {}
 
   ngOnInit(): void {
-    // Registrar los plugins necesarios
     Chart.register();
     this.getTotalEstudiantes();
+    this.getTotalPartidas();
+    this.getPromedioScore();
+    this.getTiempoPromedio();
   }
 
   getTotalEstudiantes() {
@@ -39,6 +60,122 @@ export class ChartComponent implements OnInit {
         this.errorEstudiantes = true;
         this.loadingEstudiantes = false;
         this.totalEstudiantes = null;
+      }
+    });
+  }
+
+  getTotalPartidas() {
+    this.loadingPartidas = true;
+    this.errorPartidas = false;
+    let total = 0;
+    let completed = 0;
+    const onComplete = () => {
+      completed++;
+      if (completed === 2) {
+        this.totalPartidas = total;
+        this.loadingPartidas = false;
+      }
+    };
+    this.puzzleService.getTotalPuzzleResults().subscribe({
+      next: (count) => {
+        total += count;
+        onComplete();
+      },
+      error: () => {
+        this.errorPartidas = true;
+        onComplete();
+      }
+    });
+    this.memoryService.getTotalMemoryResults().subscribe({
+      next: (count) => {
+        total += count;
+        onComplete();
+      },
+      error: () => {
+        this.errorPartidas = true;
+        onComplete();
+      }
+    });
+  }
+
+  getPromedioScore() {
+    this.loadingScore = true;
+    this.errorScore = false;
+    let scores: number[] = [];
+    let completed = 0;
+    const onComplete = () => {
+      completed++;
+      if (completed === 2) {
+        if (scores.length > 0) {
+          const sum = scores.reduce((a, b) => a + b, 0);
+          this.promedioScore = Math.round((sum / scores.length) * 100) / 100;
+        } else {
+          this.promedioScore = 0;
+        }
+        this.loadingScore = false;
+      }
+    };
+    this.puzzleService.getAllPuzzleScores().subscribe({
+      next: (arr) => {
+        scores = scores.concat(arr.filter(s => typeof s === 'number'));
+        onComplete();
+      },
+      error: () => {
+        this.errorScore = true;
+        onComplete();
+      }
+    });
+    this.memoryService.getAllMemoryScores().subscribe({
+      next: (arr) => {
+        scores = scores.concat(arr.filter(s => typeof s === 'number'));
+        onComplete();
+      },
+      error: () => {
+        this.errorScore = true;
+        onComplete();
+      }
+    });
+  }
+
+  getTiempoPromedio() {
+    this.loadingTiempo = true;
+    this.errorTiempo = false;
+    let tiempos: number[] = [];
+    let completed = 0;
+    const onComplete = () => {
+      completed++;
+      if (completed === 2) {
+        if (tiempos.length > 0) {
+          const sum = tiempos.reduce((a, b) => a + b, 0);
+          const avg = sum / tiempos.length;
+          // Formatear a minutos y segundos
+          const min = Math.floor(avg / 60);
+          const sec = Math.round(avg % 60);
+          this.tiempoPromedio = `${min} min ${sec} s`;
+        } else {
+          this.tiempoPromedio = '0 min';
+        }
+        this.loadingTiempo = false;
+      }
+    };
+    this.puzzleService.getAllPuzzleTimes().subscribe({
+      next: (arr) => {
+        tiempos = tiempos.concat(arr.filter(s => typeof s === 'number'));
+        onComplete();
+      },
+      error: () => {
+        this.errorTiempo = true;
+        onComplete();
+      }
+    });
+    this.memoryService.getAllMemoryTimes().subscribe({
+      next: (arr) => {
+        tiempos = tiempos.concat(arr.filter(s => typeof s === 'number'));
+        onComplete();
+      },
+      error: () => {
+        this.errorTiempo = true;
+        onComplete();
       }
     });
   }

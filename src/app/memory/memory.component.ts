@@ -22,6 +22,7 @@ export interface Card {
 })
 export class MemoryComponent implements OnInit {
   @ViewChild('winSound') winSound!: ElementRef<HTMLAudioElement>;
+  @ViewChild('loseSound') loseSound!: ElementRef<HTMLAudioElement>;
 
   cards: Card[] = [];
   activeLevel: MemoryConfig | null = null; // Variable para guardar la configuración del nivel activo
@@ -152,6 +153,7 @@ initializeGame(config: MemoryConfig): void {
             this.timeExceeded = true;
             this.stopGameTimer();
             this.gameStarted = false;
+            this.playLoseSound();
             this.snackBar.open('¡Se acabó el tiempo!', 'Cerrar', { duration: 3000 });
         }
     }, 1000);
@@ -181,6 +183,7 @@ initializeGame(config: MemoryConfig): void {
             this.intentExceeded = true;
             this.stopGameTimer();
             this.gameStarted = false;
+            this.playLoseSound();
             this.snackBar.open('¡Se acabaron los intentos!', 'Cerrar', { duration: 3000 });
             this.checkGameEnd(); // Llamar a checkGameEnd cuando se agotan los intentos
             return; // No procesar más si los intentos se agotaron
@@ -310,6 +313,28 @@ initializeGame(config: MemoryConfig): void {
       }
     } catch (error) {
       console.error('Error al reproducir el sonido de victoria:', error);
+    }
+  }
+
+  playLoseSound(): void {
+    try {
+      if (this.loseSound && this.loseSound.nativeElement) {
+        this.loseSound.nativeElement.currentTime = 0; // Reiniciar el audio
+        this.loseSound.nativeElement.volume = 0.7; // Volumen al 70%
+        const playPromise = this.loseSound.nativeElement.play();
+        
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              console.log('Sonido de derrota reproducido exitosamente en memoria');
+            })
+            .catch(error => {
+              console.log('No se pudo reproducir el sonido de derrota:', error);
+            });
+        }
+      }
+    } catch (error) {
+      console.error('Error al reproducir el sonido de derrota:', error);
     }
   }
 

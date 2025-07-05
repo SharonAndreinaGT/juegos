@@ -29,6 +29,10 @@ export class ChartComponent implements OnInit {
   loadingTiempo = true;
   errorTiempo = false;
 
+  rendimientoPorGrado: { [grade: string]: number } = { first: 0, second: 0, third: 0 };
+  loadingRendimiento = true;
+  errorRendimiento = false;
+
   constructor(
     private router: Router,
     private userService: UserService,
@@ -42,6 +46,7 @@ export class ChartComponent implements OnInit {
     this.getTotalPartidas();
     this.getPromedioScore();
     this.getTiempoPromedio();
+    this.getRendimientoPorGrado();
   }
 
   getTotalEstudiantes() {
@@ -175,6 +180,84 @@ export class ChartComponent implements OnInit {
       },
       error: () => {
         this.errorTiempo = true;
+        onComplete();
+      }
+    });
+  }
+
+  getRendimientoPorGrado() {
+    this.loadingRendimiento = true;
+    this.errorRendimiento = false;
+    let allResults: { student_id: any, score: number }[] = [];
+    let users: any[] = [];
+    let completed = 0;
+    const onComplete = () => {
+      completed++;
+      if (completed === 3) {
+        // Map student_id to grade
+        const gradeScores: { [grade: string]: number[] } = { first: [], second: [], third: [] };
+        allResults.forEach(res => {
+          const user = users.find(u => u.id === res.student_id);
+          if (user && gradeScores[user.grade]) {
+            gradeScores[user.grade].push(res.score);
+          }
+        });
+        // Calcular promedios
+        (['first', 'second', 'third'] as const).forEach(grade => {
+          const arr = gradeScores[grade];
+          this.rendimientoPorGrado[grade] = arr.length > 0 ? Math.round((arr.reduce((a, b) => a + b, 0) / arr.length) * 100) / 100 : 0;
+        });
+        // Actualizar gráfico
+        this.barChartData = {
+          ...this.barChartData,
+          datasets: [{
+            ...this.barChartData.datasets[0],
+            data: [
+              this.rendimientoPorGrado['first'],
+              this.rendimientoPorGrado['second'],
+              this.rendimientoPorGrado['third']
+            ]
+          }]
+        };
+        this.loadingRendimiento = false;
+      }
+    };
+    this.puzzleService.getAllPuzzleScores().subscribe({
+      next: (arr) => {
+        allResults = allResults.concat((arr as any[]).map((score, i) => ({ student_id: null, score }))); // fallback por si no hay student_id
+        this.puzzleService.getAllPuzzleScoresWithStudent().subscribe({
+          next: (results) => {
+            allResults = allResults.concat(results);
+            onComplete();
+          },
+          error: () => {
+            this.errorRendimiento = true;
+            onComplete();
+          }
+        });
+      },
+      error: () => {
+        this.errorRendimiento = true;
+        onComplete();
+      }
+    });
+    this.memoryService.getAllMemoryScoresWithStudent().subscribe({
+      next: (results) => {
+        allResults = allResults.concat(results);
+        onComplete();
+      },
+      error: () => {
+        this.errorRendimiento = true;
+        onComplete();
+      }
+    });
+    this.userService.getUsers().subscribe({
+      next: (response) => {
+        users = response.data || [];
+        onComplete();
+      },
+      error: () => {
+        this.errorRendimiento = true;
         onComplete();
       }
     });

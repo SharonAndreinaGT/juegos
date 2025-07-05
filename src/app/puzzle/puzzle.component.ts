@@ -19,6 +19,7 @@ interface PuzzlePiece {
 export class PuzzleComponent implements OnInit, OnDestroy {
 
   @ViewChild('winSound') winSound!: ElementRef<HTMLAudioElement>;
+  @ViewChild('loseSound') loseSound!: ElementRef<HTMLAudioElement>;
 
   rows = 3;
   cols = 3;
@@ -205,6 +206,28 @@ export class PuzzleComponent implements OnInit, OnDestroy {
     }
   }
 
+  playLoseSound(): void {
+    try {
+      if (this.loseSound && this.loseSound.nativeElement) {
+        this.loseSound.nativeElement.currentTime = 0; // Reiniciar el audio
+        this.loseSound.nativeElement.volume = 0.7; // Volumen al 70%
+        const playPromise = this.loseSound.nativeElement.play();
+        
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              console.log('Sonido de derrota reproducido exitosamente en puzzle');
+            })
+            .catch(error => {
+              console.log('No se pudo reproducir el sonido de derrota:', error);
+            });
+        }
+      }
+    } catch (error) {
+      console.error('Error al reproducir el sonido de derrota:', error);
+    }
+  }
+
   calculateScoreAndStars(): void {
     let rawScore = 0;
     const maxPossibleMoves = (this.rows * this.cols) * 5;
@@ -267,6 +290,7 @@ export class PuzzleComponent implements OnInit, OnDestroy {
         if (this.timeLeft <= 0) {
           this.stopTimer();
           if (!this.isComplete) {
+            this.playLoseSound();
             this.calculateScoreAndStars();
             this.saveGameResult();
           }

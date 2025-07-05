@@ -1,0 +1,67 @@
+/* Botón de control de música */
+.music-control-btn {
+  position: fixed !important;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  background-color: rgba(63, 81, 181, 0.9) !important;
+  color: white !important;
+  border-radius: 50% !important;
+  width: 56px !important;
+  height: 56px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  transition: all 0.3s ease !important;
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.music-control-btn:hover {
+  background-color: rgba(63, 81, 181, 1) !important;
+  transform: scale(1.1) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
+}
+
+.music-control-btn:active {
+  transform: scale(0.95) !important;
+}
+
+.music-control-btn mat-icon {
+  font-size: 24px !important;
+  width: 24px !important;
+  height: 24px !important;
+  line-height: 24px !important;
+}
+
+/* Efecto de pulso cuando está reproduciendo */
+.music-control-btn.playing {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 0 rgba(63, 81, 181, 0.7);
+  }
+  70% {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 10px rgba(63, 81, 181, 0);
+  }
+  100% {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 0 rgba(63, 81, 181, 0);
+  }
+}
+
+/* Responsive para pantallas pequeñas */
+@media (max-width: 768px) {
+  .music-control-btn {
+    top: 15px;
+    right: 15px;
+    width: 48px !important;
+    height: 48px !important;
+  }
+  
+  .music-control-btn mat-icon {
+    font-size: 20px !important;
+    width: 20px !important;
+    height: 20px !important;
+    line-height: 20px !important;
+  }
+}

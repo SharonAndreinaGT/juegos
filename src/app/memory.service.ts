@@ -89,4 +89,13 @@ export class MemoryService {
       map(response => (response.data || []).map((item: any) => item.elapsedTime))
     );
   }
+
+  /**
+   * Obtiene todos los scores y student_id de memory_results
+   */
+  getAllMemoryScoresWithStudent(): Observable<{ student_id: any, score: number }[]> {
+    return this.http.get<any>(`${this.memoryResultsApiUrl}?fields=score,student_id&limit=-1`).pipe(
+      map(response => (response.data || []).map((item: any) => ({ student_id: item.student_id, score: item.score })))
+    );
+  }
 }

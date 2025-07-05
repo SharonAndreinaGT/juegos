@@ -151,4 +151,13 @@ export class PuzzleService {
       map(response => (response.data || []).map((item: any) => item.time))
     );
   }
+
+  /**
+   * Obtiene todos los scores y student_id de puzzle_results
+   */
+  getAllPuzzleScoresWithStudent(): Observable<{ student_id: any, score: number }[]> {
+    return this.http.get<any>(`${this.directusBaseUrl}/items/${this.puzzleResultsCollection}?fields=score,student_id&limit=-1`).pipe(
+      map(response => (response.data || []).map((item: any) => ({ student_id: item.student_id, score: item.score })))
+    );
+  }
 }

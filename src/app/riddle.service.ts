@@ -1,6 +1,7 @@
+// src/app/riddle/riddle.service.ts
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of, lastValueFrom } from 'rxjs'; 
-import { RiddleLevel, RiddleWord } from './riddle.model';
+import { BehaviorSubject, Observable, of, lastValueFrom } from 'rxjs';
+import { RiddleLevel, RiddleWord, RiddleResult } from './riddle.model'; // Importa RiddleResult
 import { HttpClient } from '@angular/common/http';
 import { catchError, map, tap } from 'rxjs/operators';
 
@@ -8,8 +9,8 @@ import { catchError, map, tap } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class RiddleService {
-  // url de la base de datos
   private directusUrl = 'http://localhost:8055/items/riddle';
+  private directusResultsUrl = 'http://localhost:8055/items/riddle_results'; //URL para los resultados
 
   private levelsSubject = new BehaviorSubject<RiddleLevel[]>([]);
   levels$: Observable<RiddleLevel[]> = this.levelsSubject.asObservable();
@@ -46,7 +47,7 @@ export class RiddleService {
                 return of([]);
               })
             )
-          ).catch(err => console.error('Unhandled promise rejection during default level creation:', err)); // Catch for lastValueFrom
+          ).catch(err => console.error('Unhandled promise rejection during default level creation:', err));
         }
       }),
       catchError(error => {
@@ -94,7 +95,7 @@ export class RiddleService {
       }),
       catchError(error => {
         console.error(`[RiddleService] Error al ${operation} nivel ${level.level_number} (ID: ${level.id || 'nuevo'}) en Directus:`, error);
-        return of(level); 
+        return of(level);
       })
     );
   }
@@ -106,5 +107,24 @@ export class RiddleService {
 
   getLevelConfig(levelNumber: number): RiddleLevel | undefined {
     return this.levelsSubject.value.find(level => level.level_number === levelNumber);
+  }
+
+  // Nuevo método para guardar los resultados de la partida de Riddle
+  saveRiddleResult(result: RiddleResult): Observable<RiddleResult> {
+    console.log('[RiddleService] Enviando resultado de Riddle a Directus:', result);
+    return this.http.post<any>(this.directusResultsUrl, result).pipe(
+      map(response => {
+        if (response && response.data) {
+          console.log('[RiddleService] Resultado de Riddle guardado exitosamente:', response.data);
+          return response.data as RiddleResult;
+        } else {
+          throw new Error('No data received from Directus on saving riddle result.');
+        }
+      }),
+      catchError(error => {
+        console.error('[RiddleService] Error al guardar el resultado de Riddle:', error);
+        return of(result); 
+      })
+    );
   }
 }

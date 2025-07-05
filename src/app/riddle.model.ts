@@ -13,6 +13,28 @@ export interface RiddleLevel {
   words_level: number; // Cantidad de palabras que se mostrarán por partida en este nivel.
   words: RiddleWord[]; // Array de palabras disponibles para este nivel, incluyendo sus pistas.
   isActive: boolean;
+  time_limit?: number;
+}
+
+export interface RiddleResult {
+  id?: string; // Directus ID, será generado por Directus
+  level_name: string; // Nombre del nivel jugado (e.g., 'Fácil', 'Medio', 'Difícil')
+  score: number;      // Puntaje obtenido
+  attempts_made: number; // Intentos usados
+  words_guessed: number; // Cantidad de palabras adivinadas
+  time_taken: number; // Tiempo que tomó la partida (en segundos)
+  is_complete: boolean; // Si la partida se completó (todas las palabras adivinadas o nivel finalizado)
+  student_id: string;   // ID del estudiante que jugó la partida (vinculado a la colección 'users' o 'students' de Directus)
+}
+
+export interface User {
+  id: string; // El Primary Key de Directus, angular lo maneja como string
+  name: string; // identificador
+  lastname?: string;
+  score?: number;
+  grade?: string;
+  section?: string;
+  status?: string;
 }
 
 // Define la estructura general de la configuración de todo el juego.

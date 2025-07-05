@@ -75,6 +75,13 @@
                       <mat-error *ngIf="level1Form.get('wordsPerLevel')?.hasError('min')">Debe ser al menos 1</mat-error>
                     </mat-form-field>
 
+                    <mat-form-field appearance="fill" class="full-width">
+                      <mat-label>Tiempo Límite de Partida (segundos)</mat-label>
+                      <input matInput type="number" formControlName="timeLimit">
+                      <mat-error *ngIf="level1Form.get('timeLimit')?.hasError('required')">El tiempo límite es obligatorio</mat-error>
+                      <mat-error *ngIf="level1Form.get('timeLimit')?.hasError('min')">Debe ser al menos 10 segundos</mat-error>
+                    </mat-form-field>
+
                     <h3>Palabras para Nivel 1</h3>
                     <div class="word-input-container">
                       <mat-form-field appearance="fill" class="word-input-field">
@@ -125,6 +132,13 @@
                       <mat-error *ngIf="level2Form.get('wordsPerLevel')?.hasError('min')">Debe ser al menos 1</mat-error>
                     </mat-form-field>
 
+                    <mat-form-field appearance="fill" class="full-width">
+                      <mat-label>Tiempo Límite de Partida (segundos)</mat-label>
+                      <input matInput type="number" formControlName="timeLimit">
+                      <mat-error *ngIf="level2Form.get('timeLimit')?.hasError('required')">El tiempo límite es obligatorio</mat-error>
+                      <mat-error *ngIf="level2Form.get('timeLimit')?.hasError('min')">Debe ser al menos 10 segundos</mat-error>
+                    </mat-form-field>
+
                     <h3>Palabras para Nivel 2</h3>
                     <div class="word-input-container">
                       <mat-form-field appearance="fill" class="word-input-field">
@@ -173,6 +187,13 @@
                       <input matInput type="number" formControlName="wordsPerLevel">
                       <mat-error *ngIf="level3Form.get('wordsPerLevel')?.hasError('required')">La cantidad de palabras es obligatoria</mat-error>
                       <mat-error *ngIf="level3Form.get('wordsPerLevel')?.hasError('min')">Debe ser al menos 1</mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="fill" class="full-width">
+                      <mat-label>Tiempo Límite de Partida (segundos)</mat-label>
+                      <input matInput type="number" formControlName="timeLimit">
+                      <mat-error *ngIf="level3Form.get('timeLimit')?.hasError('required')">El tiempo límite es obligatorio</mat-error>
+                      <mat-error *ngIf="level3Form.get('timeLimit')?.hasError('min')">Debe ser al menos 10 segundos</mat-error>
                     </mat-form-field>
 
                     <h3>Palabras para Nivel 3</h3>

@@ -1,7 +1,10 @@
+// src/app/riddle/riddle.component.ts
+
 import { Component, OnInit, HostListener, OnDestroy } from '@angular/core';
-import { RiddleLevel, RiddleWord } from '../riddle.model';
+import { RiddleLevel, RiddleWord, RiddleResult } from '../riddle.model';
 import { RiddleService } from '../riddle.service';
-import { Subscription } from 'rxjs';
+import { SharedDataService } from '../sharedData.service';
+import { Subscription, interval } from 'rxjs';
 import { Router } from '@angular/router';
 
 @Component({
@@ -11,70 +14,91 @@ import { Router } from '@angular/router';
 })
 export class RiddleComponent implements OnInit, OnDestroy {
   // --- PROPIEDADES DEL JUEGO ---
-  words: RiddleWord[] = []; // Almacena las palabras del nivel activo, incluyendo la pista
+  words: RiddleWord[] = [];
   secretWord: string = '';
   displayWord: string = '';
   guessedLetters: Set<string> = new Set<string>();
-  incorrectGuesses: number = 0; // Intentos incorrectos para la palabra actual
-  maxIncorrectGuesses: number = 7; // Valor por defecto, se sobrescribe con la configuración del nivel
-  gameStatus: 'playing' | 'won' | 'lost' | 'level-complete' = 'playing'; // Estados del juego
-  message: string = ''; // Mensajes informativos para el usuario
+  incorrectGuesses: number = 0;
+  maxIncorrectGuesses: number = 7;
+  gameStatus: 'playing' | 'won' | 'lost' | 'level-complete' | 'time-up' = 'playing';
+  message: string = '';
 
   // --- PROPIEDADES PARA EL PROGRESO Y PUNTUACIÓN ---
-  currentWordIndex: number = 0; // Índice de la palabra actual en el array 'words'
-  guessedWordsCount: number = 0; // Contador de palabras adivinadas correctamente en el nivel
-  score: number = 0; // Puntuación numérica general del nivel
-  stars: number = 0; // Estrellas para la puntuación cualitativa
-  totalIncorrectGuessesMade: number = 0; // Acumula los intentos incorrectos de todas las palabras del nivel
+  currentWordIndex: number = 0;
+  guessedWordsCount: number = 0;
+  score: number = 0;
+  stars: number = 0;
+  totalIncorrectGuessesMade: number = 0;
+
+  // --- PROPIEDADES DE TIEMPO ---
+  gameStartTime: number = 0;
+  timeTaken: number = 0;
+  timeRemaining: number = 0;
+  private timerSubscription: Subscription | undefined;
 
   // Propiedad para almacenar la configuración del nivel activo
-  // Inicializa con un objeto por defecto para que las propiedades no sean 'undefined'
-  // mientras se esperan los datos del servicio.
   activeLevelConfig: RiddleLevel = {
-    id: null, // Asigna un valor inicial, aunque sea nulo
+    id: null,
     level_number: 0,
     level_name: 'Cargando Configuración...',
-    max_intents: 7, // Valor seguro para evitar errores en el template antes de la carga real
+    max_intents: 7,
     words_level: 0,
     words: [],
-    isActive: false
+    isActive: false,
+    time_limit: 0 // Cambiado a time_limit
   };
 
-  private levelsSubscription!: Subscription; // Suscripción para desuscribirse al destruir el componente
+  private levelsSubscription!: Subscription;
+  private studentIdSubscription!: Subscription;
+  currentStudentId: string | null = null;
 
-  constructor(private router: Router, private riddleService: RiddleService) { }
+  constructor(
+    private router: Router,
+    private riddleService: RiddleService,
+    private sharedDataService: SharedDataService
+  ) { }
 
   ngOnInit(): void {
-    // Nos suscribimos al observable de niveles para obtener la configuración guardada.
+    this.studentIdSubscription = this.sharedDataService.loggedInStudentId$.subscribe((studentId: string | null) => {
+      this.currentStudentId = studentId;
+      console.log(`[RiddleComponent] ID de estudiante obtenido del servicio compartido: ${this.currentStudentId}`);
+    });
+
     this.levelsSubscription = this.riddleService.levels$.subscribe((levels: RiddleLevel[]) => {
-      // Buscamos el nivel que ha sido marcado como activo.
       const activeLevel = levels.find(lvl => lvl.isActive);
 
       if (activeLevel) {
         this.activeLevelConfig = activeLevel;
-        // Solo inicializa el juego si el nivel activo tiene palabras
+        // Asegurarse de que time_limit tenga un valor válido
+        if (typeof this.activeLevelConfig.time_limit !== 'number' || this.activeLevelConfig.time_limit <= 0) {
+          console.warn(`[RiddleComponent] Nivel ${this.activeLevelConfig.level_name} tiene un time_limit inválido (${this.activeLevelConfig.time_limit}). Estableciendo por defecto a 300 segundos.`);
+          this.activeLevelConfig.time_limit = 300; // Valor por defecto si no está bien configurado
+        }
+        this.timeRemaining = this.activeLevelConfig.time_limit;
+
         if (this.activeLevelConfig.words && this.activeLevelConfig.words.length > 0 && this.activeLevelConfig.words_level > 0) {
-          // Mezclamos las palabras al inicio del nivel para que no siempre salgan en el mismo orden
-          this.words = this.shuffleArray([...this.activeLevelConfig.words]);
-          this.resetGame(); // Llama a resetGame para inicializar el juego con la nueva configuración
+          const shuffledWords = this.shuffleArray([...this.activeLevelConfig.words]);
+          this.words = shuffledWords.slice(0, this.activeLevelConfig.words_level);
+          console.log(`[RiddleComponent] Palabras para el nivel ${this.activeLevelConfig.level_name}:`, this.words.map(w => w.word));
+          this.resetGame();
         } else {
-          this.gameStatus = 'lost'; // O un estado más apropiado
+          this.gameStatus = 'lost';
           this.message = 'El nivel activo no tiene palabras o la cantidad de palabras por nivel es cero. Por favor, configura el nivel.';
-          this.words = []; // Aseguramos que no haya palabras activas
+          this.words = [];
           this.secretWord = '';
           this.displayWord = '';
           console.warn('El nivel activo no tiene palabras o words_level es 0.');
+          this.stopGameTimer();
         }
       } else {
-        // Si no hay ningún nivel activo, mostramos un mensaje de error y deshabilitamos el juego.
         this.gameStatus = 'lost';
         this.message = 'No hay ningún nivel activo. Por favor, activa un nivel en la configuración del docente.';
         this.words = [];
         this.secretWord = '';
         this.displayWord = '';
         console.warn('Ningún nivel está activo.');
+        this.stopGameTimer();
 
-        // Restablece activeLevelConfig a un estado seguro para evitar errores en el template
         this.activeLevelConfig = {
           id: null,
           level_number: 0,
@@ -82,77 +106,101 @@ export class RiddleComponent implements OnInit, OnDestroy {
           max_intents: 7,
           words_level: 0,
           words: [],
-          isActive: false
+          isActive: false,
+          time_limit: 0
         };
       }
+      this.startGameTimer();
     });
   }
 
   ngOnDestroy(): void {
-    // Es crucial desuscribirse para evitar fugas de memoria.
     if (this.levelsSubscription) {
       this.levelsSubscription.unsubscribe();
     }
+    if (this.studentIdSubscription) {
+      this.studentIdSubscription.unsubscribe();
+    }
+    this.stopGameTimer();
+    if (this.gameStatus === 'playing') {
+        this.saveGameResult(false, this.timeTaken);
+    }
   }
 
-  /**
-   * Escucha eventos de teclado en todo el documento para la entrada de letras.
-   * @param event El evento de teclado.
-   */
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
     const key = event.key.toUpperCase();
-    // Solo procesa la entrada si el juego está en curso y la tecla es una letra del alfabeto
     if (this.gameStatus === 'playing' && key.length === 1 && key >= 'A' && key <= 'Z') {
       this.checkGuess(key);
     }
   }
 
-  /**
-   * Inicializa un nuevo juego o la siguiente palabra si el nivel no ha terminado.
-   */
+  startGameTimer(): void {
+    this.stopGameTimer();
+    this.gameStartTime = Date.now();
+    this.timeTaken = 0;
+
+    // Usar time_limit
+    this.timeRemaining = this.activeLevelConfig.time_limit || 0;
+
+    this.timerSubscription = interval(1000).subscribe(() => {
+      this.timeTaken = Math.floor((Date.now() - this.gameStartTime) / 1000);
+      this.timeRemaining = (this.activeLevelConfig.time_limit || 0) - this.timeTaken;
+
+      if (this.timeRemaining <= 0) {
+        this.stopGameTimer();
+        this.gameStatus = 'time-up';
+        this.message = `¡Se acabó el tiempo! La partida ha terminado.`;
+        this.calculateStars();
+        this.saveGameResult(false, (this.activeLevelConfig.time_limit || 0));
+      }
+    });
+  }
+
+  stopGameTimer(): void {
+    if (this.timerSubscription) {
+      this.timerSubscription.unsubscribe();
+      this.timerSubscription = undefined;
+    }
+  }
+
   initializeGame(): void {
-    // Asegúrate de que activeLevelConfig tiene un valor válido antes de usarlo
     if (!this.activeLevelConfig || this.activeLevelConfig.words_level === 0 || !this.activeLevelConfig.words || this.activeLevelConfig.words.length === 0) {
       this.gameStatus = 'lost';
       this.message = 'Configuración del nivel inválida o sin palabras para jugar.';
+      this.stopGameTimer();
       return;
     }
 
-    // Si ya adivinamos todas las palabras requeridas para el nivel, marcamos el nivel como completo.
     if (this.guessedWordsCount >= this.activeLevelConfig.words_level) {
       this.gameStatus = 'level-complete';
-      this.calculateStars(); // Calcula las estrellas al finalizar el nivel
+      this.calculateStars();
       this.message = `¡Nivel ${this.activeLevelConfig.level_name} completado!`;
+      this.stopGameTimer();
+      this.saveGameResult(true, this.timeTaken);
       return;
     }
 
-    // Reiniciamos los estados para la nueva palabra
     this.guessedLetters.clear();
-    this.incorrectGuesses = 0; // Reinicia intentos para la palabra actual
+    this.incorrectGuesses = 0;
     this.gameStatus = 'playing';
     this.message = '';
 
-    // Configuramos el número máximo de intentos con el valor del nivel activo.
     this.maxIncorrectGuesses = this.activeLevelConfig.max_intents;
 
-    // Seleccionamos la siguiente palabra si hay palabras disponibles y no hemos excedido el límite del nivel
     if (this.words.length > 0 && this.currentWordIndex < this.words.length && this.currentWordIndex < this.activeLevelConfig.words_level) {
       this.secretWord = this.words[this.currentWordIndex].word.toUpperCase();
       this.updateDisplayWord();
     } else {
-      // Si no hay suficientes palabras configuradas para el nivel, o se terminó el arreglo de palabras.
-      this.gameStatus = 'level-complete'; // Consideramos el nivel como "terminado"
+      this.gameStatus = 'level-complete';
       this.calculateStars();
       this.message = 'No hay suficientes palabras disponibles para el nivel configurado o se han jugado todas las palabras.';
       console.error('Error: No hay suficientes palabras para el nivel configurado o se ha excedido el límite de palabras del nivel.');
+      this.stopGameTimer();
+      this.saveGameResult(true, this.timeTaken);
     }
   }
 
-  /**
-   * Actualiza la palabra que se muestra al usuario.
-   * Remplaza las letras no adivinadas con guiones bajos.
-   */
   updateDisplayWord(): void {
     this.displayWord = this.secretWord
       .split('')
@@ -160,10 +208,6 @@ export class RiddleComponent implements OnInit, OnDestroy {
       .join(' ');
   }
 
-  /**
-   * Maneja la suposición de una letra por parte del usuario.
-   * @param letter La letra adivinada por el usuario.
-   */
   checkGuess(letter: string): void {
     if (this.gameStatus !== 'playing' || this.guessedLetters.has(letter)) {
       return;
@@ -180,13 +224,12 @@ export class RiddleComponent implements OnInit, OnDestroy {
     this.checkGameStatus();
   }
 
-  /**
-   * Verifica si el juego ha terminado para la palabra actual (ganada o perdida)
-   * o si el nivel completo ha sido finalizado.
-   */
   checkGameStatus(): void {
+    if (this.gameStatus !== 'playing') {
+      return;
+    }
+
     if (this.displayWord.replace(/ /g, '') === this.secretWord) {
-      // La palabra actual fue adivinada correctamente
       this.gameStatus = 'won';
       this.message = '¡Correcto!';
 
@@ -197,26 +240,29 @@ export class RiddleComponent implements OnInit, OnDestroy {
       if (this.guessedWordsCount < this.activeLevelConfig.words_level) {
         this.currentWordIndex++;
         setTimeout(() => {
-          this.initializeGame();
+          if (this.gameStatus === 'won') {
+            this.initializeGame();
+          }
         }, 1500);
       } else {
         this.gameStatus = 'level-complete';
         this.calculateStars();
         this.message = `¡Nivel ${this.activeLevelConfig.level_name} completado!`;
+        this.stopGameTimer();
+        this.saveGameResult(true, this.timeTaken);
       }
 
     } else if (this.incorrectGuesses >= this.maxIncorrectGuesses) {
-      // Se agotaron los intentos para la palabra actual
       this.gameStatus = 'lost';
-      this.message = `¡Oh no! Has perdido esta palabra.`;
+      this.message = `¡Oh no! Has perdido esta palabra. La palabra era: ${this.secretWord}.`;
 
       this.totalIncorrectGuessesMade += this.maxIncorrectGuesses;
       this.currentWordIndex++;
 
       setTimeout(() => {
-        if (this.currentWordIndex < this.words.length && this.currentWordIndex < this.activeLevelConfig.words_level) {
+        if (this.gameStatus === 'lost' && this.currentWordIndex < this.words.length && this.currentWordIndex < this.activeLevelConfig.words_level) {
           this.initializeGame();
-        } else {
+        } else if (this.gameStatus === 'lost') {
           this.gameStatus = 'level-complete';
           this.calculateStars();
           if (this.guessedWordsCount === 0) {
@@ -224,14 +270,13 @@ export class RiddleComponent implements OnInit, OnDestroy {
           } else {
             this.message = `¡Nivel ${this.activeLevelConfig.level_name} completado!`;
           }
+          this.stopGameTimer();
+          this.saveGameResult(false, this.timeTaken);
         }
       }, 2000);
     }
   }
 
-  /**
-   * Calcula la cantidad de estrellas en base a las palabras adivinadas y la eficiencia de los intentos.
-   */
   calculateStars(): void {
     if (this.activeLevelConfig.words_level === 0) {
       this.stars = 0;
@@ -249,22 +294,15 @@ export class RiddleComponent implements OnInit, OnDestroy {
 
     if (wordsGuessedPercentage === 100 && incorrectGuessesEfficiency <= 20) {
       this.stars = 3;
-    }
-    else if (wordsGuessedPercentage >= 80 && incorrectGuessesEfficiency <= 50) {
+    } else if (wordsGuessedPercentage >= 80 && incorrectGuessesEfficiency <= 50) {
       this.stars = 2;
-    }
-    else if (wordsGuessedPercentage >= 50) {
+    } else if (wordsGuessedPercentage >= 50) {
       this.stars = 1;
-    }
-    else {
+    } else {
       this.stars = 0;
     }
   }
 
-  /**
-   * Obtiene la pista para la palabra secreta actual (solo para Nivel 3).
-   * @returns La pista de la palabra actual, o undefined si no hay.
-   */
   get currentHint(): string | undefined {
     if (this.activeLevelConfig && this.activeLevelConfig.level_number === 3 && this.currentWordIndex < this.words.length) {
       return this.words[this.currentWordIndex].hint;
@@ -272,10 +310,6 @@ export class RiddleComponent implements OnInit, OnDestroy {
     return undefined;
   }
 
-  /**
-   * Reinicia el juego completamente para el nivel actual.
-   * Vuelve a la primera palabra y reinicia todos los contadores.
-   */
   resetGame(): void {
     this.currentWordIndex = 0;
     this.guessedWordsCount = 0;
@@ -283,23 +317,24 @@ export class RiddleComponent implements OnInit, OnDestroy {
     this.stars = 0;
     this.totalIncorrectGuessesMade = 0;
 
-    // Vuelve a mezclar las palabras para una nueva partida (solo si ya tenemos palabras cargadas)
+    this.timeTaken = 0;
+    this.timeRemaining = this.activeLevelConfig.time_limit || 0; // Usar time_limit
+    this.stopGameTimer();
+    this.startGameTimer();
+
     if (this.activeLevelConfig.words && this.activeLevelConfig.words.length > 0) {
-        this.words = this.shuffleArray([...this.activeLevelConfig.words]);
+      const shuffledWords = this.shuffleArray([...this.activeLevelConfig.words]);
+      this.words = shuffledWords.slice(0, this.activeLevelConfig.words_level);
     } else {
-        this.words = []; // Asegura que el array de palabras esté vacío si no hay configuración válida
-        this.gameStatus = 'lost';
-        this.message = 'No se puede reiniciar el juego: el nivel no tiene palabras configuradas.';
-        return; // Detiene el reinicio si no hay palabras
+      this.words = [];
+      this.gameStatus = 'lost';
+      this.message = 'No se puede reiniciar el juego: el nivel no tiene palabras configuradas.';
+      this.stopGameTimer();
+      return;
     }
-    this.initializeGame(); // Inicia una nueva partida
+    this.initializeGame();
   }
 
-  /**
-   * Mezcla aleatoriamente un array utilizando el algoritmo de Fisher-Yates.
-   * @param array El array a mezclar.
-   * @returns El array mezclado.
-   */
   private shuffleArray<T>(array: T[]): T[] {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -307,8 +342,47 @@ export class RiddleComponent implements OnInit, OnDestroy {
     }
     return array;
   }
-  
+
   options(): void {
     this.router.navigate(['/options']);
+  }
+
+  /**
+   * Guarda el resultado de la partida en Directus.
+   * @param isGameCompleted Indica si el juego (nivel) fue completado exitosamente (todas las palabras adivinadas).
+   * @param finalTime La duración final de la partida en segundos.
+   */
+  saveGameResult(isGameCompleted: boolean, finalTime: number): void {
+    if (!this.currentStudentId) {
+      console.warn('No se pudo guardar el resultado del juego: No hay ID de estudiante disponible. Asegúrate de que el estudiante haya iniciado sesión.');
+      alert('Tu resultado no pudo ser guardado. Por favor, asegúrate de haber iniciado sesión.');
+      return;
+    }
+
+    const gameResult: RiddleResult = {
+      level_name: this.activeLevelConfig.level_name,
+      score: this.score,
+      attempts_made: this.totalIncorrectGuessesMade,
+      words_guessed: this.guessedWordsCount,
+      time_taken: finalTime,
+      is_complete: isGameCompleted,
+      student_id: this.currentStudentId
+    };
+
+    console.log('[RiddleComponent] Intentando guardar resultado:', gameResult);
+    this.riddleService.saveRiddleResult(gameResult).subscribe(
+      (response) => {
+        console.log('Resultado del juego de Riddle guardado exitosamente:', response);
+      },
+      (error) => {
+        console.error('Error al guardar el resultado del juego de Riddle:', error);
+      }
+    );
+  }
+
+  formatTime(seconds: number): string {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   }
 }

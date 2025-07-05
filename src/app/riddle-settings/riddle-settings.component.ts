@@ -3,7 +3,7 @@ import { RiddleService } from '../riddle.service';
 import { RiddleLevel, RiddleWord } from '../riddle.model';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatTabChangeEvent } from '@angular/material/tabs';
-import { lastValueFrom } from 'rxjs'; 
+import { lastValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-riddle-settings',
@@ -13,9 +13,10 @@ import { lastValueFrom } from 'rxjs';
 export class RiddleSettingsComponent implements OnInit {
   title = 'Configuración del Juego de Adivinar la Palabra';
 
-  level1Config: RiddleLevel = { id: null, level_number: 1, level_name: 'Fácil', max_intents: 5, words_level: 5, words: [], isActive: false };
-  level2Config: RiddleLevel = { id: null, level_number: 2, level_name: 'Medio', max_intents: 4, words_level: 6, words: [], isActive: false };
-  level3Config: RiddleLevel = { id: null, level_number: 3, level_name: 'Difícil', max_intents: 3, words_level: 7, words: [], isActive: false };
+  // Cambiado a time_limit
+  level1Config: RiddleLevel = { id: null, level_number: 1, level_name: 'Fácil', max_intents: 5, words_level: 5, words: [], isActive: false, time_limit: 300 };
+  level2Config: RiddleLevel = { id: null, level_number: 2, level_name: 'Medio', max_intents: 4, words_level: 6, words: [], isActive: false, time_limit: 240 };
+  level3Config: RiddleLevel = { id: null, level_number: 3, level_name: 'Difícil', max_intents: 3, words_level: 7, words: [], isActive: false, time_limit: 180 };
 
   level1Form!: FormGroup;
   level2Form!: FormGroup;
@@ -45,16 +46,22 @@ export class RiddleSettingsComponent implements OnInit {
     this.level1Form = this.fb.group({
       maxIntents: [this.level1Config.max_intents, [Validators.required, Validators.min(1)]],
       wordsPerLevel: [this.level1Config.words_level, [Validators.required, Validators.min(1)]],
+      // Cambiado a timeLimit
+      timeLimit: [this.level1Config.time_limit, [Validators.required, Validators.min(10)]] // Mínimo 10 segundos
     });
 
     this.level2Form = this.fb.group({
       maxIntents: [this.level2Config.max_intents, [Validators.required, Validators.min(1)]],
       wordsPerLevel: [this.level2Config.words_level, [Validators.required, Validators.min(1)]],
+      // Cambiado a timeLimit
+      timeLimit: [this.level2Config.time_limit, [Validators.required, Validators.min(10)]]
     });
 
     this.level3Form = this.fb.group({
       maxIntents: [this.level3Config.max_intents, [Validators.required, Validators.min(1)]],
       wordsPerLevel: [this.level3Config.words_level, [Validators.required, Validators.min(1)]],
+      // Cambiado a timeLimit
+      timeLimit: [this.level3Config.time_limit, [Validators.required, Validators.min(10)]]
     });
   }
 
@@ -86,6 +93,9 @@ export class RiddleSettingsComponent implements OnInit {
       if (match && match.length === 3) {
         value = match[1].trim();
         hint = match[2].trim();
+      } else {
+        alert('Para el Nivel 3, el formato de palabra con pista debe ser: PALABRA (Pista)');
+        return;
       }
     }
 
@@ -148,6 +158,7 @@ export class RiddleSettingsComponent implements OnInit {
     if (levelToSave && formToValidate) {
       levelToSave.max_intents = formToValidate.value.maxIntents;
       levelToSave.words_level = formToValidate.value.wordsPerLevel;
+      levelToSave.time_limit = formToValidate.value.timeLimit; // Guarda el nuevo campo de tiempo
 
       await this.saveSingleLevelConfig(levelToSave);
       alert('Configuración guardada exitosamente.');

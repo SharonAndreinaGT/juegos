@@ -7,6 +7,9 @@
         <div class="status">
           <div class="intent-display">Intentos restantes: <span>{{ maxIncorrectGuesses - incorrectGuesses }}</span></div>
           <div class="word-progress">Palabra <span>{{ currentWordIndex + 1 }}</span> de <span>{{ activeLevelConfig.words_level }}</span></div>
+          <div *ngIf="gameStatus === 'playing' || gameStatus === 'time-up'" class="game-timer">
+            Tiempo restante: {{ formatTime(timeRemaining) }}
+          </div>
         </div>
       </div>
 

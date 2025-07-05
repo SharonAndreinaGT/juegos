@@ -92,7 +92,12 @@
                 <mat-icon class="metric-icon">trending_up</mat-icon>
                 <div class="metric-text">
                   <h3>Puntaje Promedio</h3>
-                  <p class="metric-value">85%</p>
+                  <ng-container *ngIf="!errorScore">
+                    <p class="metric-value">{{ promedioScore !== null ? promedioScore + '%' : '...' }}</p>
+                  </ng-container>
+                  <ng-container *ngIf="errorScore">
+                    <p class="metric-value" style="color: red; font-size: 1rem;">Error</p>
+                  </ng-container>
                 </div>
               </div>
             </mat-card-content>

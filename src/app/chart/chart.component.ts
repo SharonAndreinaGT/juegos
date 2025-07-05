@@ -21,6 +21,10 @@ export class ChartComponent implements OnInit {
   loadingPartidas = true;
   errorPartidas = false;
 
+  promedioScore: number | null = null;
+  loadingScore = true;
+  errorScore = false;
+
   constructor(
     private router: Router,
     private userService: UserService,
@@ -32,6 +36,7 @@ export class ChartComponent implements OnInit {
     Chart.register();
     this.getTotalEstudiantes();
     this.getTotalPartidas();
+    this.getPromedioScore();
   }
 
   getTotalEstudiantes() {
@@ -83,6 +88,45 @@ export class ChartComponent implements OnInit {
       },
       error: () => {
         this.errorPartidas = true;
+        onComplete();
+      }
+    });
+  }
+
+  getPromedioScore() {
+    this.loadingScore = true;
+    this.errorScore = false;
+    let scores: number[] = [];
+    let completed = 0;
+    const onComplete = () => {
+      completed++;
+      if (completed === 2) {
+        if (scores.length > 0) {
+          const sum = scores.reduce((a, b) => a + b, 0);
+          this.promedioScore = Math.round((sum / scores.length) * 100) / 100;
+        } else {
+          this.promedioScore = 0;
+        }
+        this.loadingScore = false;
+      }
+    };
+    this.puzzleService.getAllPuzzleScores().subscribe({
+      next: (arr) => {
+        scores = scores.concat(arr.filter(s => typeof s === 'number'));
+        onComplete();
+      },
+      error: () => {
+        this.errorScore = true;
+        onComplete();
+      }
+    });
+    this.memoryService.getAllMemoryScores().subscribe({
+      next: (arr) => {
+        scores = scores.concat(arr.filter(s => typeof s === 'number'));
+        onComplete();
+      },
+      error: () => {
+        this.errorScore = true;
         onComplete();
       }
     });

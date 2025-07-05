@@ -71,4 +71,13 @@ export class MemoryService {
       map(response => response.meta?.filter_count ?? (response.data?.length ?? 0))
     );
   }
+
+  /**
+   * Obtiene todos los scores de memory_results
+   */
+  getAllMemoryScores(): Observable<number[]> {
+    return this.http.get<any>(`${this.memoryResultsApiUrl}?fields=score&limit=-1`).pipe(
+      map(response => (response.data || []).map((item: any) => item.score))
+    );
+  }
 }

@@ -1,69 +1,67 @@
 <mat-sidenav-container class="container">
-    <mat-sidenav mode="side" opened class="sidenav-bar">
+  <mat-sidenav mode="side" opened class="sidenav-bar">
     <mat-toolbar class="sidenav">
       <span>Administrador</span>
     </mat-toolbar>
     
     <mat-nav-list>
-      <button mat-button class="menu-button" (click)="navigateTo('main')">
+      <button mat-button class="menu-button" (click)="navigateToMain()">
         <mat-icon>person</mat-icon>
         <span>Inicio</span>
       </button>
-      <button mat-button class="menu-button" (click)="navigateTo('firstGrade')">
+      <button mat-button class="menu-button" (click)="navigateToGradeStudents('first')">
         <mat-icon>person_add</mat-icon>
         <span>Primer Grado</span>
       </button>
-      <button mat-button class="menu-button" (click)="navigateTo('secondGrade')">
+      <button mat-button class="menu-button" (click)="navigateToGradeStudents('second')">
         <mat-icon>person_add</mat-icon>
         <span>Segundo Grado</span>
       </button>
-      <button mat-button class="menu-button" (click)="navigateTo('thirdGrade')">
+      <button mat-button class="menu-button" (click)="navigateToGradeStudents('third')">
         <mat-icon>person_add</mat-icon>
         <span>Tercer Grado</span>
       </button>
-      <button mat-button class="menu-button" (click)="navigateTo('progress')">
+      <button mat-button class="menu-button" (click)="navigateToProgress()">
         <mat-icon>timeline</mat-icon>
         <span>Progreso</span>
       </button>
-      <button mat-button class="menu-button" (click)="navigateTo('settings')">
+      <button mat-button class="menu-button" (click)="navigateToSettings()">
         <mat-icon>settings</mat-icon>
         <span>Configuración Juegos</span>
       </button>
-      <button mat-button class="menu-button" (click)="navigateTo('report')">
+      <button mat-button class="menu-button" (click)="navigateToReports()">
         <mat-icon>description</mat-icon>
         <span>Informes</span>
       </button>
-      <button mat-button class="menu-button" (click)="navigateTo('chart')">
+      <button mat-button class="menu-button" (click)="navigateToChart()">
         <mat-icon>bar_chart</mat-icon>
         <span>Chart</span>
       </button>
 
       <mat-divider></mat-divider>
 
-      <button mat-button class="menu-button" (click)="navigateTo('welcome')">
+      <button mat-button class="menu-button" (click)="navigateToWelcome()">
         <mat-icon>logout</mat-icon>
         <span>Salir</span>
       </button>
     </mat-nav-list>
-    </mat-sidenav>
+  </mat-sidenav>
 
-    <mat-sidenav-content class="content">
-    <ng-container >
+  <mat-sidenav-content class="content">
+    <ng-container>
       <div class="welcome-container">
         <mat-card class="welcome-card">
           <mat-card-content>
             <div class="welcome-content">
-              <h2>Informe</h2>
-
+              <h2>Chart</h2>
+              <p>¡Hola Mundo! Este es el módulo Chart de la aplicación educativa.</p>
+              <p>Aquí puedes agregar tus gráficos y visualizaciones.</p>
             </div>
           </mat-card-content>
         </mat-card>
       </div>
-
-
     </ng-container>
 
     <router-outlet></router-outlet>
   </mat-sidenav-content>
-</mat-sidenav-container>
-
+</mat-sidenav-container> 

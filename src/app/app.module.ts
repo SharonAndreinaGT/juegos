@@ -23,6 +23,7 @@ import { ReportComponent } from './report/report.component';
 import { ProgressComponent } from './progress/progress.component';
 import { GamesOptionsComponent } from './games-options/games-options.component';
 import { MemoryCardComponent } from './memory-card/memory-card.component';
+import { ChartComponent } from './chart/chart.component';
 
 
 //importaciones de angular material
@@ -70,7 +71,8 @@ import { MatChipsModule } from '@angular/material/chips';
       ReportComponent,
       ProgressComponent,
       GamesOptionsComponent,
-      MemoryCardComponent
+      MemoryCardComponent,
+      ChartComponent
     ],
     imports: [
       BrowserModule,

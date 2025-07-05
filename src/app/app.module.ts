@@ -23,6 +23,7 @@ import { ReportComponent } from './report/report.component';
 import { ProgressComponent } from './progress/progress.component';
 import { GamesOptionsComponent } from './games-options/games-options.component';
 import { MemoryCardComponent } from './memory-card/memory-card.component';
+import { ChartComponent } from './chart/chart.component';
 
 
 //importaciones de angular material
@@ -49,6 +50,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatChipsModule } from '@angular/material/chips';
+import { NgChartsModule } from 'ng2-charts';
 
 @NgModule({
     declarations: [
@@ -70,7 +72,8 @@ import { MatChipsModule } from '@angular/material/chips';
       ReportComponent,
       ProgressComponent,
       GamesOptionsComponent,
-      MemoryCardComponent
+      MemoryCardComponent,
+      ChartComponent
     ],
     imports: [
       BrowserModule,
@@ -96,9 +99,10 @@ import { MatChipsModule } from '@angular/material/chips';
       MatButtonModule,
       FormsModule,
       MatTabsModule,
-      MatSlideToggleModule,
-      MatChipsModule,
-      HttpClientModule
+              MatSlideToggleModule,
+        MatChipsModule,
+        NgChartsModule,
+        HttpClientModule
     ],
     providers: [
      

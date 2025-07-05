@@ -15,6 +15,7 @@ import { MemorySettingsComponent } from './memory-settings/memory-settings.compo
 import { RiddleSettingsComponent } from './riddle-settings/riddle-settings.component';
 import { ReportComponent } from './report/report.component';
 import { ProgressComponent } from './progress/progress.component';
+import { ChartComponent } from './chart/chart.component';
 
 //rutas de navegacion
 
@@ -29,6 +30,7 @@ const routes: Routes = [
   { path: 'riddle', component: RiddleComponent },
   { path: 'report', component: ReportComponent },
   { path: 'progress', component: ProgressComponent },
+  { path: 'chart', component: ChartComponent },
 
  
   { path: 'firstGrade', component: GradeStudentsComponent, data: { gradeTitle: 'Primer Grado', gradeFilter: 'first' }},

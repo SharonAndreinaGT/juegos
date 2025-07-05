@@ -1,0 +1,160 @@
+<mat-sidenav-container class="container">
+  <mat-sidenav mode="side" opened class="sidenav-bar">
+    <mat-toolbar class="sidenav">
+      <span>Administrador</span>
+    </mat-toolbar>
+    
+    <mat-nav-list>
+      <button mat-button class="menu-button" (click)="navigateToMain()">
+        <mat-icon>person</mat-icon>
+        <span>Inicio</span>
+      </button>
+      <button mat-button class="menu-button" (click)="navigateToGradeStudents('first')">
+        <mat-icon>person_add</mat-icon>
+        <span>Primer Grado</span>
+      </button>
+      <button mat-button class="menu-button" (click)="navigateToGradeStudents('second')">
+        <mat-icon>person_add</mat-icon>
+        <span>Segundo Grado</span>
+      </button>
+      <button mat-button class="menu-button" (click)="navigateToGradeStudents('third')">
+        <mat-icon>person_add</mat-icon>
+        <span>Tercer Grado</span>
+      </button>
+      <button mat-button class="menu-button" (click)="navigateToProgress()">
+        <mat-icon>timeline</mat-icon>
+        <span>Progreso</span>
+      </button>
+      <button mat-button class="menu-button" (click)="navigateToSettings()">
+        <mat-icon>settings</mat-icon>
+        <span>Configuración Juegos</span>
+      </button>
+      <button mat-button class="menu-button" (click)="navigateToReports()">
+        <mat-icon>description</mat-icon>
+        <span>Informes</span>
+      </button>
+      <button mat-button class="menu-button" (click)="navigateToChart()">
+        <mat-icon>bar_chart</mat-icon>
+        <span>Chart</span>
+      </button>
+
+      <mat-divider></mat-divider>
+
+      <button mat-button class="menu-button" (click)="navigateToWelcome()">
+        <mat-icon>logout</mat-icon>
+        <span>Salir</span>
+      </button>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="content">
+    <ng-container>
+      <div class="welcome-container">
+        <!-- Métricas adicionales -->
+        <div class="metrics-grid">
+          <mat-card class="metric-card">
+            <mat-card-content>
+              <div class="metric-content">
+                <mat-icon class="metric-icon">school</mat-icon>
+                <div class="metric-text">
+                  <h3>Total Estudiantes</h3>
+                  <ng-container *ngIf="!errorEstudiantes">
+                    <p class="metric-value">{{ totalEstudiantes !== null ? totalEstudiantes : '...' }}</p>
+                  </ng-container>
+                  <ng-container *ngIf="errorEstudiantes">
+                    <p class="metric-value" style="color: red; font-size: 1rem;">Error</p>
+                  </ng-container>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="metric-card">
+            <mat-card-content>
+              <div class="metric-content">
+                <mat-icon class="metric-icon">games</mat-icon>
+                <div class="metric-text">
+                  <h3>Partidas Jugadas</h3>
+                  <p class="metric-value">1,250</p>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="metric-card">
+            <mat-card-content>
+              <div class="metric-content">
+                <mat-icon class="metric-icon">trending_up</mat-icon>
+                <div class="metric-text">
+                  <h3>Puntaje Promedio</h3>
+                  <p class="metric-value">85%</p>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="metric-card">
+            <mat-card-content>
+              <div class="metric-content">
+                <mat-icon class="metric-icon">schedule</mat-icon>
+                <div class="metric-text">
+                  <h3>Tiempo Promedio</h3>
+                  <p class="metric-value">12 min</p>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+          <!-- Gráfico 1: Rendimiento por Grado -->
+          <mat-card class="chart-card">
+            <mat-card-content>
+              <canvas baseChart
+                [data]="barChartData"
+                [options]="barChartOptions"
+                [type]="barChartType">
+              </canvas>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Gráfico 2: Juegos más Jugados -->
+          <mat-card class="chart-card">
+            <mat-card-content>
+              <canvas baseChart
+                [data]="barChartData2"
+                [options]="barChartOptions2"
+                [type]="barChartType2">
+              </canvas>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Gráfico 3: Distribución de Estudiantes -->
+          <mat-card class="chart-card">
+            <mat-card-content>
+              <canvas baseChart
+                [data]="pieChartData"
+                [options]="pieChartOptions"
+                [type]="pieChartType">
+              </canvas>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Gráfico 4: Progreso Semanal -->
+          <mat-card class="chart-card">
+            <mat-card-content>
+              <canvas baseChart
+                [data]="lineChartData"
+                [options]="lineChartOptions"
+                [type]="lineChartType">
+              </canvas>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+    </ng-container>
+
+    <router-outlet></router-outlet>
+  </mat-sidenav-content>
+</mat-sidenav-container> 

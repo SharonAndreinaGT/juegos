@@ -58,7 +58,12 @@
                 <mat-icon class="metric-icon">school</mat-icon>
                 <div class="metric-text">
                   <h3>Total Estudiantes</h3>
-                  <p class="metric-value">100</p>
+                  <ng-container *ngIf="!errorEstudiantes">
+                    <p class="metric-value">{{ totalEstudiantes !== null ? totalEstudiantes : '...' }}</p>
+                  </ng-container>
+                  <ng-container *ngIf="errorEstudiantes">
+                    <p class="metric-value" style="color: red; font-size: 1rem;">Error</p>
+                  </ng-container>
                 </div>
               </div>
             </mat-card-content>

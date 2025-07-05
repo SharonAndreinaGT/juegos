@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Chart, ChartConfiguration, ChartData, ChartType } from 'chart.js';
 import { NgChartsModule } from 'ng2-charts';
+import { UserService } from '../user.service';
 
 @Component({
   selector: 'app-chart',
@@ -10,11 +11,36 @@ import { NgChartsModule } from 'ng2-charts';
 })
 export class ChartComponent implements OnInit {
 
-  constructor(private router: Router) {}
+  totalEstudiantes: number | null = null;
+  loadingEstudiantes = true;
+  errorEstudiantes = false;
+
+  constructor(private router: Router, private userService: UserService) {}
 
   ngOnInit(): void {
     // Registrar los plugins necesarios
     Chart.register();
+    this.getTotalEstudiantes();
+  }
+
+  getTotalEstudiantes() {
+    this.loadingEstudiantes = true;
+    this.errorEstudiantes = false;
+    this.userService.getUsers().subscribe({
+      next: (response) => {
+        if (response && response.data) {
+          this.totalEstudiantes = response.data.length;
+        } else {
+          this.totalEstudiantes = 0;
+        }
+        this.loadingEstudiantes = false;
+      },
+      error: (err) => {
+        this.errorEstudiantes = true;
+        this.loadingEstudiantes = false;
+        this.totalEstudiantes = null;
+      }
+    });
   }
 
   // Gráfico 1: Barras verticales - Rendimiento por Grado

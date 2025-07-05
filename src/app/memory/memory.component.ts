@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar'; // Necesitas MatSnackBar para los mensajes del juego.
 
 // --- NUEVAS LÍNEAS ---
@@ -21,6 +21,8 @@ export interface Card {
   styleUrls: ['./memory.component.scss']
 })
 export class MemoryComponent implements OnInit {
+  @ViewChild('winSound') winSound!: ElementRef<HTMLAudioElement>;
+
   cards: Card[] = [];
   activeLevel: MemoryConfig | null = null; // Variable para guardar la configuración del nivel activo
 
@@ -197,6 +199,7 @@ initializeGame(config: MemoryConfig): void {
         if (this.matchedPairs === this.totalPairs) {
           this.stopGameTimer();
           this.gameStarted = false;
+          this.playWinSound();
           this.checkGameEnd(); // Llamar a checkGameEnd cuando se completa el juego
         }
       } else {
@@ -285,6 +288,28 @@ initializeGame(config: MemoryConfig): void {
         () => console.log('Resultado del juego guardado con éxito'),
         (error) => console.error('Error al guardar el resultado del juego', error)
       );
+    }
+  }
+
+  playWinSound(): void {
+    try {
+      if (this.winSound && this.winSound.nativeElement) {
+        this.winSound.nativeElement.currentTime = 0; // Reiniciar el audio
+        this.winSound.nativeElement.volume = 0.7; // Volumen al 70%
+        const playPromise = this.winSound.nativeElement.play();
+        
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              console.log('Sonido de victoria reproducido exitosamente en memoria');
+            })
+            .catch(error => {
+              console.log('No se pudo reproducir el sonido de victoria:', error);
+            });
+        }
+      }
+    } catch (error) {
+      console.error('Error al reproducir el sonido de victoria:', error);
     }
   }
 

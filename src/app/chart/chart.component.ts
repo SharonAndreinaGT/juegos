@@ -65,6 +65,86 @@ export class ChartComponent implements OnInit {
     });
   }
 
+  getProgresoMensual() {
+    let allResults: { score: number, created_at: string }[] = [];
+    let completed = 0;
+    const onComplete = () => {
+      completed++;
+      if (completed === 2) {
+        // Agrupar por mes
+        const monthMap: { [month: string]: number[] } = {};
+        allResults.forEach(res => {
+          if (typeof res.score === 'number' && res.created_at) {
+            const date = new Date(res.created_at);
+            const year = date.getFullYear();
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const key = `${year}-${month}`;
+            if (!monthMap[key]) monthMap[key] = [];
+            monthMap[key].push(res.score);
+          }
+        });
+        // Depuración: muestra el agrupamiento por mes
+        console.log('Agrupación por mes:', monthMap);
+
+        // Ordenar meses
+        const sortedMonths = Object.keys(monthMap).sort();
+        // Calcular promedios
+        let labels: string[] = [];
+        let data: number[] = [];
+        sortedMonths.forEach(month => {
+          labels.push(month);
+          const arr = monthMap[month];
+          const promedio = Math.round((arr.reduce((a, b) => a + b, 0) / arr.length) * 100) / 100;
+          data.push(promedio);
+          // Depuración: muestra el promedio de cada mes
+          console.log(`Mes ${month}: scores =`, arr, 'promedio =', promedio);
+        });
+        // Incluir el mes actual aunque no tenga datos
+        const now = new Date();
+        const currentMonth = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
+        if (!labels.includes(currentMonth)) {
+          labels.push(currentMonth);
+          data.push(0);
+        }
+        // Actualizar gráfico
+        this.lineChartData = {
+          ...this.lineChartData,
+          labels,
+          datasets: [{
+            ...this.lineChartData.datasets[0],
+            data
+          }]
+        };
+        // Depuración: muestra los datos finales del gráfico
+        console.log('Labels:', labels, 'Data:', data);
+      }
+    };
+    this.puzzleService.getAllPuzzleScoresWithDate().subscribe({
+      next: (arr) => {
+        allResults = allResults.concat(arr);
+        onComplete();
+      },
+      error: () => onComplete()
+    });
+    this.memoryService.getAllMemoryScoresWithDate().subscribe({
+      next: (arr) => {
+        allResults = allResults.concat(arr);
+        onComplete();
+      },
+      error: () => onComplete()
+    });
+  }
+
+  // Función auxiliar para obtener el número de semana ISO
+  getWeekNumber(date: Date): number {
+    const tempDate = new Date(date.getTime());
+    tempDate.setHours(0, 0, 0, 0);
+    // Jueves en la semana decide el año
+    tempDate.setDate(tempDate.getDate() + 3 - ((tempDate.getDay() + 6) % 7));
+    const week1 = new Date(tempDate.getFullYear(), 0, 4);
+    return 1 + Math.round(((tempDate.getTime() - week1.getTime()) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
+  }
+
   ngOnInit(): void {
     Chart.register();
     this.getTotalEstudiantes();
@@ -73,6 +153,7 @@ export class ChartComponent implements OnInit {
     this.getTiempoPromedio();
     this.getRendimientoPorGrado();
     this.getDistribucionPorGrado();
+    this.getProgresoMensual();
   }
 
   getTotalEstudiantes() {

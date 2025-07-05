@@ -18,22 +18,22 @@ export class RiddleComponent implements OnInit, OnDestroy {
   secretWord: string = '';
   displayWord: string = '';
   guessedLetters: Set<string> = new Set<string>();
-  incorrectGuesses: number = 0;
-  maxIncorrectGuesses: number = 7;
+  incorrectGuesses: number = 0; // Intentos incorrectos para la palabra actual
+  maxIncorrectGuesses: number = 7; // Valor por defecto, se sobrescribe con la configuración del nivel
   gameStatus: 'playing' | 'won' | 'lost' | 'level-complete' | 'time-up' = 'playing';
   message: string = '';
 
   // --- PROPIEDADES PARA EL PROGRESO Y PUNTUACIÓN ---
   currentWordIndex: number = 0;
-  guessedWordsCount: number = 0;
-  score: number = 0;
-  stars: number = 0;
-  totalIncorrectGuessesMade: number = 0;
+  guessedWordsCount: number = 0; // Contador de palabras adivinadas correctamente en el nivel
+  score: number = 0; // ¡Puntuación final del nivel, de 0 a 20!
+  stars: number = 0; // Estrellas para la puntuación cualitativa
+  totalIncorrectGuessesMade: number = 0; // Acumula los intentos incorrectos de todas las palabras del nivel
 
   // --- PROPIEDADES DE TIEMPO ---
-  gameStartTime: number = 0;
-  timeTaken: number = 0;
-  timeRemaining: number = 0;
+  gameStartTime: number = 0; // Marca el inicio de la partida completa (en milisegundos)
+  timeTaken: number = 0;     // Tiempo transcurrido en segundos
+  timeRemaining: number = 0; // Tiempo restante en segundos
   private timerSubscription: Subscription | undefined;
 
   // Propiedad para almacenar la configuración del nivel activo
@@ -45,7 +45,7 @@ export class RiddleComponent implements OnInit, OnDestroy {
     words_level: 0,
     words: [],
     isActive: false,
-    time_limit: 0 // Cambiado a time_limit
+    time_limit: 0
   };
 
   private levelsSubscription!: Subscription;
@@ -69,10 +69,9 @@ export class RiddleComponent implements OnInit, OnDestroy {
 
       if (activeLevel) {
         this.activeLevelConfig = activeLevel;
-        // Asegurarse de que time_limit tenga un valor válido
         if (typeof this.activeLevelConfig.time_limit !== 'number' || this.activeLevelConfig.time_limit <= 0) {
           console.warn(`[RiddleComponent] Nivel ${this.activeLevelConfig.level_name} tiene un time_limit inválido (${this.activeLevelConfig.time_limit}). Estableciendo por defecto a 300 segundos.`);
-          this.activeLevelConfig.time_limit = 300; // Valor por defecto si no está bien configurado
+          this.activeLevelConfig.time_limit = 300;
         }
         this.timeRemaining = this.activeLevelConfig.time_limit;
 
@@ -122,8 +121,10 @@ export class RiddleComponent implements OnInit, OnDestroy {
       this.studentIdSubscription.unsubscribe();
     }
     this.stopGameTimer();
+    // Si el juego está activo al salir del componente, calcula el score y guarda el resultado como no completado
     if (this.gameStatus === 'playing') {
-        this.saveGameResult(false, this.timeTaken);
+        this.calculateScoreAndStars(); // Calcula el score y estrellas finales
+        this.saveGameResult(false, this.timeTaken); // Se guarda como no completado
     }
   }
 
@@ -140,7 +141,6 @@ export class RiddleComponent implements OnInit, OnDestroy {
     this.gameStartTime = Date.now();
     this.timeTaken = 0;
 
-    // Usar time_limit
     this.timeRemaining = this.activeLevelConfig.time_limit || 0;
 
     this.timerSubscription = interval(1000).subscribe(() => {
@@ -151,8 +151,8 @@ export class RiddleComponent implements OnInit, OnDestroy {
         this.stopGameTimer();
         this.gameStatus = 'time-up';
         this.message = `¡Se acabó el tiempo! La partida ha terminado.`;
-        this.calculateStars();
-        this.saveGameResult(false, (this.activeLevelConfig.time_limit || 0));
+        this.calculateScoreAndStars(); // Calcula score y estrellas al agotar el tiempo
+        this.saveGameResult(false, (this.activeLevelConfig.time_limit || 0)); // Se guarda como no completado por tiempo
       }
     });
   }
@@ -174,7 +174,7 @@ export class RiddleComponent implements OnInit, OnDestroy {
 
     if (this.guessedWordsCount >= this.activeLevelConfig.words_level) {
       this.gameStatus = 'level-complete';
-      this.calculateStars();
+      this.calculateScoreAndStars(); // Calcula score y estrellas al completar el nivel
       this.message = `¡Nivel ${this.activeLevelConfig.level_name} completado!`;
       this.stopGameTimer();
       this.saveGameResult(true, this.timeTaken);
@@ -193,11 +193,11 @@ export class RiddleComponent implements OnInit, OnDestroy {
       this.updateDisplayWord();
     } else {
       this.gameStatus = 'level-complete';
-      this.calculateStars();
+      this.calculateScoreAndStars(); // Calcula score y estrellas si no hay suficientes palabras al inicio
       this.message = 'No hay suficientes palabras disponibles para el nivel configurado o se han jugado todas las palabras.';
       console.error('Error: No hay suficientes palabras para el nivel configurado o se ha excedido el límite de palabras del nivel.');
       this.stopGameTimer();
-      this.saveGameResult(true, this.timeTaken);
+      this.saveGameResult(true, this.timeTaken); // Se guarda como completado si se terminaron las palabras disponibles
     }
   }
 
@@ -234,8 +234,8 @@ export class RiddleComponent implements OnInit, OnDestroy {
       this.message = '¡Correcto!';
 
       this.guessedWordsCount++;
-      this.score++;
-      this.totalIncorrectGuessesMade += this.incorrectGuesses;
+      // this.score++; // ¡Eliminado! El score final se calcula al final del nivel
+      this.totalIncorrectGuessesMade += this.incorrectGuesses; // Suma los intentos incorrectos de esta palabra
 
       if (this.guessedWordsCount < this.activeLevelConfig.words_level) {
         this.currentWordIndex++;
@@ -246,7 +246,7 @@ export class RiddleComponent implements OnInit, OnDestroy {
         }, 1500);
       } else {
         this.gameStatus = 'level-complete';
-        this.calculateStars();
+        this.calculateScoreAndStars(); // Calcula score y estrellas al completar el nivel
         this.message = `¡Nivel ${this.activeLevelConfig.level_name} completado!`;
         this.stopGameTimer();
         this.saveGameResult(true, this.timeTaken);
@@ -256,7 +256,7 @@ export class RiddleComponent implements OnInit, OnDestroy {
       this.gameStatus = 'lost';
       this.message = `¡Oh no! Has perdido esta palabra. La palabra era: ${this.secretWord}.`;
 
-      this.totalIncorrectGuessesMade += this.maxIncorrectGuesses;
+      this.totalIncorrectGuessesMade += this.maxIncorrectGuesses; // Suma los intentos máximos si se pierde la palabra
       this.currentWordIndex++;
 
       setTimeout(() => {
@@ -264,43 +264,68 @@ export class RiddleComponent implements OnInit, OnDestroy {
           this.initializeGame();
         } else if (this.gameStatus === 'lost') {
           this.gameStatus = 'level-complete';
-          this.calculateStars();
+          this.calculateScoreAndStars(); // Calcula score y estrellas al finalizar el nivel
           if (this.guessedWordsCount === 0) {
             this.message = 'Has terminado el nivel, pero no adivinaste ninguna palabra.';
           } else {
             this.message = `¡Nivel ${this.activeLevelConfig.level_name} completado!`;
           }
           this.stopGameTimer();
-          this.saveGameResult(false, this.timeTaken);
+          this.saveGameResult(false, this.timeTaken); // Se guarda como no completado si no se adivinaron todas
         }
       }, 2000);
     }
   }
 
-  calculateStars(): void {
-    if (this.activeLevelConfig.words_level === 0) {
-      this.stars = 0;
-      return;
+  /**
+   * Calcula el puntaje (0-20) y la cantidad de estrellas (0-3)
+   * basándose en palabras adivinadas, intentos incorrectos y tiempo empleado.
+   */
+  calculateScoreAndStars(): void {
+    const maxOverallScore = 20;
+    let calculatedScore = 0;
+
+    // Porcentaje de Palabras Adivinadas (hasta 10 puntos)
+    if (this.activeLevelConfig.words_level > 0) {
+        const wordsGuessedRatio = this.guessedWordsCount / this.activeLevelConfig.words_level;
+        calculatedScore += Math.round(wordsGuessedRatio * 10); // Max 10 puntos por palabras
     }
 
-    const wordsGuessedPercentage = (this.guessedWordsCount / this.activeLevelConfig.words_level) * 100;
-
+    //Eficiencia de Intentos Incorrectos (hasta 5 puntos)
     const totalPossibleAttemptsInLevel = this.activeLevelConfig.words_level * this.activeLevelConfig.max_intents;
-
-    let incorrectGuessesEfficiency = 0;
     if (totalPossibleAttemptsInLevel > 0) {
-      incorrectGuessesEfficiency = (this.totalIncorrectGuessesMade / totalPossibleAttemptsInLevel) * 100;
+        const incorrectRatio = this.totalIncorrectGuessesMade / totalPossibleAttemptsInLevel;
+        // Cuanto menor sea, mayor el puntaje.
+        calculatedScore += Math.round((1 - Math.min(1, incorrectRatio)) * 5); // Max 5 puntos por intentos
+    } else {
+        calculatedScore += 5; // Si no hay palabras o intentos, asume eficiencia perfecta
     }
 
-    if (wordsGuessedPercentage === 100 && incorrectGuessesEfficiency <= 20) {
-      this.stars = 3;
-    } else if (wordsGuessedPercentage >= 80 && incorrectGuessesEfficiency <= 50) {
-      this.stars = 2;
-    } else if (wordsGuessedPercentage >= 50) {
-      this.stars = 1;
+    // Eficiencia del Tiempo (hasta 5 puntos)
+    const timeLimit = this.activeLevelConfig.time_limit;
+    if (timeLimit && timeLimit > 0 && this.timeTaken > 0) {
+        const timeUsedRatio = this.timeTaken / timeLimit;
+        // Cuanto menor sea el tiempo usado, mayor el puntaje.
+        calculatedScore += Math.round((1 - Math.min(1, timeUsedRatio)) * 5); // Max 5 puntos por tiempo
     } else {
-      this.stars = 0;
+        calculatedScore += 5; // Si no hay límite de tiempo, asume eficiencia perfecta
     }
+
+    // Asegura que el puntaje esté dentro del rango 0-20
+    this.score = Math.min(Math.max(0, calculatedScore), maxOverallScore);
+
+    // Convertir el score (0-20) a estrellas (0-3)
+    if (this.score >= 18) { // Rango alto
+        this.stars = 3;
+    } else if (this.score >= 12) { // Rango medio
+        this.stars = 2;
+    } else if (this.score >= 6) { // Rango básico
+        this.stars = 1;
+    } else {
+        this.stars = 0;
+    }
+
+    console.log(`[RiddleComponent] Puntaje Final: ${this.score}, Estrellas: ${this.stars}`);
   }
 
   get currentHint(): string | undefined {
@@ -313,12 +338,12 @@ export class RiddleComponent implements OnInit, OnDestroy {
   resetGame(): void {
     this.currentWordIndex = 0;
     this.guessedWordsCount = 0;
-    this.score = 0;
-    this.stars = 0;
+    this.score = 0; // Reinicia el score final
+    this.stars = 0; // Reinicia las estrellas
     this.totalIncorrectGuessesMade = 0;
 
     this.timeTaken = 0;
-    this.timeRemaining = this.activeLevelConfig.time_limit || 0; // Usar time_limit
+    this.timeRemaining = this.activeLevelConfig.time_limit || 0;
     this.stopGameTimer();
     this.startGameTimer();
 
@@ -361,7 +386,7 @@ export class RiddleComponent implements OnInit, OnDestroy {
 
     const gameResult: RiddleResult = {
       level_name: this.activeLevelConfig.level_name,
-      score: this.score,
+      score: this.score, 
       attempts_made: this.totalIncorrectGuessesMade,
       words_guessed: this.guessedWordsCount,
       time_taken: finalTime,

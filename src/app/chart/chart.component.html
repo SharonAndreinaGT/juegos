@@ -109,7 +109,12 @@
                 <mat-icon class="metric-icon">schedule</mat-icon>
                 <div class="metric-text">
                   <h3>Tiempo Promedio</h3>
-                  <p class="metric-value">12 min</p>
+                  <ng-container *ngIf="!errorTiempo">
+                    <p class="metric-value">{{ tiempoPromedio !== null ? tiempoPromedio : '...' }}</p>
+                  </ng-container>
+                  <ng-container *ngIf="errorTiempo">
+                    <p class="metric-value" style="color: red; font-size: 1rem;">Error</p>
+                  </ng-container>
                 </div>
               </div>
             </mat-card-content>

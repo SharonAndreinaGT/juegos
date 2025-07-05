@@ -25,6 +25,10 @@ export class ChartComponent implements OnInit {
   loadingScore = true;
   errorScore = false;
 
+  tiempoPromedio: string | null = null;
+  loadingTiempo = true;
+  errorTiempo = false;
+
   constructor(
     private router: Router,
     private userService: UserService,
@@ -37,6 +41,7 @@ export class ChartComponent implements OnInit {
     this.getTotalEstudiantes();
     this.getTotalPartidas();
     this.getPromedioScore();
+    this.getTiempoPromedio();
   }
 
   getTotalEstudiantes() {
@@ -127,6 +132,49 @@ export class ChartComponent implements OnInit {
       },
       error: () => {
         this.errorScore = true;
+        onComplete();
+      }
+    });
+  }
+
+  getTiempoPromedio() {
+    this.loadingTiempo = true;
+    this.errorTiempo = false;
+    let tiempos: number[] = [];
+    let completed = 0;
+    const onComplete = () => {
+      completed++;
+      if (completed === 2) {
+        if (tiempos.length > 0) {
+          const sum = tiempos.reduce((a, b) => a + b, 0);
+          const avg = sum / tiempos.length;
+          // Formatear a minutos y segundos
+          const min = Math.floor(avg / 60);
+          const sec = Math.round(avg % 60);
+          this.tiempoPromedio = `${min} min ${sec} s`;
+        } else {
+          this.tiempoPromedio = '0 min';
+        }
+        this.loadingTiempo = false;
+      }
+    };
+    this.puzzleService.getAllPuzzleTimes().subscribe({
+      next: (arr) => {
+        tiempos = tiempos.concat(arr.filter(s => typeof s === 'number'));
+        onComplete();
+      },
+      error: () => {
+        this.errorTiempo = true;
+        onComplete();
+      }
+    });
+    this.memoryService.getAllMemoryTimes().subscribe({
+      next: (arr) => {
+        tiempos = tiempos.concat(arr.filter(s => typeof s === 'number'));
+        onComplete();
+      },
+      error: () => {
+        this.errorTiempo = true;
         onComplete();
       }
     });

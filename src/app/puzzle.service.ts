@@ -142,4 +142,13 @@ export class PuzzleService {
       map(response => (response.data || []).map((item: any) => item.score))
     );
   }
+
+  /**
+   * Obtiene todos los tiempos (time) de puzzle_results
+   */
+  getAllPuzzleTimes(): Observable<number[]> {
+    return this.http.get<any>(`${this.directusBaseUrl}/items/${this.puzzleResultsCollection}?fields=time&limit=-1`).pipe(
+      map(response => (response.data || []).map((item: any) => item.time))
+    );
+  }
 }

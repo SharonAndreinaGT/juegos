@@ -80,4 +80,13 @@ export class MemoryService {
       map(response => (response.data || []).map((item: any) => item.score))
     );
   }
+
+  /**
+   * Obtiene todos los tiempos (elapsedTime) de memory_results
+   */
+  getAllMemoryTimes(): Observable<number[]> {
+    return this.http.get<any>(`${this.memoryResultsApiUrl}?fields=elapsedTime&limit=-1`).pipe(
+      map(response => (response.data || []).map((item: any) => item.elapsedTime))
+    );
+  }
 }

@@ -75,7 +75,12 @@
                 <mat-icon class="metric-icon">games</mat-icon>
                 <div class="metric-text">
                   <h3>Partidas Jugadas</h3>
-                  <p class="metric-value">1,250</p>
+                  <ng-container *ngIf="!errorPartidas">
+                    <p class="metric-value">{{ totalPartidas !== null ? totalPartidas : '...' }}</p>
+                  </ng-container>
+                  <ng-container *ngIf="errorPartidas">
+                    <p class="metric-value" style="color: red; font-size: 1rem;">Error</p>
+                  </ng-container>
                 </div>
               </div>
             </mat-card-content>

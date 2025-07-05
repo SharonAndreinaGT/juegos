@@ -3,6 +3,8 @@ import { Router } from '@angular/router';
 import { Chart, ChartConfiguration, ChartData, ChartType } from 'chart.js';
 import { NgChartsModule } from 'ng2-charts';
 import { UserService } from '../user.service';
+import { PuzzleService } from '../puzzle.service';
+import { MemoryService } from '../memory.service';
 
 @Component({
   selector: 'app-chart',
@@ -15,12 +17,21 @@ export class ChartComponent implements OnInit {
   loadingEstudiantes = true;
   errorEstudiantes = false;
 
-  constructor(private router: Router, private userService: UserService) {}
+  totalPartidas: number | null = null;
+  loadingPartidas = true;
+  errorPartidas = false;
+
+  constructor(
+    private router: Router,
+    private userService: UserService,
+    private puzzleService: PuzzleService,
+    private memoryService: MemoryService
+  ) {}
 
   ngOnInit(): void {
-    // Registrar los plugins necesarios
     Chart.register();
     this.getTotalEstudiantes();
+    this.getTotalPartidas();
   }
 
   getTotalEstudiantes() {
@@ -39,6 +50,40 @@ export class ChartComponent implements OnInit {
         this.errorEstudiantes = true;
         this.loadingEstudiantes = false;
         this.totalEstudiantes = null;
+      }
+    });
+  }
+
+  getTotalPartidas() {
+    this.loadingPartidas = true;
+    this.errorPartidas = false;
+    let total = 0;
+    let completed = 0;
+    const onComplete = () => {
+      completed++;
+      if (completed === 2) {
+        this.totalPartidas = total;
+        this.loadingPartidas = false;
+      }
+    };
+    this.puzzleService.getTotalPuzzleResults().subscribe({
+      next: (count) => {
+        total += count;
+        onComplete();
+      },
+      error: () => {
+        this.errorPartidas = true;
+        onComplete();
+      }
+    });
+    this.memoryService.getTotalMemoryResults().subscribe({
+      next: (count) => {
+        total += count;
+        onComplete();
+      },
+      error: () => {
+        this.errorPartidas = true;
+        onComplete();
       }
     });
   }

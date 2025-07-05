@@ -124,4 +124,13 @@ export class PuzzleService {
       })
     );
   }
+
+  /**
+   * Obtiene el total de partidas jugadas (conteo de registros en puzzle_results)
+   */
+  getTotalPuzzleResults(): Observable<number> {
+    return this.http.get<any>(`${this.directusBaseUrl}/items/${this.puzzleResultsCollection}?meta=filter_count`).pipe(
+      map(response => response.meta?.filter_count ?? (response.data?.length ?? 0))
+    );
+  }
 }

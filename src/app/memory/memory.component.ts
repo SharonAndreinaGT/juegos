@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar'; // Necesitas MatSnackBar para los mensajes del juego.
 
 // --- NUEVAS LÍNEAS ---
@@ -21,6 +21,9 @@ export interface Card {
   styleUrls: ['./memory.component.scss']
 })
 export class MemoryComponent implements OnInit {
+  @ViewChild('winSound') winSound!: ElementRef<HTMLAudioElement>;
+  @ViewChild('loseSound') loseSound!: ElementRef<HTMLAudioElement>;
+
   cards: Card[] = [];
   activeLevel: MemoryConfig | null = null; // Variable para guardar la configuración del nivel activo
 
@@ -150,6 +153,7 @@ initializeGame(config: MemoryConfig): void {
             this.timeExceeded = true;
             this.stopGameTimer();
             this.gameStarted = false;
+            this.playLoseSound();
             this.snackBar.open('¡Se acabó el tiempo!', 'Cerrar', { duration: 3000 });
         }
     }, 1000);
@@ -179,6 +183,7 @@ initializeGame(config: MemoryConfig): void {
             this.intentExceeded = true;
             this.stopGameTimer();
             this.gameStarted = false;
+            this.playLoseSound();
             this.snackBar.open('¡Se acabaron los intentos!', 'Cerrar', { duration: 3000 });
             this.checkGameEnd(); // Llamar a checkGameEnd cuando se agotan los intentos
             return; // No procesar más si los intentos se agotaron
@@ -197,6 +202,7 @@ initializeGame(config: MemoryConfig): void {
         if (this.matchedPairs === this.totalPairs) {
           this.stopGameTimer();
           this.gameStarted = false;
+          this.playWinSound();
           this.checkGameEnd(); // Llamar a checkGameEnd cuando se completa el juego
         }
       } else {
@@ -285,6 +291,50 @@ initializeGame(config: MemoryConfig): void {
         () => console.log('Resultado del juego guardado con éxito'),
         (error) => console.error('Error al guardar el resultado del juego', error)
       );
+    }
+  }
+
+  playWinSound(): void {
+    try {
+      if (this.winSound && this.winSound.nativeElement) {
+        this.winSound.nativeElement.currentTime = 0; // Reiniciar el audio
+        this.winSound.nativeElement.volume = 0.7; // Volumen al 70%
+        const playPromise = this.winSound.nativeElement.play();
+        
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              console.log('Sonido de victoria reproducido exitosamente en memoria');
+            })
+            .catch(error => {
+              console.log('No se pudo reproducir el sonido de victoria:', error);
+            });
+        }
+      }
+    } catch (error) {
+      console.error('Error al reproducir el sonido de victoria:', error);
+    }
+  }
+
+  playLoseSound(): void {
+    try {
+      if (this.loseSound && this.loseSound.nativeElement) {
+        this.loseSound.nativeElement.currentTime = 0; // Reiniciar el audio
+        this.loseSound.nativeElement.volume = 0.7; // Volumen al 70%
+        const playPromise = this.loseSound.nativeElement.play();
+        
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              console.log('Sonido de derrota reproducido exitosamente en memoria');
+            })
+            .catch(error => {
+              console.log('No se pudo reproducir el sonido de derrota:', error);
+            });
+        }
+      }
+    } catch (error) {
+      console.error('Error al reproducir el sonido de derrota:', error);
     }
   }
 

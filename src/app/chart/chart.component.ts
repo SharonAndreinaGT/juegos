@@ -69,21 +69,35 @@ export class ChartComponent implements OnInit {
     });
   }
 
+  actualizarJuegosMasJugados(puzzleCount: number, memoryCount: number) {
+    this.barChartData2 = {
+      ...this.barChartData2,
+      datasets: [{
+        ...this.barChartData2.datasets[0],
+        data: [puzzleCount, memoryCount, 0]
+      }]
+    };
+  }
+
   getTotalPartidas() {
     this.loadingPartidas = true;
     this.errorPartidas = false;
     let total = 0;
     let completed = 0;
+    let puzzleCount = 0;
+    let memoryCount = 0;
     const onComplete = () => {
       completed++;
       if (completed === 2) {
-        this.totalPartidas = total;
+        this.totalPartidas = puzzleCount + memoryCount;
         this.loadingPartidas = false;
+        this.actualizarJuegosMasJugados(puzzleCount, memoryCount);
       }
     };
     this.puzzleService.getTotalPuzzleResults().subscribe({
       next: (count) => {
         total += count;
+        puzzleCount = count;
         onComplete();
       },
       error: () => {
@@ -94,6 +108,7 @@ export class ChartComponent implements OnInit {
     this.memoryService.getTotalMemoryResults().subscribe({
       next: (count) => {
         total += count;
+        memoryCount = count;
         onComplete();
       },
       error: () => {

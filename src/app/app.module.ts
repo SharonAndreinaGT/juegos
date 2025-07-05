@@ -50,6 +50,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatChipsModule } from '@angular/material/chips';
+import { NgChartsModule } from 'ng2-charts';
 
 @NgModule({
     declarations: [
@@ -98,9 +99,10 @@ import { MatChipsModule } from '@angular/material/chips';
       MatButtonModule,
       FormsModule,
       MatTabsModule,
-      MatSlideToggleModule,
-      MatChipsModule,
-      HttpClientModule
+              MatSlideToggleModule,
+        MatChipsModule,
+        NgChartsModule,
+        HttpClientModule
     ],
     providers: [
      

@@ -50,15 +50,103 @@
   <mat-sidenav-content class="content">
     <ng-container>
       <div class="welcome-container">
-        <mat-card class="welcome-card">
-          <mat-card-content>
-            <div class="welcome-content">
-              <h2>Chart</h2>
-              <p>¡Hola Mundo! Este es el módulo Chart de la aplicación educativa.</p>
-              <p>Aquí puedes agregar tus gráficos y visualizaciones.</p>
-            </div>
-          </mat-card-content>
-        </mat-card>
+        <!-- Métricas adicionales -->
+        <div class="metrics-grid">
+          <mat-card class="metric-card">
+            <mat-card-content>
+              <div class="metric-content">
+                <mat-icon class="metric-icon">school</mat-icon>
+                <div class="metric-text">
+                  <h3>Total Estudiantes</h3>
+                  <p class="metric-value">100</p>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="metric-card">
+            <mat-card-content>
+              <div class="metric-content">
+                <mat-icon class="metric-icon">games</mat-icon>
+                <div class="metric-text">
+                  <h3>Partidas Jugadas</h3>
+                  <p class="metric-value">1,250</p>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="metric-card">
+            <mat-card-content>
+              <div class="metric-content">
+                <mat-icon class="metric-icon">trending_up</mat-icon>
+                <div class="metric-text">
+                  <h3>Puntaje Promedio</h3>
+                  <p class="metric-value">85%</p>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="metric-card">
+            <mat-card-content>
+              <div class="metric-content">
+                <mat-icon class="metric-icon">schedule</mat-icon>
+                <div class="metric-text">
+                  <h3>Tiempo Promedio</h3>
+                  <p class="metric-value">12 min</p>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+          <!-- Gráfico 1: Rendimiento por Grado -->
+          <mat-card class="chart-card">
+            <mat-card-content>
+              <canvas baseChart
+                [data]="barChartData"
+                [options]="barChartOptions"
+                [type]="barChartType">
+              </canvas>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Gráfico 2: Juegos más Jugados -->
+          <mat-card class="chart-card">
+            <mat-card-content>
+              <canvas baseChart
+                [data]="barChartData2"
+                [options]="barChartOptions2"
+                [type]="barChartType2">
+              </canvas>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Gráfico 3: Distribución de Estudiantes -->
+          <mat-card class="chart-card">
+            <mat-card-content>
+              <canvas baseChart
+                [data]="pieChartData"
+                [options]="pieChartOptions"
+                [type]="pieChartType">
+              </canvas>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Gráfico 4: Progreso Semanal -->
+          <mat-card class="chart-card">
+            <mat-card-content>
+              <canvas baseChart
+                [data]="lineChartData"
+                [options]="lineChartOptions"
+                [type]="lineChartType">
+              </canvas>
+            </mat-card-content>
+          </mat-card>
+        </div>
       </div>
     </ng-container>
 

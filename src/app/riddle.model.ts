@@ -45,7 +45,6 @@ export interface RiddleStudentDisplay {
   level_name: string | null; 
   score: number;
   time_taken: number; 
-  attempts_made: number;
   words_guessed: number;
   is_complete: boolean; 
 }

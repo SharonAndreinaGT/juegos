@@ -82,6 +82,13 @@
                     </td>
                   </ng-container>
 
+                  <ng-container matColumnDef="level_name">
+                    <th mat-header-cell *matHeaderCellDef> Nivel </th>
+                    <td mat-cell *matCellDef="let student">
+                      {{ student.latestPuzzleResult?.level_name ?? '0' }}
+                    </td>
+                  </ng-container>
+
                   <ng-container matColumnDef="score">
                     <th mat-header-cell *matHeaderCellDef> Puntaje </th>
                     <td mat-cell *matCellDef="let student">
@@ -132,7 +139,7 @@
                   </ng-container>
 
                   <ng-container matColumnDef="level_id">
-                    <th mat-header-cell *matHeaderCellDef> Nivel ID </th>
+                    <th mat-header-cell *matHeaderCellDef> Nivel</th>
                     <td mat-cell *matCellDef="let result"> {{ result.level_id ?? 'N/A' }} </td>
                   </ng-container>
 
@@ -151,10 +158,6 @@
                     <td mat-cell *matCellDef="let result"> {{ result.totalPairs ?? '0' }} </td>
                   </ng-container>
 
-                  <ng-container matColumnDef="intentRemaining">
-                    <th mat-header-cell *matHeaderCellDef> Intentos Restantes </th>
-                    <td mat-cell *matCellDef="let result"> {{ result.intentRemaining ?? '0' }} </td>
-                  </ng-container>
 
                   <tr mat-header-row *matHeaderRowDef="displayedMemoryColumns"></tr>
                   <tr mat-row *matRowDef="let row; columns: displayedMemoryColumns;"></tr>
@@ -206,10 +209,6 @@
                     <td mat-cell *matCellDef="let result"> {{ result.time_taken ?? '0' }} </td>
                   </ng-container>
 
-                  <ng-container matColumnDef="attempts_made">
-                    <th mat-header-cell *matHeaderCellDef> Intentos Hechos </th>
-                    <td mat-cell *matCellDef="let result"> {{ result.attempts_made ?? '0' }} </td>
-                  </ng-container>
 
                   <ng-container matColumnDef="words_guessed">
                     <th mat-header-cell *matHeaderCellDef> Palabras Adivinadas </th>

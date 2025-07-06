@@ -154,7 +154,7 @@ export class MemoryService {
           elapsedTime: item.elapsedTime,     
           matchedPairs: item.matchedPairs,   
           totalPairs: item.totalPairs,       
-          intentRemaining: item.intentRemaining, 
+          intentRemaining: item.intentRemaining, // Changed from item.intent_remaining to item.intentRemaining
           completed: item.completed,
           student_id: item.student_id,
           date_created: item.date_created

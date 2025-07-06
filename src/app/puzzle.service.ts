@@ -1,4 +1,3 @@
-
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -114,16 +113,17 @@ export class PuzzleService {
    * @returns Un Observable que emite un array de PuzzleResult.
    */
   getStudentPuzzleResults(studentId: string): Observable<PuzzleResult[]> {
-    console.log(`[PuzzleService] Obteniendo resultados para estudiante ID: ${studentId}`);
-    return this.http.get<any>(
-      `${this.directusBaseUrl}/items/${this.puzzleResultsCollection}?filter[student_id][_eq]=${studentId}` //por esta condicion no se mostraba el puntaje ni el tiempo, &sort=-date_created
-    ).pipe(
-      map(response => {
-        console.log('[PuzzleService] Resultados de rompecabezas obtenidos:', response.data);
-        return response.data || [];
-      })
-    );
-  }
+  console.log(`[PuzzleService] Obteniendo resultados para estudiante ID: ${studentId}`);
+  return this.http.get<any>(
+    // Asegúrate de que esta URL esté exactamente así:
+    `${this.directusBaseUrl}/items/${this.puzzleResultsCollection}?filter[student_id][_eq]=${studentId}&fields=*,level_name&sort=-created_at`
+  ).pipe(
+    map(response => {
+      console.log('[PuzzleService] Resultados de rompecabezas obtenidos:', response.data);
+      return response.data || [];
+    })
+  );
+}
 
   /**
    * Obtiene el total de partidas jugadas (conteo de registros en puzzle_results)

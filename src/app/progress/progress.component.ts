@@ -33,7 +33,6 @@ interface MemoryStudentDisplay {
   score: number;
   elapsedTime: number;
   totalPairs: number;
-  intentRemaining: number;
 }
 
 // NEW: RiddleStudentDisplay interface
@@ -45,7 +44,6 @@ interface RiddleStudentDisplay {
   level_name: string | null;
   score: number;
   time_taken: number;
-  attempts_made: number;
   words_guessed: number;
 }
 
@@ -57,7 +55,7 @@ interface RiddleStudentDisplay {
 export class ProgressComponent implements OnInit, AfterViewInit {
 
   // Definimos las columnas que usará la tabla de ROMPECABEZAS
-  displayedColumns: string[] = ['name', 'lastname', 'grade', 'score', 'time'];
+  displayedColumns: string[] = ['name', 'lastname', 'grade', 'level_name','score', 'time'];
   // Definimos las columnas que usará la tabla de MEMORIA
   displayedMemoryColumns: string[] = [
     'name',
@@ -67,7 +65,6 @@ export class ProgressComponent implements OnInit, AfterViewInit {
     'score',
     'elapsedTime',
     'totalPairs',
-    'intentRemaining',
   ];
   // NEW: Definimos las columnas que usará la tabla de ADIVINA LA PALABRA OCULTA
   displayedRiddleColumns: string[] = [
@@ -77,7 +74,6 @@ export class ProgressComponent implements OnInit, AfterViewInit {
     'level_name',
     'score',
     'time_taken',
-    'attempts_made',
     'words_guessed',
   ];
 
@@ -107,13 +103,13 @@ export class ProgressComponent implements OnInit, AfterViewInit {
     private userService: UserService,
     private puzzleService: PuzzleService,
     private memoryService: MemoryService,
-    private riddleService: RiddleService // Inject RiddleService
+    private riddleService: RiddleService 
   ) {}
 
   ngOnInit(): void {
     this.loadAllStudentsProgress();
     this.loadAllStudentsMemoryResults();
-    this.loadAllStudentsRiddleResults(); // NEW: Load Riddle results
+    this.loadAllStudentsRiddleResults(); 
   }
 
   ngAfterViewInit(): void {
@@ -124,15 +120,14 @@ export class ProgressComponent implements OnInit, AfterViewInit {
       if (this.memoryPaginator) {
         this.memoryResultsData.paginator = this.memoryPaginator;
       }
-      // NEW: Assign paginator for Riddle table
+      
       if (this.riddlePaginator) {
         this.riddleResultsData.paginator = this.riddlePaginator;
       }
     });
   }
 
-  // ... (loadAllStudentsProgress and loadAllStudentsMemoryResults methods are unchanged from previous working versions) ...
-
+  
   loadAllStudentsProgress(): void {
     this.loading = true;
     this.error = null;
@@ -220,7 +215,6 @@ export class ProgressComponent implements OnInit, AfterViewInit {
                   score: latestMemoryResult.score,
                   elapsedTime: latestMemoryResult.elapsedTime,
                   totalPairs: latestMemoryResult.totalPairs,
-                  intentRemaining: latestMemoryResult.intentRemaining,
                 } as MemoryStudentDisplay;
               } else {
                 return {
@@ -232,7 +226,6 @@ export class ProgressComponent implements OnInit, AfterViewInit {
                   score: 0,
                   elapsedTime: 0,
                   totalPairs: 0,
-                  intentRemaining: 0,
                 } as MemoryStudentDisplay;
               }
             }),
@@ -247,7 +240,6 @@ export class ProgressComponent implements OnInit, AfterViewInit {
                 score: 0,
                 elapsedTime: 0,
                 totalPairs: 0,
-                intentRemaining: 0,
               } as MemoryStudentDisplay);
             })
           );
@@ -301,7 +293,6 @@ export class ProgressComponent implements OnInit, AfterViewInit {
                   level_name: latestRiddleResult.level_name,
                   score: latestRiddleResult.score,
                   time_taken: latestRiddleResult.time_taken,
-                  attempts_made: latestRiddleResult.attempts_made,
                   words_guessed: latestRiddleResult.words_guessed,
                 } as RiddleStudentDisplay;
               } else {
@@ -313,7 +304,6 @@ export class ProgressComponent implements OnInit, AfterViewInit {
                   level_name: null,
                   score: 0,
                   time_taken: 0,
-                  attempts_made: 0,
                   words_guessed: 0,
                 } as RiddleStudentDisplay;
               }
@@ -328,7 +318,6 @@ export class ProgressComponent implements OnInit, AfterViewInit {
                 level_name: null,
                 score: 0,
                 time_taken: 0,
-                attempts_made: 0,
                 words_guessed: 0,
               } as RiddleStudentDisplay);
             })

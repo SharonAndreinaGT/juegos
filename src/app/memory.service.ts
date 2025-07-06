@@ -107,4 +107,59 @@ export class MemoryService {
       map(response => (response.data || []).map((item: any) => ({ score: item.score, created_at: item.created_at })))
     );
   }
+
+
+ /**
+   * Obtiene los resultados de memoria para un estudiante específico,
+   * Ordena por fecha de creación descendente para obtener el más reciente.
+   * Mapea los campos usando el casing exacto de Directus (camelCase).
+   */
+  getStudentMemoryResults(studentId: string): Observable<MemoryResult[]> {
+    console.log(`[MemoryService] Obteniendo resultados de memoria para estudiante ID: ${studentId}`);
+    // Añade el sort a la URL para obtener el más reciente primero
+    return this.http.get<any>(`${this.memoryResultsApiUrl}?filter[student_id][_eq]=${studentId}`).pipe( // Added &sort=-date_created
+      map(response => {
+        console.log('[MemoryService] Raw Directus data for student memory results:', response.data);
+        return (response.data || []).map((item: any) => ({
+          id: item.id,
+          level_id: item.level_id,
+          score: item.score,
+          stars: item.stars, 
+          elapsedTime: item.elapsedTime,    
+          matchedPairs: item.matchedPairs,  
+          totalPairs: item.totalPairs,      
+          intentRemaining: item.intentRemaining, 
+          completed: item.completed,        
+          student_id: item.student_id,
+          date_created: item.date_created 
+        } as MemoryResult));
+      })
+    );
+  }
+
+  /**
+   * Obtiene todos los resultados de memoria.
+   * Útil para la tabla general de progreso.
+   * Ordena por fecha de creación descendente.
+   */
+  getAllMemoryResults(): Observable<MemoryResult[]> {
+    // Añade el sort a la URL
+    return this.http.get<any>(`${this.memoryResultsApiUrl}?sort=-date_created&limit=-1`).pipe(
+      map(response => {
+        return (response.data || []).map((item: any) => ({
+          id: item.id,
+          level_id: item.level_id,
+          score: item.score,
+          stars: item.stars,
+          elapsedTime: item.elapsedTime,     
+          matchedPairs: item.matchedPairs,   
+          totalPairs: item.totalPairs,       
+          intentRemaining: item.intentRemaining, 
+          completed: item.completed,
+          student_id: item.student_id,
+          date_created: item.date_created
+        } as MemoryResult));
+      })
+    );
+  }
 }

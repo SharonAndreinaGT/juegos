@@ -127,4 +127,63 @@ export class RiddleService {
       })
     );
   }
+
+  /**
+   * Obtiene todos los resultados de "Adivina la Palabra Oculta" para un estudiante específico.
+   * Ordena los resultados por fecha de creación descendente para obtener el más reciente primero.
+   * @param studentId El ID del estudiante.
+   * @returns Un Observable que emite un array de RiddleResult.
+   */
+  getStudentRiddleResults(studentId: string): Observable<RiddleResult[]> {
+    console.log(`[RiddleService] Obteniendo resultados de Riddle para estudiante ID: ${studentId}`);
+    return this.http.get<any>(
+      `${this.directusResultsUrl}?filter[student_id][_eq]=${studentId}`
+    ).pipe(
+      map(response => {
+        console.log('[RiddleService] Raw Directus data for student riddle results:', response.data);
+        return (response.data || []).map((item: any) => ({
+          id: item.id,
+          level_name: item.level_name,
+          score: item.score,
+          attempts_made: item.attempts_made,
+          words_guessed: item.words_guessed,
+          time_taken: item.time_taken,
+          is_complete: item.is_complete,
+          student_id: item.student_id,
+          created_at: item.created_at 
+        } as RiddleResult));
+      }),
+      catchError(error => {
+        console.error(`[RiddleService] Error al obtener resultados de Riddle para estudiante ${studentId}:`, error);
+        return of([]); 
+      })
+    );
+  }
+
+  /**
+   * Obtiene todos los resultados de "Adivina la Palabra Oculta" de todos los estudiantes.
+   * Útil para la tabla general de progreso.
+   * Ordena por fecha de creación descendente.
+   */
+  getAllRiddleResults(): Observable<RiddleResult[]> {
+    return this.http.get<any>(`${this.directusResultsUrl}?sort=-date_created&limit=-1`).pipe(
+      map(response => {
+        return (response.data || []).map((item: any) => ({
+          id: item.id,
+          level_name: item.level_name,
+          score: item.score,
+          attempts_made: item.attempts_made,
+          words_guessed: item.words_guessed,
+          time_taken: item.time_taken,
+          is_complete: item.is_complete,
+          student_id: item.student_id,
+          created_at: item.created_at
+        } as RiddleResult));
+      }),
+      catchError(error => {
+        console.error(`[RiddleService] Error al obtener todos los resultados de Riddle:`, error);
+        return of([]); 
+      })
+    );
+  }
 }

@@ -29,7 +29,7 @@
         <mat-icon>timeline</mat-icon>
         <span>Progreso</span>
       </button>
-       <button mat-button class="menu-button" routerLink="/chart">
+      <button mat-button class="menu-button" routerLink="/chart">
         <mat-icon>bar_chart</mat-icon>
         <span>Gráficas</span>
       </button>
@@ -58,23 +58,19 @@
           <div class="table-responsive">
             <mat-tab-group>
               <mat-tab label="ROMPECABEZAS">
-
                 <table mat-table [dataSource]="studentProgressData" class="table table-striped table-bordered mat-elevation-z8" *ngIf="!loading">
 
-                  <!-- Nombre -->
                   <ng-container matColumnDef="name">
                     <th mat-header-cell *matHeaderCellDef> Nombre </th>
                     <td mat-cell *matCellDef="let student"> {{ student.name }} </td>
                   </ng-container>
 
-                  <!-- Nombre -->
                   <ng-container matColumnDef="lastname">
                     <th mat-header-cell *matHeaderCellDef> Apellido </th>
                     <td mat-cell *matCellDef="let student"> {{ student.lastname }} </td>
                   </ng-container>
 
-                  <!-- Grado -->
-                 <ng-container matColumnDef="grade">
+                  <ng-container matColumnDef="grade">
                     <th mat-header-cell *matHeaderCellDef> Grado </th>
                     <td mat-cell *matCellDef="let student">
                       {{
@@ -86,7 +82,6 @@
                     </td>
                   </ng-container>
 
-                  <!-- Puntaje -->
                   <ng-container matColumnDef="score">
                     <th mat-header-cell *matHeaderCellDef> Puntaje </th>
                     <td mat-cell *matCellDef="let student">
@@ -94,7 +89,6 @@
                     </td>
                   </ng-container>
 
-                  <!-- Tiempo -->
                   <ng-container matColumnDef="time">
                     <th mat-header-cell *matHeaderCellDef> Tiempo (segundos) </th>
                     <td mat-cell *matCellDef="let student">
@@ -108,16 +102,129 @@
 
                 <mat-paginator [pageSize]="6" showFirstLastButtons></mat-paginator>
 
-                <p *ngIf="loading">Cargando datos...</p>
+                <p *ngF="loading">Cargando datos...</p>
                 <p *ngIf="error">{{ error }}</p>
               </mat-tab>
 
               <mat-tab label="MEMORIA">
-                <div></div>
+                <table mat-table [dataSource]="memoryResultsData" class="table table-striped table-bordered mat-elevation-z8" *ngIf="!loadingMemoryResults">
+
+                  <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef> Nombre </th>
+                    <td mat-cell *matCellDef="let result"> {{ result.name }} </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="lastname">
+                    <th mat-header-cell *matHeaderCellDef> Apellido </th>
+                    <td mat-cell *matCellDef="let result"> {{ result.lastname }} </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="grade">
+                    <th mat-header-cell *matHeaderCellDef> Grado </th>
+                    <td mat-cell *matCellDef="let result">
+                      {{
+                        result.grade === 'first' ? 'Primer grado' :
+                        result.grade === 'second' ? 'Segundo grado' :
+                        result.grade === 'third' ? 'Tercer grado' :
+                        result.grade || 'No definido'
+                      }}
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="level_id">
+                    <th mat-header-cell *matHeaderCellDef> Nivel ID </th>
+                    <td mat-cell *matCellDef="let result"> {{ result.level_id ?? 'N/A' }} </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="score">
+                    <th mat-header-cell *matHeaderCellDef> Puntaje </th>
+                    <td mat-cell *matCellDef="let result"> {{ result.score ?? '0' }} </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="elapsedTime">
+                    <th mat-header-cell *matHeaderCellDef> Tiempo (segundos) </th>
+                    <td mat-cell *matCellDef="let result"> {{ result.elapsedTime ?? '0' }} </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="totalPairs">
+                    <th mat-header-cell *matHeaderCellDef> Total Pares </th>
+                    <td mat-cell *matCellDef="let result"> {{ result.totalPairs ?? '0' }} </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="intentRemaining">
+                    <th mat-header-cell *matHeaderCellDef> Intentos Restantes </th>
+                    <td mat-cell *matCellDef="let result"> {{ result.intentRemaining ?? '0' }} </td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="displayedMemoryColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedMemoryColumns;"></tr>
+                </table>
+
+                <mat-paginator [pageSize]="6" showFirstLastButtons #memoryPaginator></mat-paginator>
+
+                <p *ngIf="loadingMemoryResults">Cargando datos de memoria...</p>
+                <p *ngIf="errorMemoryResults">{{ errorMemoryResults }}</p>
               </mat-tab>
 
               <mat-tab label="ADIVINA LA PALABRA OCULTA">
-                <div></div>
+                <table mat-table [dataSource]="riddleResultsData" class="table table-striped table-bordered mat-elevation-z8" *ngIf="!loadingRiddleResults">
+
+                  <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef> Nombre </th>
+                    <td mat-cell *matCellDef="let result"> {{ result.name }} </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="lastname">
+                    <th mat-header-cell *matHeaderCellDef> Apellido </th>
+                    <td mat-cell *matCellDef="let result"> {{ result.lastname }} </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="grade">
+                    <th mat-header-cell *matHeaderCellDef> Grado </th>
+                    <td mat-cell *matCellDef="let result">
+                      {{
+                        result.grade === 'first' ? 'Primer grado' :
+                        result.grade === 'second' ? 'Segundo grado' :
+                        result.grade === 'third' ? 'Tercer grado' :
+                        result.grade || 'No definido'
+                      }}
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="level_name">
+                    <th mat-header-cell *matHeaderCellDef> Nivel </th>
+                    <td mat-cell *matCellDef="let result"> {{ result.level_name ?? 'N/A' }} </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="score">
+                    <th mat-header-cell *matHeaderCellDef> Puntaje </th>
+                    <td mat-cell *matCellDef="let result"> {{ result.score ?? '0' }} </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="time_taken">
+                    <th mat-header-cell *matHeaderCellDef> Tiempo (segundos) </th>
+                    <td mat-cell *matCellDef="let result"> {{ result.time_taken ?? '0' }} </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="attempts_made">
+                    <th mat-header-cell *matHeaderCellDef> Intentos Hechos </th>
+                    <td mat-cell *matCellDef="let result"> {{ result.attempts_made ?? '0' }} </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="words_guessed">
+                    <th mat-header-cell *matHeaderCellDef> Palabras Adivinadas </th>
+                    <td mat-cell *matCellDef="let result"> {{ result.words_guessed ?? '0' }} </td>
+                  </ng-container>
+
+
+                  <tr mat-header-row *matHeaderRowDef="displayedRiddleColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedRiddleColumns;"></tr>
+                </table>
+
+                <mat-paginator [pageSize]="6" showFirstLastButtons #riddlePaginator></mat-paginator>
+
+                <p *ngIf="loadingRiddleResults">Cargando datos de "Adivina la Palabra Oculta"...</p>
+                <p *ngIf="errorRiddleResults">{{ errorRiddleResults }}</p>
               </mat-tab>
 
             </mat-tab-group>

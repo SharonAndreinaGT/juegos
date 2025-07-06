@@ -37,6 +37,19 @@ export interface User {
   status?: string;
 }
 
+export interface RiddleStudentDisplay {
+  id: string; // Student ID
+  name: string;
+  lastname: string;
+  grade?: string;
+  level_name: string | null; 
+  score: number;
+  time_taken: number; 
+  attempts_made: number;
+  words_guessed: number;
+  is_complete: boolean; 
+}
+
 // Define la estructura general de la configuración de todo el juego.
 export interface RiddleGameSettings {
   levels: RiddleLevel[]; // Un array con la configuración de todos los niveles.

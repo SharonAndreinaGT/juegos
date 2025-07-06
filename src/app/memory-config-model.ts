@@ -9,6 +9,7 @@ export class MemoryConfig {
 }
 
 export interface MemoryResult {
+  id?: string;
   level_id?: string;
   score: number;
   stars: number;

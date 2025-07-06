@@ -11,6 +11,7 @@ export class MemoryConfig {
 export interface MemoryResult {
   id?: string;
   level_id?: string;
+  level_name?: string | null;
   score: number;
   stars: number;
   elapsedTime: number;

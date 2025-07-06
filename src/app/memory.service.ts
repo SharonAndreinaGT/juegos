@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, forkJoin, of } from 'rxjs'; 
+import { map, switchMap, catchError } from 'rxjs/operators'; 
 import { MemoryConfig, MemoryResult } from './memory-config-model';
 
 @Injectable({
@@ -109,56 +109,143 @@ export class MemoryService {
   }
 
 
- /**
+/**
    * Obtiene los resultados de memoria para un estudiante específico,
-   * Ordena por fecha de creación descendente para obtener el más reciente.
-   * Mapea los campos usando el casing exacto de Directus (camelCase).
+   * y luego obtiene el level_name asociado a cada level_id.
+   * Se ordena por fecha de creación descendente para obtener el más reciente.
    */
   getStudentMemoryResults(studentId: string): Observable<MemoryResult[]> {
     console.log(`[MemoryService] Obteniendo resultados de memoria para estudiante ID: ${studentId}`);
-    // Añade el sort a la URL para obtener el más reciente primero
-    return this.http.get<any>(`${this.memoryResultsApiUrl}?filter[student_id][_eq]=${studentId}`).pipe( // Added &sort=-date_created
+    return this.http.get<any>(
+      `${this.memoryResultsApiUrl}?filter[student_id][_eq]=${studentId}`
+    ).pipe(
+      // Primer map para obtener los datos crudos de memory_results
       map(response => {
         console.log('[MemoryService] Raw Directus data for student memory results:', response.data);
-        return (response.data || []).map((item: any) => ({
-          id: item.id,
-          level_id: item.level_id,
-          score: item.score,
-          stars: item.stars, 
-          elapsedTime: item.elapsedTime,    
-          matchedPairs: item.matchedPairs,  
-          totalPairs: item.totalPairs,      
-          intentRemaining: item.intentRemaining, 
-          completed: item.completed,        
-          student_id: item.student_id,
-          date_created: item.date_created 
-        } as MemoryResult));
+        return response.data || [];
+      }),
+      // switchMap para hacer llamadas adicionales por cada resultado
+      switchMap((results: any[]) => {
+        if (results.length === 0) {
+          return of([]); // Si no hay resultados, devuelve un array vacío
+        }
+
+        // Crear un array de Observables para obtener el nombre del nivel para cada resultado
+        const resultsWithLevelNames$ = results.map(item => {
+          if (item.level_id) {
+            // Si hay level_id, busca la configuración del nivel para obtener el level_name
+            return this.http.get<any>(`${this.apiUrl}/${item.level_id}?fields=level_name`).pipe(
+              map(levelConfigResponse => {
+                const levelName = levelConfigResponse.data?.level_name || 'N/A';
+                return {
+                  id: item.id,
+                  level_id: item.level_id,
+                  level_name: levelName, // Añadimos el level_name aquí
+                  score: item.score,
+                  stars: item.stars,
+                  elapsedTime: item.elapsedTime,
+                  matchedPairs: item.matchedPairs,
+                  totalPairs: item.totalPairs,
+                  intentRemaining: item.intentRemaining,
+                  completed: item.completed,
+                  student_id: item.student_id
+                } as MemoryResult; // Casteamos a MemoryResult
+              }),
+              catchError(err => {
+                console.error(`Error al obtener el nivel de memoria para ID ${item.level_id}:`, err);
+                return of({
+                  id: item.id,
+                  level_id: item.level_id,
+                  level_name: 'Error al cargar Nivel', // Manejo de error para el nombre del nivel
+                  score: item.score,
+                  stars: item.stars,
+                  elapsedTime: item.elapsedTime,
+                  matchedPairs: item.matchedPairs,
+                  totalPairs: item.totalPairs,
+                  intentRemaining: item.intentRemaining,
+                  completed: item.completed,
+                  student_id: item.student_id
+                } as MemoryResult);
+              })
+            );
+          } else {
+            // Si no hay level_id, devuelve el resultado con level_name como 'N/A'
+            return of({
+              id: item.id,
+              level_id: item.level_id,
+              level_name: 'N/A',
+              score: item.score,
+              stars: item.stars,
+              elapsedTime: item.elapsedTime,
+              matchedPairs: item.matchedPairs,
+              totalPairs: item.totalPairs,
+              intentRemaining: item.intentRemaining,
+              completed: item.completed,
+              student_id: item.student_id
+            } as MemoryResult);
+          }
+        });
+        // Usa forkJoin para esperar a que todas las llamadas de nivel se completen
+        return forkJoin(resultsWithLevelNames$);
+      }),
+      catchError(error => {
+        console.error('[MemoryService] Error general al obtener resultados de memoria:', error);
+        return of([]); // Devuelve un array vacío en caso de error principal
       })
     );
   }
 
-  /**
-   * Obtiene todos los resultados de memoria.
-   * Útil para la tabla general de progreso.
-   * Ordena por fecha de creación descendente.
-   */
+  // Si también usas getAllMemoryResults, aplica una lógica similar:
   getAllMemoryResults(): Observable<MemoryResult[]> {
-    // Añade el sort a la URL
     return this.http.get<any>(`${this.memoryResultsApiUrl}?sort=-date_created&limit=-1`).pipe(
-      map(response => {
-        return (response.data || []).map((item: any) => ({
-          id: item.id,
-          level_id: item.level_id,
-          score: item.score,
-          stars: item.stars,
-          elapsedTime: item.elapsedTime,     
-          matchedPairs: item.matchedPairs,   
-          totalPairs: item.totalPairs,       
-          intentRemaining: item.intentRemaining, // Changed from item.intent_remaining to item.intentRemaining
-          completed: item.completed,
-          student_id: item.student_id,
-          date_created: item.date_created
-        } as MemoryResult));
+      map(response => response.data || []),
+      switchMap((results: any[]) => {
+        if (results.length === 0) {
+          return of([]);
+        }
+        const resultsWithLevelNames$ = results.map(item => {
+          if (item.level_id) {
+            return this.http.get<any>(`${this.apiUrl}/${item.level_id}?fields=level_name`).pipe(
+              map(levelConfigResponse => {
+                const levelName = levelConfigResponse.data?.level_name || 'N/A';
+                return {
+                  id: item.id,
+                  level_id: item.level_id,
+                  level_name: levelName, // Añadimos el level_name aquí
+                  score: item.score,
+                  stars: item.stars,
+                  elapsedTime: item.elapsedTime,
+                  matchedPairs: item.matchedPairs,
+                  totalPairs: item.totalPairs,
+                  intentRemaining: item.intentRemaining,
+                  completed: item.completed,
+                  student_id: item.student_id
+                } as MemoryResult;
+              }),
+              catchError(err => {
+                console.error(`Error al obtener el nivel de memoria para ID ${item.level_id}:`, err);
+                return of({ // Devuelve un objeto MemoryResult con el error
+                  id: item.id, level_id: item.level_id, level_name: 'Error al cargar Nivel', score: item.score,
+                  stars: item.stars, elapsedTime: item.elapsedTime, matchedPairs: item.matchedPairs,
+                  totalPairs: item.totalPairs, intentRemaining: item.intentRemaining, completed: item.completed,
+                  student_id: item.student_id
+                } as MemoryResult);
+              })
+            );
+          } else {
+            return of({
+              id: item.id, level_id: item.level_id, level_name: 'N/A', score: item.score,
+              stars: item.stars, elapsedTime: item.elapsedTime, matchedPairs: item.matchedPairs,
+              totalPairs: item.totalPairs, intentRemaining: item.intentRemaining, completed: item.completed,
+              student_id: item.student_id
+            } as MemoryResult);
+          }
+        });
+        return forkJoin(resultsWithLevelNames$);
+      }),
+      catchError(error => {
+        console.error('[MemoryService] Error general al obtener todos los resultados de memoria:', error);
+        return of([]);
       })
     );
   }

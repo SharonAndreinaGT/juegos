@@ -29,7 +29,7 @@ interface MemoryStudentDisplay {
   name: string;
   lastname: string;
   grade?: string;
-  level_id: string | null;
+  level_name: string | null;
   score: number;
   elapsedTime: number;
   totalPairs: number;
@@ -61,7 +61,7 @@ export class ProgressComponent implements OnInit, AfterViewInit {
     'name',
     'lastname',
     'grade',
-    'level_id',
+    'level_name',
     'score',
     'elapsedTime',
     'totalPairs',
@@ -211,10 +211,11 @@ export class ProgressComponent implements OnInit, AfterViewInit {
                   name: user.name,
                   lastname: user.lastname,
                   grade: user.grade,
-                  level_id: latestMemoryResult.level_id,
+                  level_name: latestMemoryResult.level_name, // CAMBIADO: Ahora mapeamos level_name
                   score: latestMemoryResult.score,
                   elapsedTime: latestMemoryResult.elapsedTime,
                   totalPairs: latestMemoryResult.totalPairs,
+                  intentRemaining: latestMemoryResult.intentRemaining,
                 } as MemoryStudentDisplay;
               } else {
                 return {
@@ -222,10 +223,11 @@ export class ProgressComponent implements OnInit, AfterViewInit {
                   name: user.name,
                   lastname: user.lastname,
                   grade: user.grade,
-                  level_id: null,
+                  level_name: null, // CAMBIADO: Ahora es level_name
                   score: 0,
                   elapsedTime: 0,
                   totalPairs: 0,
+                  intentRemaining: 0,
                 } as MemoryStudentDisplay;
               }
             }),
@@ -236,10 +238,11 @@ export class ProgressComponent implements OnInit, AfterViewInit {
                 name: user.name,
                 lastname: user.lastname,
                 grade: user.grade,
-                level_id: null,
+                level_name: null, // CAMBIADO: Ahora es level_name
                 score: 0,
                 elapsedTime: 0,
                 totalPairs: 0,
+                intentRemaining: 0,
               } as MemoryStudentDisplay);
             })
           );

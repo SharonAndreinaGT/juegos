@@ -19,7 +19,6 @@ import { EditUserFormComponent } from './edit-user-form/edit-user-form.component
 import { PuzzleSettingsComponent } from './puzzle-settings/puzzle-settings.component';
 import { MemorySettingsComponent } from './memory-settings/memory-settings.component';
 import { RiddleSettingsComponent } from './riddle-settings/riddle-settings.component';
-import { ReportComponent } from './report/report.component';
 import { ProgressComponent } from './progress/progress.component';
 import { GamesOptionsComponent } from './games-options/games-options.component';
 import { MemoryCardComponent } from './memory-card/memory-card.component';
@@ -71,7 +70,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
       PuzzleSettingsComponent,
       MemorySettingsComponent,
       RiddleSettingsComponent,
-      ReportComponent,
       ProgressComponent,
       GamesOptionsComponent,
       MemoryCardComponent,

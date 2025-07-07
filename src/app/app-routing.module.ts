@@ -13,7 +13,6 @@ import { RiddleComponent } from './riddle/riddle.component';
 import { PuzzleSettingsComponent } from './puzzle-settings/puzzle-settings.component';
 import { MemorySettingsComponent } from './memory-settings/memory-settings.component';
 import { RiddleSettingsComponent } from './riddle-settings/riddle-settings.component';
-import { ReportComponent } from './report/report.component';
 import { ProgressComponent } from './progress/progress.component';
 import { ChartComponent } from './chart/chart.component';
 
@@ -28,7 +27,6 @@ const routes: Routes = [
   { path: 'puzzle/:levelName', component: PuzzleComponent },
   { path: 'memory', component: MemoryComponent },
   { path: 'riddle', component: RiddleComponent },
-  { path: 'report', component: ReportComponent },
   { path: 'progress', component: ProgressComponent },
   { path: 'chart', component: ChartComponent },
 

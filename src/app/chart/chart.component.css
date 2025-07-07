@@ -57,6 +57,22 @@
     text-align: center;
 }
 
+.welcome-content {
+  display: flex;
+  justify-content: space-between; /* Para empujar el botón a la derecha */
+  align-items: center; /* Para alinear verticalmente el título y el botón */
+  margin-bottom: 20px; /* Ajusta según necesites espacio con la tabla */
+}
+
+.generate-pdf-button {
+  margin-left: auto; /* Mueve el botón a la derecha */
+}
+
+.generate-pdf-button mat-icon {
+  font-size: 30px; /* Aumenta el tamaño de la fuente del icono */
+  width: 30px;     /* Asegúrate de que el ancho sea igual al tamaño de la fuente */
+  height: 30px;    /* Asegúrate de que el alto sea igual al tamaño de la fuente */
+}
 /* Dashboard Grid */
 .dashboard-grid {
   display: grid;

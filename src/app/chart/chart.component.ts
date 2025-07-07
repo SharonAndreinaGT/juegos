@@ -1,10 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+// src/app/chart/chart.component.ts
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core'; // Importa ElementRef
 import { Router } from '@angular/router';
 import { Chart, ChartConfiguration, ChartData, ChartType } from 'chart.js';
-import { NgChartsModule } from 'ng2-charts';
+import { NgChartsModule } from 'ng2-charts'; // Asegúrate de que esto esté importado en tu AppModule
 import { UserService } from '../user.service';
 import { PuzzleService } from '../puzzle.service';
 import { MemoryService } from '../memory.service';
+
+// Importa jsPDF
+import jsPDF from 'jspdf';
 
 @Component({
   selector: 'app-chart',
@@ -12,6 +16,13 @@ import { MemoryService } from '../memory.service';
   styleUrls: ['./chart.component.css']
 })
 export class ChartComponent implements OnInit {
+
+  // Referencias a los elementos <canvas> de los gráficos
+  @ViewChild('barChartCanvas') barChartCanvas!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('barChart2Canvas') barChart2Canvas!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('pieChartCanvas') pieChartCanvas!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('lineChartCanvas') lineChartCanvas!: ElementRef<HTMLCanvasElement>;
+
 
   totalEstudiantes: number | null = null;
   loadingEstudiantes = true;
@@ -146,7 +157,7 @@ export class ChartComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    Chart.register();
+    Chart.register(); // Asegúrate de que los controladores de Chart.js estén registrados
     this.getTotalEstudiantes();
     this.getTotalPartidas();
     this.getPromedioScore();
@@ -517,10 +528,10 @@ export class ChartComponent implements OnInit {
   navigateToGradeStudents(grade: string): void {
     const routeMap: { [key: string]: string } = {
       'first': 'firstGrade',
-      'second': 'secondGrade', 
+      'second': 'secondGrade',
       'third': 'thirdGrade'
     };
-    
+
     const route = routeMap[grade];
     if (route) {
       this.router.navigate([route]);
@@ -561,4 +572,59 @@ export class ChartComponent implements OnInit {
   navigateToWelcome(): void {
     this.router.navigate(['/welcome']);
   }
-} 
+
+  /**
+   * Genera un reporte PDF con las imágenes de los gráficos.
+   */
+  generateChartsPdf(): void {
+    const doc = new jsPDF('p', 'mm', 'a4'); // 'p' para portrait, 'mm' para milímetros, 'a4' tamaño de página
+    let yOffset = 10; // Margen superior inicial
+
+    // Título del Reporte
+    doc.setFontSize(20);
+    doc.text('Reporte de Gráficas de Progreso', 10, yOffset);
+    yOffset += 15;
+    doc.setFontSize(12);
+    doc.text(`Fecha de Emisión: ${new Date().toLocaleDateString()}`, 10, yOffset);
+    yOffset += 20;
+
+    const charts = [
+      { canvas: this.barChartCanvas, title: 'Rendimiento Promedio por Grado' },
+      { canvas: this.barChart2Canvas, title: 'Juegos más Jugados' },
+      { canvas: this.pieChartCanvas, title: 'Distribución de Estudiantes por Grado' },
+      { canvas: this.lineChartCanvas, title: 'Progreso Semanal - Puntaje Promedio' }
+    ];
+
+    charts.forEach((chart, index) => {
+      const canvas = chart.canvas.nativeElement;
+      if (canvas) {
+        const imgData = canvas.toDataURL('image/png');
+        const imgWidth = 180; // Ancho de la imagen en el PDF (ajustar según necesidad)
+        const pageHeight = doc.internal.pageSize.height;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width; // Calcular altura proporcional
+
+        // Añadir página si no es la primera o si el contenido no cabe
+        if (index > 0) {
+          doc.addPage();
+          yOffset = 10; // Reiniciar yOffset para la nueva página
+        }
+
+        // Añadir título del gráfico en el PDF
+        doc.setFontSize(16);
+        doc.text(chart.title, 10, yOffset);
+        yOffset += 10;
+
+        // Calcular posición X para centrar la imagen
+        const imgX = (doc.internal.pageSize.width - imgWidth) / 2;
+
+        // Añadir la imagen del gráfico
+        doc.addImage(imgData, 'PNG', imgX, yOffset, imgWidth, imgHeight);
+
+        // Actualizar yOffset para el siguiente contenido (o el final del documento)
+        yOffset += imgHeight + 20; // Espacio después del gráfico
+      }
+    });
+
+    doc.save('reporte_graficas.pdf');
+  }
+}

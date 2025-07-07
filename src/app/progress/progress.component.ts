@@ -15,6 +15,15 @@ import { catchError, map, switchMap } from 'rxjs/operators';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+
+declare module 'jspdf' {
+  interface jsPDF {
+    lastAutoTable: { finalY: number };
+  }
+}
+
 interface StudentProgress {
   id: string;
   name: string;
@@ -23,9 +32,8 @@ interface StudentProgress {
   latestPuzzleResult: PuzzleResult | null;
 }
 
-// MemoryStudentDisplay - no changes needed from previous step
 interface MemoryStudentDisplay {
-  id: string; // Student ID
+  id: string;
   name: string;
   lastname: string;
   grade?: string;
@@ -35,9 +43,8 @@ interface MemoryStudentDisplay {
   totalPairs: number;
 }
 
-// NEW: RiddleStudentDisplay interface
 interface RiddleStudentDisplay {
-  id: string; // Student ID
+  id: string;
   name: string;
   lastname: string;
   grade?: string;
@@ -54,9 +61,7 @@ interface RiddleStudentDisplay {
 })
 export class ProgressComponent implements OnInit, AfterViewInit {
 
-  // Definimos las columnas que usará la tabla de ROMPECABEZAS
-  displayedColumns: string[] = ['name', 'lastname', 'grade', 'level_name','score', 'time'];
-  // Definimos las columnas que usará la tabla de MEMORIA
+  displayedColumns: string[] = ['name', 'lastname', 'grade', 'level_name', 'score', 'time'];
   displayedMemoryColumns: string[] = [
     'name',
     'lastname',
@@ -66,7 +71,6 @@ export class ProgressComponent implements OnInit, AfterViewInit {
     'elapsedTime',
     'totalPairs',
   ];
-  // NEW: Definimos las columnas que usará la tabla de ADIVINA LA PALABRA OCULTA
   displayedRiddleColumns: string[] = [
     'name',
     'lastname',
@@ -77,24 +81,19 @@ export class ProgressComponent implements OnInit, AfterViewInit {
     'words_guessed',
   ];
 
-  // MatTableDataSource para la paginación, orden y filtrado
   studentProgressData = new MatTableDataSource<StudentProgress>([]);
   memoryResultsData = new MatTableDataSource<MemoryStudentDisplay>([]);
-  // NEW: MatTableDataSource for Riddle results
   riddleResultsData = new MatTableDataSource<RiddleStudentDisplay>([]);
 
   loading = true;
   loadingMemoryResults = true;
-  loadingRiddleResults = true; // NEW: Loading state for Riddle
+  loadingRiddleResults = true;
   error: string | null = null;
   errorMemoryResults: string | null = null;
-  errorRiddleResults: string | null = null; // NEW: Error state for Riddle
+  errorRiddleResults: string | null = null;
 
-  // Referencia al paginador de Angular Material para rompecabezas
   @ViewChild(MatPaginator) paginator!: MatPaginator;
-  // Referencia al paginador de Angular Material para memoria
   @ViewChild('memoryPaginator') memoryPaginator!: MatPaginator;
-  // NEW: Referencia al paginador de Angular Material para Adivina la Palabra Oculta
   @ViewChild('riddlePaginator') riddlePaginator!: MatPaginator;
 
 
@@ -103,13 +102,13 @@ export class ProgressComponent implements OnInit, AfterViewInit {
     private userService: UserService,
     private puzzleService: PuzzleService,
     private memoryService: MemoryService,
-    private riddleService: RiddleService 
-  ) {}
+    private riddleService: RiddleService
+  ) { }
 
   ngOnInit(): void {
     this.loadAllStudentsProgress();
     this.loadAllStudentsMemoryResults();
-    this.loadAllStudentsRiddleResults(); 
+    this.loadAllStudentsRiddleResults();
   }
 
   ngAfterViewInit(): void {
@@ -120,14 +119,14 @@ export class ProgressComponent implements OnInit, AfterViewInit {
       if (this.memoryPaginator) {
         this.memoryResultsData.paginator = this.memoryPaginator;
       }
-      
+
       if (this.riddlePaginator) {
         this.riddleResultsData.paginator = this.riddlePaginator;
       }
     });
   }
 
-  
+
   loadAllStudentsProgress(): void {
     this.loading = true;
     this.error = null;
@@ -185,8 +184,7 @@ export class ProgressComponent implements OnInit, AfterViewInit {
       }
     );
   }
- 
-  // metodod para traer los estudiantes que hayan jugado memory
+
   loadAllStudentsMemoryResults(): void {
     this.loadingMemoryResults = true;
     this.errorMemoryResults = null;
@@ -211,7 +209,7 @@ export class ProgressComponent implements OnInit, AfterViewInit {
                   name: user.name,
                   lastname: user.lastname,
                   grade: user.grade,
-                  level_name: latestMemoryResult.level_name, // CAMBIADO: Ahora mapeamos level_name
+                  level_name: latestMemoryResult.level_name,
                   score: latestMemoryResult.score,
                   elapsedTime: latestMemoryResult.elapsedTime,
                   totalPairs: latestMemoryResult.totalPairs,
@@ -223,7 +221,7 @@ export class ProgressComponent implements OnInit, AfterViewInit {
                   name: user.name,
                   lastname: user.lastname,
                   grade: user.grade,
-                  level_name: null, // CAMBIADO: Ahora es level_name
+                  level_name: null,
                   score: 0,
                   elapsedTime: 0,
                   totalPairs: 0,
@@ -238,7 +236,7 @@ export class ProgressComponent implements OnInit, AfterViewInit {
                 name: user.name,
                 lastname: user.lastname,
                 grade: user.grade,
-                level_name: null, // CAMBIADO: Ahora es level_name
+                level_name: null,
                 score: 0,
                 elapsedTime: 0,
                 totalPairs: 0,
@@ -268,7 +266,6 @@ export class ProgressComponent implements OnInit, AfterViewInit {
     );
   }
 
-  //metodo para traer los estudiantes que hayan juagdo riddle
   loadAllStudentsRiddleResults(): void {
     this.loadingRiddleResults = true;
     this.errorRiddleResults = null;
@@ -353,5 +350,139 @@ export class ProgressComponent implements OnInit, AfterViewInit {
 
   navigateTo(view: string): void {
     this.router.navigate([view]);
+  }
+
+  /**
+   * Genera un reporte PDF con los progresos de Rompecabezas, Memoria y Adivina la Palabra Oculta.
+   */
+  generateReportPdf(): void {
+    const doc = new jsPDF();
+    let yOffset = 10; // Posición inicial para el contenido en la página
+
+    // --- Título del Reporte (en la primera página) ---
+    doc.setFontSize(18);
+    doc.text('Reporte de Progreso General de Estudiantes', 14, yOffset);
+    yOffset += 10;
+    doc.setFontSize(12);
+    doc.text(`Fecha de Emisión: ${new Date().toLocaleDateString()}`, 14, yOffset);
+    yOffset += 20;
+
+    // --- Sección de ROMPECABEZAS ---
+    doc.setFontSize(16);
+    doc.text('1. Progreso de Rompecabezas', 14, yOffset);
+    yOffset += 10;
+
+    const puzzleHeaders = [['Nombre', 'Apellido', 'Grado', 'Nivel', 'Puntaje', 'Tiempo (segundos)']];
+    const puzzleData = this.studentProgressData.data.map(student => [
+      student.name,
+      student.lastname,
+      student.grade === 'first' ? 'Primer grado' : student.grade === 'second' ? 'Segundo grado' : student.grade === 'third' ? 'Tercer grado' : 'No definido',
+      student.latestPuzzleResult?.level_name ?? '0',
+      (student.latestPuzzleResult?.score ?? '0').toString(),
+      (student.latestPuzzleResult?.time ?? '0').toString()
+    ]);
+
+    autoTable(doc, {
+      head: puzzleHeaders,
+      body: puzzleData,
+      startY: yOffset,
+      theme: 'grid',
+      styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
+      columnStyles: {
+        0: { cellWidth: 30 },
+        1: { cellWidth: 30 },
+        2: { cellWidth: 25 },
+        3: { cellWidth: 20 },
+        4: { cellWidth: 20 },
+        5: { cellWidth: 30 }
+      },
+      didDrawPage: (data) => {
+        // Si la tabla de rompecabezas se extiende a una nueva página,
+        // puedes agregar encabezados o pie de página específicos aquí.
+      }
+    });
+
+    // --- Sección de MEMORIA ---
+    // Añadir una nueva página antes de dibujar la sección de memoria
+    doc.addPage();
+    yOffset = 10; // Reiniciar yOffset para la nueva página
+
+    doc.setFontSize(16);
+    doc.text('2. Progreso de Memoria', 14, yOffset);
+    yOffset += 10;
+
+    const memoryHeaders = [['Nombre', 'Apellido', 'Grado', 'Nivel', 'Puntaje', 'Tiempo (segundos)', 'Total Pares']];
+    const memoryData = this.memoryResultsData.data.map(result => [
+      result.name,
+      result.lastname,
+      result.grade === 'first' ? 'Primer grado' : result.grade === 'second' ? 'Segundo grado' : result.grade === 'third' ? 'Tercer grado' : 'No definido',
+      result.level_name ?? 'N/A',
+      (result.score ?? '0').toString(),
+      (result.elapsedTime ?? '0').toString(),
+      (result.totalPairs ?? '0').toString()
+    ]);
+
+    autoTable(doc, {
+      head: memoryHeaders,
+      body: memoryData,
+      startY: yOffset,
+      theme: 'grid',
+      styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
+      columnStyles: {
+        0: { cellWidth: 30 },
+        1: { cellWidth: 30 },
+        2: { cellWidth: 25 },
+        3: { cellWidth: 20 },
+        4: { cellWidth: 20 },
+        5: { cellWidth: 30 },
+        6: { cellWidth: 25 }
+      },
+      didDrawPage: (data) => {
+        // Si la tabla de memoria se extiende a una nueva página...
+      }
+    });
+
+    // --- Sección de ADIVINA LA PALABRA OCULTA ---
+    // Añadir una nueva página antes de dibujar la sección de Adivina la Palabra Oculta
+    doc.addPage();
+    yOffset = 10; // Reiniciar yOffset para la nueva página
+
+    doc.setFontSize(16);
+    doc.text('3. Progreso de Adivina la Palabra Oculta', 14, yOffset);
+    yOffset += 10;
+
+    const riddleHeaders = [['Nombre', 'Apellido', 'Grado', 'Nivel', 'Puntaje', 'Tiempo (segundos)', 'Palabras Adivinadas']];
+    const riddleData = this.riddleResultsData.data.map(result => [
+      result.name,
+      result.lastname,
+      result.grade === 'first' ? 'Primer grado' : result.grade === 'second' ? 'Segundo grado' : result.grade === 'third' ? 'Tercer grado' : 'No definido',
+      result.level_name ?? 'N/A',
+      (result.score ?? '0').toString(),
+      (result.time_taken ?? '0').toString(),
+      (result.words_guessed ?? '0').toString()
+    ]);
+
+    autoTable(doc, {
+      head: riddleHeaders,
+      body: riddleData,
+      startY: yOffset,
+      theme: 'grid',
+      styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
+      columnStyles: {
+        0: { cellWidth: 30 },
+        1: { cellWidth: 30 },
+        2: { cellWidth: 25 },
+        3: { cellWidth: 20 },
+        4: { cellWidth: 20 },
+        5: { cellWidth: 30 },
+        6: { cellWidth: 25 }
+      },
+      didDrawPage: (data) => {
+        // Si la tabla de adivina la palabra se extiende a una nueva página...
+      }
+    });
+
+    // Guardar el PDF
+    doc.save('reporte_progreso_general.pdf');
   }
 }

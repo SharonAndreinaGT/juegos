@@ -51,6 +51,8 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatChipsModule } from '@angular/material/chips';
 import { NgChartsModule } from 'ng2-charts';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
 
 @NgModule({
     declarations: [
@@ -99,10 +101,11 @@ import { NgChartsModule } from 'ng2-charts';
       MatButtonModule,
       FormsModule,
       MatTabsModule,
-              MatSlideToggleModule,
-        MatChipsModule,
-        NgChartsModule,
-        HttpClientModule
+      MatSlideToggleModule,
+      MatChipsModule,
+      NgChartsModule,
+      MatProgressSpinnerModule,
+      HttpClientModule
     ],
     providers: [
      

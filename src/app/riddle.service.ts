@@ -186,4 +186,49 @@ export class RiddleService {
       })
     );
   }
+
+  /**
+   * Obtiene todos los scores de riddle_results
+   */
+  getAllRiddleScores(): Observable<number[]> {
+    return this.http.get<any>(`${this.directusResultsUrl}?fields=score&limit=-1`).pipe(
+      map(response => (response.data || []).map((item: any) => item.score))
+    );
+  }
+
+  /**
+   * Obtiene todos los tiempos de riddle_results
+   */
+  getAllRiddleTimes(): Observable<number[]> {
+    return this.http.get<any>(`${this.directusResultsUrl}?fields=time_taken&limit=-1`).pipe(
+      map(response => (response.data || []).map((item: any) => item.time_taken))
+    );
+  }
+
+  /**
+   * Obtiene todos los scores con student_id de riddle_results
+   */
+  getAllRiddleScoresWithStudent(): Observable<{ student_id: string, score: number }[]> {
+    return this.http.get<any>(`${this.directusResultsUrl}?fields=score,student_id&limit=-1`).pipe(
+      map(response => (response.data || []).map((item: any) => ({ student_id: item.student_id, score: item.score })))
+    );
+  }
+
+  /**
+   * Obtiene todos los scores y created_at de riddle_results
+   */
+  getAllRiddleScoresWithDate(): Observable<{ score: number, created_at: string }[]> {
+    return this.http.get<any>(`${this.directusResultsUrl}?fields=score,created_at&limit=-1`).pipe(
+      map(response => (response.data || []).map((item: any) => ({ score: item.score, created_at: item.created_at })))
+    );
+  }
+
+  /**
+   * Obtiene el total de partidas jugadas (conteo de registros en riddle_results)
+   */
+  getTotalRiddleResults(): Observable<number> {
+    return this.http.get<any>(`${this.directusResultsUrl}?meta=filter_count`).pipe(
+      map(response => response.meta?.filter_count ?? (response.data?.length ?? 0))
+    );
+  }
 }

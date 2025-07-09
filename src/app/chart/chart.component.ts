@@ -6,6 +6,7 @@ import { NgChartsModule } from 'ng2-charts'; // Asegúrate de que esto esté imp
 import { UserService } from '../user.service';
 import { PuzzleService } from '../puzzle.service';
 import { MemoryService } from '../memory.service';
+import { RiddleService } from '../riddle.service';
 
 // Importa jsPDF
 import jsPDF from 'jspdf';
@@ -48,7 +49,8 @@ export class ChartComponent implements OnInit {
     private router: Router,
     private userService: UserService,
     private puzzleService: PuzzleService,
-    private memoryService: MemoryService
+    private memoryService: MemoryService,
+    private riddleService: RiddleService
   ) {}
 
   actualizarDistribucionPorGrado(countFirst: number, countSecond: number, countThird: number) {
@@ -81,7 +83,7 @@ export class ChartComponent implements OnInit {
     let completed = 0;
     const onComplete = () => {
       completed++;
-      if (completed === 2) {
+      if (completed === 3) {
         // Agrupar por mes
         const monthMap: { [month: string]: number[] } = {};
         allResults.forEach(res => {
@@ -144,6 +146,13 @@ export class ChartComponent implements OnInit {
       },
       error: () => onComplete()
     });
+    this.riddleService.getAllRiddleScoresWithDate().subscribe({
+      next: (arr) => {
+        allResults = allResults.concat(arr);
+        onComplete();
+      },
+      error: () => onComplete()
+    });
   }
 
   // Función auxiliar para obtener el número de semana ISO
@@ -187,12 +196,12 @@ export class ChartComponent implements OnInit {
     });
   }
 
-  actualizarJuegosMasJugados(puzzleCount: number, memoryCount: number) {
+  actualizarJuegosMasJugados(puzzleCount: number, memoryCount: number, riddleCount: number) {
     this.barChartData2 = {
       ...this.barChartData2,
       datasets: [{
         ...this.barChartData2.datasets[0],
-        data: [puzzleCount, memoryCount, 0]
+        data: [puzzleCount, memoryCount, riddleCount]
       }]
     };
   }
@@ -204,12 +213,13 @@ export class ChartComponent implements OnInit {
     let completed = 0;
     let puzzleCount = 0;
     let memoryCount = 0;
+    let riddleCount = 0;
     const onComplete = () => {
       completed++;
-      if (completed === 2) {
-        this.totalPartidas = puzzleCount + memoryCount;
+      if (completed === 3) {
+        this.totalPartidas = puzzleCount + memoryCount + riddleCount;
         this.loadingPartidas = false;
-        this.actualizarJuegosMasJugados(puzzleCount, memoryCount);
+        this.actualizarJuegosMasJugados(puzzleCount, memoryCount, riddleCount);
       }
     };
     this.puzzleService.getTotalPuzzleResults().subscribe({
@@ -234,6 +244,17 @@ export class ChartComponent implements OnInit {
         onComplete();
       }
     });
+    this.riddleService.getTotalRiddleResults().subscribe({
+      next: (count) => {
+        total += count;
+        riddleCount = count;
+        onComplete();
+      },
+      error: () => {
+        this.errorPartidas = true;
+        onComplete();
+      }
+    });
   }
 
   getPromedioScore() {
@@ -243,7 +264,7 @@ export class ChartComponent implements OnInit {
     let completed = 0;
     const onComplete = () => {
       completed++;
-      if (completed === 2) {
+      if (completed === 3) {
         if (scores.length > 0) {
           const sum = scores.reduce((a, b) => a + b, 0);
           this.promedioScore = Math.round((sum / scores.length) * 100) / 100;
@@ -273,6 +294,16 @@ export class ChartComponent implements OnInit {
         onComplete();
       }
     });
+    this.riddleService.getAllRiddleScores().subscribe({
+      next: (arr) => {
+        scores = scores.concat(arr.filter(s => typeof s === 'number'));
+        onComplete();
+      },
+      error: () => {
+        this.errorScore = true;
+        onComplete();
+      }
+    });
   }
 
   getTiempoPromedio() {
@@ -282,7 +313,7 @@ export class ChartComponent implements OnInit {
     let completed = 0;
     const onComplete = () => {
       completed++;
-      if (completed === 2) {
+      if (completed === 3) {
         if (tiempos.length > 0) {
           const sum = tiempos.reduce((a, b) => a + b, 0);
           const avg = sum / tiempos.length;
@@ -316,6 +347,16 @@ export class ChartComponent implements OnInit {
         onComplete();
       }
     });
+    this.riddleService.getAllRiddleTimes().subscribe({
+      next: (arr) => {
+        tiempos = tiempos.concat(arr.filter(s => typeof s === 'number'));
+        onComplete();
+      },
+      error: () => {
+        this.errorTiempo = true;
+        onComplete();
+      }
+    });
   }
 
   getRendimientoPorGrado() {
@@ -326,7 +367,7 @@ export class ChartComponent implements OnInit {
     let completed = 0;
     const onComplete = () => {
       completed++;
-      if (completed === 3) {
+      if (completed === 4) {
         // Map student_id to grade
         const gradeScores: { [grade: string]: number[] } = { first: [], second: [], third: [] };
         allResults.forEach(res => {
@@ -357,7 +398,7 @@ export class ChartComponent implements OnInit {
     };
     this.puzzleService.getAllPuzzleScores().subscribe({
       next: (arr) => {
-        allResults = allResults.concat((arr as any[]).map((score, i) => ({ student_id: null, score }))); // fallback por si no hay student_id
+        allResults = allResults.concat((arr as any[]).map((score, i) => ({ student_id: null, score })));
         this.puzzleService.getAllPuzzleScoresWithStudent().subscribe({
           next: (results) => {
             allResults = allResults.concat(results);
@@ -375,6 +416,16 @@ export class ChartComponent implements OnInit {
       }
     });
     this.memoryService.getAllMemoryScoresWithStudent().subscribe({
+      next: (results) => {
+        allResults = allResults.concat(results);
+        onComplete();
+      },
+      error: () => {
+        this.errorRendimiento = true;
+        onComplete();
+      }
+    });
+    this.riddleService.getAllRiddleScoresWithStudent().subscribe({
       next: (results) => {
         allResults = allResults.concat(results);
         onComplete();
@@ -480,7 +531,7 @@ export class ChartComponent implements OnInit {
     ]
   };
 
-  // Gráfico 4: Línea - Progreso Semanal
+  // Gráfico 4: Línea - Progreso Mensual
   public lineChartOptions: ChartConfiguration['options'] = {
     responsive: true,
     plugins: {
@@ -489,7 +540,7 @@ export class ChartComponent implements OnInit {
       },
       title: {
         display: true,
-        text: 'Progreso Semanal - Puntaje Promedio'
+        text: 'Progreso Mensual - Puntaje Promedio'
       }
     },
     scales: {
@@ -592,7 +643,7 @@ export class ChartComponent implements OnInit {
       { canvas: this.barChartCanvas, title: 'Rendimiento Promedio por Grado' },
       { canvas: this.barChart2Canvas, title: 'Juegos más Jugados' },
       { canvas: this.pieChartCanvas, title: 'Distribución de Estudiantes por Grado' },
-      { canvas: this.lineChartCanvas, title: 'Progreso Semanal - Puntaje Promedio' }
+      { canvas: this.lineChartCanvas, title: 'Progreso Mensual - Puntaje Promedio' }
     ];
 
     charts.forEach((chart, index) => {

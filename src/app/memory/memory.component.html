@@ -1,4 +1,4 @@
-<!-- Elemento de audio para el sonido de victoria -->
+
 <audio #winSound>
   <source src="assets/sounds/win.mp3" type="audio/mpeg">
   Tu navegador no soporta el elemento de audio.
@@ -19,8 +19,8 @@
         <div class="time-display">Tiempo: <span>{{ formatTime(elapsedTime) }}</span></div>
       </div>
     </div>
-   
-    
+
+
     <div class="memory-wrapper">
       <div class="memory-wrapper">
         <div class="game-board"
@@ -31,7 +31,7 @@
             (cardClick)="onCardClick(card)"
           ></app-memory-card>
         </div>
-         
+
         <!-- Mensaje de fin de juego (Similar al de puzzle) -->
         <div *ngIf="!gameStarted && (matchedPairs === totalPairs || intentExceeded || timeExceeded)" class="game-over-message">
           <h2 *ngIf="matchedPairs === totalPairs">¡Memoria completada!</h2>
@@ -40,7 +40,7 @@
           </h2>
 
           <p>Pares encontrados: {{ matchedPairs }} / {{ totalPairs }}</p>
-          <p>Tiempo transcurrido: {{ formatTime(elapsedTime) }}</p>
+          <p>Tiempo restante: {{ formatTime(elapsedTime) }}</p> <!-- Muestra el tiempo restante -->
 
           <div class="stars-display">
             <h3>Tu Puntuación:</h3>

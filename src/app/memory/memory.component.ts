@@ -29,13 +29,13 @@ export class MemoryComponent implements OnInit {
 
   // Variables para el estado del juego (asegúrate de que las tienes inicializadas como necesites)
   intent: number = 0; // Intentos actuales
-  elapsedTime: number = 0; // Tiempo transcurrido en segundos
+  elapsedTime: number = 0; // Tiempo restante en segundos (¡ahora descendente!)
   gameStarted: boolean = false; // Indica si el juego está en curso
   matchedPairs: number = 0; // Pares encontrados
   totalPairs: number = 0; // Total de pares a encontrar
   intentExceeded: boolean = false; // Indica si se acabaron los intentos
   timeExceeded: boolean = false; // Indica si se acabó el tiempo
-  
+
   //variables del score y studentID
   score: number = 0;
   stars: number = 0;
@@ -43,9 +43,10 @@ export class MemoryComponent implements OnInit {
 
   private timer: any; // Para el temporizador del juego
   private flippedCards: Card[] = []; // Para las cartas volteadas actualmente
+  private initialTimeLimit: number = 0; // Para almacenar el límite de tiempo inicial
 
   constructor(
-    //  Inyectar el servicio de estado del juego ---
+    //  Inyectar el servicio de estado del juego ---
     private sharedDataService: SharedDataService,
     private gameStateService: MemoryGameStateService,
     private router: Router,
@@ -53,7 +54,7 @@ export class MemoryComponent implements OnInit {
     private snackBar: MatSnackBar // Inyectar MatSnackBar para notificaciones
   ) { }
 
-/*************  ✨ Windsurf Command ⭐  *************/
+/*************  ✨ Windsurf Command ⭐  *************/
   /**
    * ngOnInit
    *
@@ -61,7 +62,7 @@ export class MemoryComponent implements OnInit {
    * En este caso, se llama a loadActiveMemoryConfig() para obtener la configuración
    * del nivel activo cuando se inicia el componente.
    */
-/*******  42785c72-6dab-4d7d-b731-0b90d52fc6d7  *******/
+/*******  42785c72-6dab-4d7d-b731-0b90d52fc6d7  *******/
   ngOnInit(): void {
     this.sharedDataService.loggedInStudentId$.subscribe((studentId: string | null) => {
       this.currentStudentId = studentId;
@@ -79,7 +80,7 @@ export class MemoryComponent implements OnInit {
         // Obtener el primer registro activo (debería ser solo uno)
         const activeConfig = response.data?.[0];
         console.log('Configuración activa encontrada:', activeConfig);
-        
+
         if (activeConfig) {
           this.activeLevel = activeConfig;
           this.initializeGame(activeConfig); // Inicializar el juego con la nueva configuración
@@ -102,13 +103,16 @@ initializeGame(config: MemoryConfig): void {
   this.gameStarted = false;
   this.intentExceeded = false;
   this.timeExceeded = false;
-  this.elapsedTime = 0;
   this.score = 0; // Reiniciar el score
   this.stars = 0; // Reiniciar las estrellas
 
   // Configurar el juego con los valores de la configuración cargada
   this.intent = config.intent ?? 1; // Usa el número de intentos de la configuración o un valor predeterminado
-  
+
+  // Inicializar elapsedTime con el límite de tiempo para que sea descendente
+  this.initialTimeLimit = config.time_limit ?? 0;
+  this.elapsedTime = this.initialTimeLimit;
+
   // Preparar las cartas con las imágenes de la configuración
   if (config.images && config.images.length > 0) {
     let cardData: Card[] = config.images.flatMap((imageConfig) => [
@@ -147,14 +151,20 @@ initializeGame(config: MemoryConfig): void {
     if (this.timer) {
         clearInterval(this.timer); // Asegurarse de limpiar cualquier temporizador anterior
     }
+    // Inicializar el tiempo restante con el límite de tiempo
+    this.elapsedTime = timeLimit;
+    this.initialTimeLimit = timeLimit; // Guardar el límite de tiempo inicial
+
     this.timer = setInterval(() => {
-        this.elapsedTime++;
-        if (this.activeLevel && this.activeLevel.time_limit! > 0 && this.elapsedTime >= this.activeLevel.time_limit!) {
+        this.elapsedTime--; // Decrementar el tiempo
+        if (this.elapsedTime <= 0) { // La condición ahora es cuando el tiempo llega a 0 o menos
+            this.elapsedTime = 0; // Asegurarse de que no baje de 0
             this.timeExceeded = true;
             this.stopGameTimer();
             this.gameStarted = false;
             this.playLoseSound();
             this.snackBar.open('¡Se acabó el tiempo!', 'Cerrar', { duration: 3000 });
+            this.checkGameEnd(); // Llamar a checkGameEnd cuando se acaba el tiempo
         }
     }, 1000);
   }
@@ -239,12 +249,15 @@ initializeGame(config: MemoryConfig): void {
         }
       }
 
-      // Penalización por tiempo restante: Si se completó rápido, bonificar
+      // Bonificación por tiempo restante: Si se completó rápido, bonificar
       if (this.activeLevel && this.activeLevel.time_limit! > 0) {
-        const timeRemaining = this.activeLevel.time_limit! - this.elapsedTime;
-        if (timeRemaining >= this.activeLevel.time_limit! * 0.5) {
+        // elapsedTime ahora es el tiempo restante, no el tiempo transcurrido
+        const timeRemaining = this.elapsedTime;
+        const initialTimeLimit = this.initialTimeLimit; // Usar el límite de tiempo inicial
+
+        if (timeRemaining >= initialTimeLimit * 0.5) {
           this.score += 5; // Más puntos por rapidez
-        } else if (timeRemaining >= this.activeLevel.time_limit! * 0.25) {
+        } else if (timeRemaining >= initialTimeLimit * 0.25) {
           this.score += 2; // Puntos por una finalización razonable
         }
       }
@@ -280,7 +293,7 @@ initializeGame(config: MemoryConfig): void {
         level_id: this.activeLevel?.id, // Asumiendo que MemoryConfig tiene un ID
         score: this.score,
         stars: this.stars,
-        elapsedTime: this.elapsedTime,
+        elapsedTime: this.initialTimeLimit - this.elapsedTime, // Guardar el tiempo transcurrido real
         matchedPairs: this.matchedPairs,
         totalPairs: this.totalPairs,
         intentRemaining: this.intent,
@@ -300,7 +313,7 @@ initializeGame(config: MemoryConfig): void {
         this.winSound.nativeElement.currentTime = 0; // Reiniciar el audio
         this.winSound.nativeElement.volume = 0.7; // Volumen al 70%
         const playPromise = this.winSound.nativeElement.play();
-        
+
         if (playPromise !== undefined) {
           playPromise
             .then(() => {
@@ -322,7 +335,7 @@ initializeGame(config: MemoryConfig): void {
         this.loseSound.nativeElement.currentTime = 0; // Reiniciar el audio
         this.loseSound.nativeElement.volume = 0.7; // Volumen al 70%
         const playPromise = this.loseSound.nativeElement.play();
-        
+
         if (playPromise !== undefined) {
           playPromise
             .then(() => {

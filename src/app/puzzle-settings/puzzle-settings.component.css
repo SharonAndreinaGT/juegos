@@ -1,125 +1,171 @@
-/*Css del contendor principal*/
+/* CSS del contenedor principal (generalmente el cuerpo o un contenedor padre) */
 .container {
-    background: rgba(128, 128, 128, 0.402);
-  }
-  
+  background: rgba(128, 128, 128, 0.402); /* Fondo gris semitransparente */
+}
+
+/* Estilos para la barra de navegación lateral (sidebar) */
 .sidenav {
-    background-color: #9fd3f3d9;
-    border-radius: 0px;
+  background-color: #9fd3f3d9; /* Color de fondo azul claro semitransparente */
+  border-radius: 0px; /* Bordes rectos */
 }
-  
+
+/* Estilos para la barra de navegación lateral en sí, dentro del sidenav */
 .sidenav-bar {
-    width: 200px;
-    margin: 16px;
-    border-right: none;
-    border-radius: 10px;
-    background-color: #f0f8ff;
+  width: 200px; /* Ancho fijo de la barra lateral */
+  margin: 16px; /* Margen alrededor de la barra lateral */
+  border-right: none; /* Sin borde derecho */
+  border-radius: 10px; /* Bordes ligeramente redondeados */
+  background-color: #f0f8ff; /* Color de fondo blanco azulado */
 }
-  
+
+/* Estilos para el área de contenido principal */
 .content {
-  padding: 16.5px;
+  padding: 16.5px; /* Relleno alrededor del contenido */
 }
-  
+
+/* Estilos para los botones del menú de navegación */
 .menu-button {
-    width: 100%;
-    margin-right: 8px;
-    display: flex;
-    font-size: 1rem;
-    justify-content: flex-start;
+  width: 100%; /* Ocupa todo el ancho disponible */
+  margin-right: 8px; /* Margen a la derecha */
+  display: flex; /* Utiliza flexbox para alinear contenido */
+  font-size: 1rem; /* Tamaño de fuente normal */
+  justify-content: flex-start; /* Alinea el contenido al inicio (izquierda) */
 }
 
+/* Estilos para una tarjeta de bienvenida */
 .welcome-card {
-    background-color: #f0f8ff;
+  background-color: #f0f8ff; /* Color de fondo blanco azulado */
 }
-  
+
+/* Estilos para el contenedor de bienvenida */
 .welcome-container {
-    height: calc(100vh - 65px);
-    border-radius: 10px;
-    margin: 16px;
-    margin-left: 20px;
-    display: flex;
-    background-color: #f0f8ff;
+  height: calc(100vh - 65px); /* Altura que se ajusta a la ventana menos un espacio fijo */
+  border-radius: 10px; /* Bordes redondeados */
+  margin: 16px; /* Margen general */
+  margin-left: 20px; /* Margen izquierdo un poco mayor */
+  display: flex; /* Utiliza flexbox para el diseño interno */
+  background-color: #f0f8ff; /* Color de fondo blanco azulado */
 }
-  
+
+/* Estilos para el título principal H1 dentro del contenido de bienvenida */
 .welcome-content h1 {
-    font-size: 2.5em;
-    color: #3f51b5;
-    margin-bottom: 20px;
-    font-family: 'Arial', sans-serif;
+  font-size: 2.5em; /* Tamaño de fuente grande */
+  color: #3f51b5; /* Color de texto azul oscuro */
+  margin-bottom: 20px; /* Margen inferior */
+  font-family: 'Arial', sans-serif; /* Fuente Arial o genérica sans-serif */
 }
 
-.h2{
-    color: #3f51b5;
-    margin-bottom: 20px;
-    font-family: 'Arial', sans-serif;
+/* Estilos para los títulos H2 (aunque el selector solo es .h2, no h2) */
+.h2 {
+  color: #3f51b5; /* Color de texto azul oscuro */
+  margin-bottom: 20px; /* Margen inferior */
+  font-family: 'Arial', sans-serif; /* Fuente Arial o genérica sans-serif */
 }
 
-/* CSS para el botón */
+/* CSS para el botón de la esquina (ej. un botón de acción flotante) */
 .colorbutton-btn {
-  padding: 10px 20px; 
-  border: 2px solid #3f51b5;
-  border-radius: 20px;
-  background-color: #cfe0ff;
-  color: #3f51b5;
-  font-weight: bold;
-  font-family: 'Verdana', sans-serif;
-  transition: border-color 0.3s ease, background-color 0.3s ease, transform 0.3s ease; /* Añadimos transiciones */
-  outline: none;
-  cursor: pointer;
+  padding: 10px 20px; /* Relleno interno del botón */
+  border: 2px solid #3f51b5; /* Borde sólido azul oscuro */
+  border-radius: 20px; /* Bordes muy redondeados (forma de píldora) */
+  background-color: #cfe0ff; /* Color de fondo azul claro */
+  color: #3f51b5; /* Color de texto azul oscuro */
+  font-weight: bold; /* Texto en negrita */
+  font-family: 'Verdana', sans-serif; /* Fuente Verdana o genérica sans-serif */
+  transition: border-color 0.3s ease, background-color 0.3s ease,
+    transform 0.3s ease; /* Transiciones suaves para efectos hover */
+  outline: none; /* Elimina el contorno al hacer clic */
+  cursor: pointer; /* Cambia el cursor a una mano */
 
-  /* POSICIONAMIENTO*/
-  position: absolute; /* Posicionamiento absoluto */
-  bottom: 20px;
-  right: 30px; 
+  /* POSICIONAMIENTO ABSOLUTO */
+  position: absolute; /* Posicionamiento absoluto respecto al ancestro posicionado */
+  bottom: 20px; /* A 20px del borde inferior */
+  right: 30px; /* A 30px del borde derecho */
 }
 
+/* Estilos para el botón de la esquina al pasar el ratón por encima */
 .colorbutton-btn:hover {
-  background-color: #bbd3ff; 
-  border-color: #303f9f; 
-  transform: translateY(-2px); /* Pequeño levantamiento al pasar el mouse */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra para efecto "elevado" */
+  background-color: #bbd3ff; /* Color de fondo un poco más oscuro */
+  border-color: #303f9f; /* Color del borde un poco más oscuro */
+  transform: translateY(-2px); /* Ligeramente elevado */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra sutil */
 }
 
+/* Nuevo CSS para un diseño de dos columnas (flexbox) */
+.tab-content-form {
+  display: flex; /* Usa flexbox para las columnas */
+  flex-wrap: wrap; /* Permite que las columnas salten a la siguiente línea si no hay espacio */
+  gap: 20px; /* Espacio entre las columnas */
+  justify-content: space-between; /* Distribuye los elementos uniformemente con espacio entre ellos */
+}
 
-/* Image Preview Styles - Adapted for smaller size and no overflow */
+/* Estilos para cada columna dentro del diseño de dos columnas */
+.form-column {
+  flex: 1; /* Permite que las columnas crezcan y se encojan equitativamente */
+  min-width: 300px; /* Ancho mínimo para cada columna antes de que se envuelvan */
+  display: flex; /* Usa flexbox para organizar elementos dentro de la columna */
+  flex-direction: column; /* Coloca los elementos en una columna vertical */
+}
+
+/* Estilos modificados para los grupos de formulario (campos de entrada con etiquetas) */
+.form-group {
+  width: 100%; /* Asegura que el grupo de formulario ocupe todo el ancho de su columna */
+  margin-bottom: 15px; /* Espaciado consistente entre grupos de formulario */
+}
+
+/* Estilos para la vista previa de la imagen - Adaptados para un tamaño más pequeño y sin desbordamiento */
 .image-preview {
-  margin-top: 15px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  overflow: hidden; /* Important to clip overflowing images */
-  background-color: #f9f9f9;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 10px; /* Add some padding around the image */
-  max-width: 250px; /* Control max width of the preview container */
-  height: auto; /* Allow height to adjust naturally */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for the preview */
+  margin-top: 10px; /* Margen superior ligeramente reducido para la vista previa */
+  border: 1px solid #ddd; /* Borde gris claro (limpiado de duplicados) */
+  border-radius: 8px; /* Bordes redondeados */
+  overflow: hidden; /* Importante para recortar imágenes que se desborden del contenedor */
+  background-color: #f9f9f9; /* Fondo muy claro */
+  display: flex; /* Usa flexbox para centrar la imagen */
+  justify-content: center; /* Centra horizontalmente la imagen */
+  align-items: center; /* Centra verticalmente la imagen */
+  padding: 8px; /* Relleno ligeramente reducido dentro de la vista previa */
+  max-width: 100%; /* Asegura que la vista previa se ajuste al ancho de su columna */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Sombra sutil para la vista previa */
+  box-sizing: border-box; /* Incluye el padding y el borde en el ancho/alto total */
 }
-
+/* Estilos para la etiqueta de imagen (<img>) dentro de la vista previa */
 .image-preview img {
-  max-width: 100%; /* Ensure image doesn't overflow its preview container */
-  max-height: 180px; /* Limit the maximum height of the image */
-  display: block; /* Remove extra space below image */
-  object-fit: contain; /* Scales the image nicely within its content box without cropping */
-  border-radius: 5px; /* Slightly rounded corners for the image itself */
+  max-width: 100%; /* Asegura que la imagen no se desborde de su contenedor de vista previa */
+  max-height: 160px; /* Limita la altura máxima de la imagen */
+  display: block; /* Elimina el espacio extra debajo de la imagen (común con imágenes inline) */
+  object-fit: contain; /* Escala la imagen dentro de su caja de contenido sin recortarla, manteniendo la relación de aspecto */
+  border-radius: 5px; /* Bordes ligeramente redondeados para la imagen misma */
 }
 
-/* Material Design specific overrides */
+/* Anulaciones específicas para estilos de Material Design (como campos de formulario) */
 .mat-form-field-appearance-outline .mat-form-field-wrapper {
-  margin-bottom: 0; /* Remove default margin */
+  margin-bottom: 0; /* Elimina el margen inferior predeterminado */
 }
 
+/* Ajusta el espaciado para mensajes de ayuda/error en los campos de Material Design */
 .mat-form-field-subscript-wrapper {
-  padding: 4px 0 0; /* Adjust hint/error message spacing */
+  padding: 4px 0 0; /* Relleno superior e inferior */
 }
 
+/* Estilos para los mensajes de ayuda (hint) de Material Design */
 .mat-hint {
-  font-size: 0.85rem;
-  color: #888;
+  font-size: 0.85rem; /* Tamaño de fuente ligeramente más pequeño */
+  color: #888; /* Color de texto gris */
 }
 
-.settings-card{
-  background-color: #cfe0ff;
+/* Estilos para una tarjeta de configuración */
+.settings-card {
+  background-color: #cfe0ff; /* Color de fondo azul claro */
 }
 
+/* Añadido padding-bottom al contenido de la tarjeta de configuración */
+.settings-card mat-card-content {
+  padding-bottom: 30px; /* Ajusta este valor para más espacio en la parte inferior */
+}
+
+/* Estilo para el botón "Guardar Configuración" (de Material Design) - haciéndolo más pequeño */
+button.mat-raised-button.mat-primary {
+  padding: 8px 16px; /* Ajusta el relleno para el tamaño deseado del botón */
+  font-size: 0.9rem; /* Ajusta el tamaño de la fuente si es necesario */
+  min-width: 120px; /* Asegura que el botón no sea demasiado estrecho */
+  height: auto; /* Permite que la altura se ajuste en función del padding y el contenido */
+}

@@ -12,7 +12,7 @@
 
 <mat-sidenav-container class="container">
   <div class="game-container">
-      <div class="header">
+      <div class="header" *ngIf="gameStarted">
         <h2 class="game-title">Juego de Memoria</h2>
       <div class="status" >
         <div class="intent-display">Intentos: <span>{{ intent }}</span></div>

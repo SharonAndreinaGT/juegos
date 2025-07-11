@@ -43,14 +43,19 @@
       <p>La palabra era: <strong>{{ secretWord }}</strong></p>
     </div>
 
-    <div *ngIf="gameStatus === 'level-complete'" class="game-over-message final-game-over-message">
+    <div *ngIf="gameStatus === 'level-complete' || gameStatus === 'time-up'" class="game-over-message final-game-over-message">
       <h2 *ngIf="gameStatus === 'level-complete'">¡Juego terminado!</h2>
+      <h2 *ngIf="gameStatus === 'time-up'">¡Tiempo agotado!</h2>
 
-      <p *ngIf="gameStatus === 'level-complete'">
+      <p *ngIf="gameStatus === 'level-complete' || gameStatus === 'time-up'">
         Adivinaste {{ guessedWordsCount }} de {{ activeLevelConfig.words_level }} palabras.
       </p>
 
-      <div class="stars-display" *ngIf="gameStatus === 'level-complete' ">
+      <p *ngIf="gameStatus !== 'time-up' && gameStatus === 'level-complete'">
+        Tiempo transcurrido: {{ formatTime(timeTaken) }}
+      </p>
+
+      <div class="stars-display" *ngIf="gameStatus === 'level-complete' || gameStatus === 'time-up' ">
         <h3>Tu Puntuación:</h3>
         <span *ngFor="let i of [0, 1, 2]" class="star" [class.filled]="i < stars">
           &#9733; </span>

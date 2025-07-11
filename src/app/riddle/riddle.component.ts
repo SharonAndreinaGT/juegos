@@ -1,6 +1,6 @@
 // src/app/riddle/riddle.component.ts
 
-import { Component, OnInit, HostListener, OnDestroy } from '@angular/core';
+import { Component, OnInit, HostListener, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { RiddleLevel, RiddleWord, RiddleResult } from '../riddle.model';
 import { RiddleService } from '../riddle.service';
 import { SharedDataService } from '../sharedData.service';
@@ -13,6 +13,10 @@ import { Router } from '@angular/router';
   styleUrls: ['./riddle.component.css']
 })
 export class RiddleComponent implements OnInit, OnDestroy {
+  // propiedades para el sonido
+  @ViewChild('winSound') winSound!: ElementRef<HTMLAudioElement>;
+  @ViewChild('loseSound') loseSound!: ElementRef<HTMLAudioElement>;
+  
   // --- PROPIEDADES DEL JUEGO ---
   words: RiddleWord[] = [];
   secretWord: string = '';
@@ -153,6 +157,7 @@ export class RiddleComponent implements OnInit, OnDestroy {
         this.message = `¡Se acabó el tiempo! La partida ha terminado.`;
         this.calculateScoreAndStars(); // Calcula score y estrellas al agotar el tiempo
         this.saveGameResult(false, (this.activeLevelConfig.time_limit || 0)); // Se guarda como no completado por tiempo
+        this.playLoseSound();
       }
     });
   }
@@ -178,6 +183,7 @@ export class RiddleComponent implements OnInit, OnDestroy {
       this.message = `¡Nivel ${this.activeLevelConfig.level_name} completado!`;
       this.stopGameTimer();
       this.saveGameResult(true, this.timeTaken);
+      this.playWinSound();
       return;
     }
 
@@ -250,6 +256,7 @@ export class RiddleComponent implements OnInit, OnDestroy {
         this.message = `¡Nivel ${this.activeLevelConfig.level_name} completado!`;
         this.stopGameTimer();
         this.saveGameResult(true, this.timeTaken);
+        this.playWinSound(); // REPRODUCIR SONIDO DE VICTORIA (nivel completado)
       }
 
     } else if (this.incorrectGuesses >= this.maxIncorrectGuesses) {
@@ -272,6 +279,7 @@ export class RiddleComponent implements OnInit, OnDestroy {
           }
           this.stopGameTimer();
           this.saveGameResult(false, this.timeTaken); // Se guarda como no completado si no se adivinaron todas
+          this.playLoseSound(); // REPRODUCIR SONIDO DE DERROTA (nivel terminado por pérdida)
         }
       }, 2000);
     }
@@ -403,6 +411,53 @@ export class RiddleComponent implements OnInit, OnDestroy {
         console.error('Error al guardar el resultado del juego de Riddle:', error);
       }
     );
+  }
+
+
+  //metodo para el sonido cuando gane
+  playWinSound(): void {
+    try {
+      if (this.winSound && this.winSound.nativeElement) {
+        this.winSound.nativeElement.currentTime = 0; // Reiniciar el audio
+        this.winSound.nativeElement.volume = 0.7; // Volumen al 70%
+        const playPromise = this.winSound.nativeElement.play();
+        
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              console.log('Sonido de victoria reproducido exitosamente en memoria');
+            })
+            .catch(error => {
+              console.log('No se pudo reproducir el sonido de victoria:', error);
+            });
+        }
+      }
+    } catch (error) {
+      console.error('Error al reproducir el sonido de victoria:', error);
+    }
+  }
+
+  //metodo para el sonido cuando pierde
+  playLoseSound(): void {
+    try {
+      if (this.loseSound && this.loseSound.nativeElement) {
+        this.loseSound.nativeElement.currentTime = 0; // Reiniciar el audio
+        this.loseSound.nativeElement.volume = 0.7; // Volumen al 70%
+        const playPromise = this.loseSound.nativeElement.play();
+        
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              console.log('Sonido de derrota reproducido exitosamente en memoria');
+            })
+            .catch(error => {
+              console.log('No se pudo reproducir el sonido de derrota:', error);
+            });
+        }
+      }
+    } catch (error) {
+      console.error('Error al reproducir el sonido de derrota:', error);
+    }
   }
 
   formatTime(seconds: number): string {

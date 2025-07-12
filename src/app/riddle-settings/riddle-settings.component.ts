@@ -11,7 +11,7 @@ import { lastValueFrom } from 'rxjs';
   styleUrls: ['./riddle-settings.component.css']
 })
 export class RiddleSettingsComponent implements OnInit {
-  title = 'Configuración del Juego de Adivinar la Palabra';
+  title = 'Adivinar la Palabra Oculta';
 
   // Cambiado a time_limit
   level1Config: RiddleLevel = { id: null, level_number: 1, level_name: 'Fácil', max_intents: 5, words_level: 5, words: [], isActive: false, time_limit: 300 };

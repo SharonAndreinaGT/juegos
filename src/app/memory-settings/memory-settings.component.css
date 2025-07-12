@@ -1,81 +1,229 @@
 /*Css del contendor principal*/
 .container {
-    background: rgba(128, 128, 128, 0.402);
-  }
-  
+  background: rgba(128, 128, 128, 0.402);
+  overflow-x: hidden; /* ← evita desbordamiento horizontal */
+  max-width: 100vw;    /* ← evita crecer más allá del viewport */
+  box-sizing: border-box;
+}
+
 .sidenav {
-    background-color: #9fd3f3d9;
-    border-radius: 0px;
+  background-color: #9fd3f3d9;
+  border-radius: 0px;
 }
-  
+
 .sidenav-bar {
-    width: 200px;
-    margin: 16px;
-    border-right: none;
-    border-radius: 10px;
-    background-color: #f0f8ff;
+  width: 200px;
+  margin: 16px;
+  border-right: none;
+  border-radius: 10px;
+  background-color: #f0f8ff;
 }
-  
+
 .content {
   padding: 16.5px;
 }
-  
+
 .menu-button {
-    width: 100%;
-    margin-right: 8px;
-    display: flex;
-    font-size: 1rem;
-    justify-content: flex-start;
+  width: 100%;
+  margin-right: 8px;
+  display: flex;
+  font-size: 1rem;
+  justify-content: flex-start;
 }
 
 .welcome-card {
-    background-color: #f0f8ff;
-}
-  
-.welcome-container {
-    height: calc(100vh - 65px);
-    border-radius: 10px;
-    margin: 16px;
-    margin-left: 20px;
-    display: flex;
-    background-color: #f0f8ff;
-}
-  
-.welcome-content h1 {
-    font-size: 2.5em;
-    color: #3f51b5;
-    margin-bottom: 20px;
-    font-family: 'Arial', sans-serif;
-}
-.h2{
-    color: #3f51b5;
-    margin-bottom: 20px;
-    font-family: 'Arial', sans-serif;
+  background-color: #f0f8ff;
 }
 
-/* CSS para el botón */
+.welcome-container {
+  height: calc(100vh - 65px);
+  border-radius: 10px;
+  margin: 16px;
+  margin-left: 20px;
+  display: flex;
+  background-color: #f0f8ff;
+}
+
+.welcome-content h1 {
+  font-size: 2.5em;
+  color: #3f51b5;
+  margin-bottom: 20px;
+  font-family: 'Arial', sans-serif;
+}
+.h2 {
+  color: #3f51b5;
+  margin-bottom: 20px;
+  font-family: 'Arial', sans-serif;
+}
+
+/* CSS para el botón de la esquina (si es que aún existe en la página) */
 .colorbutton-btn {
-  padding: 10px 20px; 
+  padding: 10px 20px;
   border: 2px solid #3f51b5;
   border-radius: 20px;
   background-color: #cfe0ff;
   color: #3f51b5;
   font-weight: bold;
   font-family: 'Verdana', sans-serif;
-  transition: border-color 0.3s ease, background-color 0.3s ease, transform 0.3s ease; /* Añadimos transiciones */
+  transition: border-color 0.3s ease, background-color 0.3s ease,
+    transform 0.3s ease;
   outline: none;
   cursor: pointer;
-
-  /* POSICIONAMIENTO*/
   position: absolute; /* Posicionamiento absoluto */
   bottom: 20px;
-  right: 30px; 
+  right: 30px;
 }
 
 .colorbutton-btn:hover {
-  background-color: #bbd3ff; 
-  border-color: #303f9f; 
-  transform: translateY(-2px); /* Pequeño levantamiento al pasar el mouse */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra para efecto "elevado" */
+  background-color: #bbd3ff;
+  border-color: #303f9f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
+/* Estilos para la tarjeta de configuración principal */
+.settings-card {
+  background-color: #cfe0ff; /* Color de fondo azul claro */
+  padding-bottom: 8px; /* Añadido padding para que el contenido no esté pegado a los bordes */
+  border-radius: 10px; /* Bordes redondeados para la tarjeta */
+}
+
+.level-settings-flex-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: flex-start;
+  justify-content: space-between;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.level-form-column,
+.level-images-column {
+  flex: 1 1 300px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Estilos para los campos de formulario de Material Design */
+.full-width {
+  width: 85%; /* Asegura que los campos de formulario ocupen todo el ancho de su columna */
+}
+
+/* Estilos para el switch de "Nivel Activo" */
+.active-level-toggle {
+  margin-top: 20px; /* Espacio sobre el switch */
+  margin-bottom: 20px; /* Espacio debajo del switch */
+}
+
+/* Sección para el input de carga de archivos y su título (REVISADO) */
+.image-upload-section {
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* Espacio entre el título, input y la cuadrícula de imágenes */
+  width: 100%; /* Ocupa todo el ancho de su columna */
+}
+
+/* Contenedor para la CUADRÍCULA de imágenes existentes (REVISADO y CRUCIAL) */
+.image-grid-container {
+  display: grid; /* Usa Grid para organizar las imágenes en una cuadrícula */
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); /* REDUCIDO el minmax para que quepan más */
+  /* minmax(90px, 1fr) significa: mínimo 90px, máximo distribuye el espacio */
+  gap: 10px; /* REDUCIDO el espacio entre las imágenes */
+  padding: 10px; /* Relleno interno */
+  background-color: #f0f8ff; /* Fondo ligeramente diferente para destacar */
+  border-radius: 8px; /* Bordes redondeados */
+  max-height: 350px; /* REDUCIDO la altura máxima */
+  overflow-y: auto; /* Agrega SCROLL VERTICAL si las imágenes exceden la altura */
+  border: 1px solid #d3eafc; /* Borde sutil */
+  box-sizing: border-box; /* Asegura que padding no aumente el tamaño total */
+}
+
+/* Estilos para cada ITEM individual de imagen (imagen + nombre + botón eliminar) (REVISADO) */
+.image-grid-item {
+  display: flex;
+  flex-direction: column; /* Apila imagen, nombre y botón verticalmente */
+  align-items: center; /* Centra horizontalmente el contenido */
+  padding: 5px; /* REDUCIDO el padding */
+  border: 1px solid #c9e2f9; /* Borde sutil para cada ítem */
+  border-radius: 8px;
+  background-color: #ffffff; /* Fondo blanco para cada ítem */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Sombra ligera */
+  text-align: center; /* Centra el texto del nombre del archivo */
+  box-sizing: border-box; /* Asegura que padding no aumente el tamaño total */
+}
+
+.image-grid-item img {
+  width: 70px; /* REDUCIDO el tamaño de la imagen */
+  height: 70px; /* REDUCIDO el tamaño de la imagen */
+  object-fit: contain; /* Ajusta la imagen sin recortar dentro de su espacio */
+  margin-bottom: 5px; /* REDUCIDO el espacio */
+  border-radius: 4px; /* Bordes ligeramente redondeados para la imagen */
+}
+
+.image-grid-item span {
+  font-size: 0.7em; /* REDUCIDO el tamaño de la fuente */
+  color: #555;
+  word-break: break-word; /* Rompe palabras largas para evitar desbordamiento */
+  margin-bottom: 3px; /* REDUCIDO el espacio */
+}
+
+/* Estilos para el botón de eliminar imagen (el "cubo de basura") (REVISADO) */
+.delete-image-button {
+  min-width: 25px; /* REDUCIDO el tamaño del botón */
+  height: 25px; /* REDUCIDO el tamaño del botón */
+  line-height: 25px; /* Centra el ícono verticalmente */
+  padding: 0; /* Elimina el padding extra para mantenerlo pequeño */
+  border-radius: 50%; /* Lo hace redondo */
+  font-size: 0.8em; /* REDUCIDO el tamaño del icono */
+}
+
+/* Contenedor del botón "Guardar Configuración" */
+.save-button-container {
+  display: flex;
+  justify-content: flex-end; /* Alinea el botón a la derecha */
+  width: 100%; /* Asegura que el contenedor ocupe todo el ancho */
+  margin-top: 30px; /* Margen superior para separarlo del contenido de arriba */
+}
+
+
+/* Material Design specific overrides */
+.mat-form-field-appearance-fill .mat-form-field-wrapper {
+    padding-bottom: 0 !important; /* A veces el padding de Material puede causar espacios extra */
+}
+.mat-form-field-subscript-wrapper {
+  padding: 4px 0 0;
+}
+
+.mat-hint {
+  font-size: 0.85rem;
+  color: #888;
+}
+
+@media (max-width: 768px) {
+  .level-settings-flex-container {
+    flex-direction: column;
+  }
+
+  .level-form-column,
+  .level-images-column {
+    max-width: 100%;
+    padding-right: 0;
+  }
+}
+
+.image-previews {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.image-preview-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 90px;
+  word-break: break-word;
+  text-align: center;
+}

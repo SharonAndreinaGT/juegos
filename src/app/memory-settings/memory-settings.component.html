@@ -50,221 +50,247 @@
           <h1>{{ title }}</h1>
         </div>
 
-        <!-- Se ha eliminado el tag <form> global, ya que cada nivel tiene su propio FormGroup -->
-        <mat-tab-group animationDuration="0ms">
-          <!-- Nivel 1 -->
-          <mat-tab label="Nivel 1">
-            <div [formGroup]="level1Form" class="level-settings-container">
-              <h2 class="h2">{{ level1Form.get('level_name')?.value }}</h2>
 
-              <mat-form-field appearance="fill" class="full-width">
-                <mat-label>Nombre del Nivel</mat-label>
-                <input matInput formControlName="level_name" required>
-                <mat-error *ngIf="level1Form.get('level_name')?.hasError('required') && level1Form.get('level_name')?.touched">
-                  El nombre del nivel es requerido.
-                </mat-error>
-              </mat-form-field>
+      <mat-card class="settings-card">
+        <mat-card-content>
+          <mat-tab-group>
 
-              <mat-form-field appearance="fill" class="full-width">
-                <mat-label>Límite de Tiempo (segundos)</mat-label>
-                <input matInput type="number" formControlName="time_limit" required min="1">
-                <mat-error *ngIf="level1Form.get('time_limit')?.hasError('required') && level1Form.get('time_limit')?.touched">
-                  El tiempo es requerido.
-                </mat-error>
-                <mat-error *ngIf="level1Form.get('time_limit')?.hasError('min') && level1Form.get('time_limit')?.touched">
-                  Mínimo 1 segundo.
-                </mat-error>
-              </mat-form-field>
+            <!-- NIVEL 1 -->
+            <mat-tab label="Nivel 1">
+              <div [formGroup]="level1Form" class="level-settings-flex-container">
 
-              <mat-form-field appearance="fill" class="full-width">
-                <mat-label>Intentos Permitidos (0 para ilimitado)</mat-label>
-                <input matInput type="number" formControlName="intent" required min="0">
-                <mat-error *ngIf="level1Form.get('intent')?.hasError('required') && level1Form.get('intent')?.touched">
-                  Los intentos son requeridos.
-                </mat-error>
-                <mat-error *ngIf="level1Form.get('intent')?.hasError('min') && level1Form.get('intent')?.touched">
-                  Mínimo 0 intentos.
-                </mat-error>
-              </mat-form-field>
+                <!-- Columna izquierda: Formulario -->
+                <div class="level-form-column">
+                  <h2 class="h2">{{ level1Form.get('level_name')?.value }}</h2>
 
-              <mat-form-field appearance="fill" class="full-width">
-                <mat-label>Cantidad de Tarjetas</mat-label>
-                <input matInput [value]="LEVEL_CARD_COUNTS.level1" readonly>
-                <mat-hint>Este nivel tiene {{ LEVEL_CARD_COUNTS.level1 }} tarjetas ({{ LEVEL_CARD_COUNTS.level1 / 2 }} pares).</mat-hint>
-              </mat-form-field>
+                  <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Nombre del Nivel</mat-label>
+                    <input matInput formControlName="level_name" required>
+                    <mat-error *ngIf="level1Form.get('level_name')?.hasError('required') && level1Form.get('level_name')?.touched">
+                      El nombre del nivel es requerido.
+                    </mat-error>
+                  </mat-form-field>
 
-              <div class="image-upload-section">
-                <h3>Cargar Imágenes ({{ LEVEL_CARD_COUNTS.level1 / 2 }} pares necesarios)</h3>
-                <input type="file" (change)="onFileSelected($event, 'level1')" accept="image/*" multiple>
-                <mat-error *ngIf="level1Form.hasError('notEnoughImages')">
-                  Debes subir {{ LEVEL_CARD_COUNTS.level1 / 2 }} imágenes para este nivel.
-                </mat-error>
+                  <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Límite de Tiempo (segundos)</mat-label>
+                    <input matInput type="number" formControlName="time_limit" required min="1">
+                    <mat-error *ngIf="level1Form.get('time_limit')?.hasError('required') && level1Form.get('time_limit')?.touched">
+                      El tiempo es requerido.
+                    </mat-error>
+                    <mat-error *ngIf="level1Form.get('time_limit')?.hasError('min') && level1Form.get('time_limit')?.touched">
+                      Mínimo 1 segundo.
+                    </mat-error>
+                  </mat-form-field>
 
-                <div *ngIf="getImagesForLevel('level1').length > 0" class="image-previews">
-                  <div *ngFor="let file of getImagesForLevel('level1'); let i = index" class="image-preview-item">
-                    <img [src]="file.preview" alt="Preview" width="80" height="80">
-                    <span>{{ file.file?.name || 'Imagen existente' }}</span>
-                    <button mat-icon-button color="warn" (click)="removeImage('level1', i)">
-                      <mat-icon>delete</mat-icon>
+                  <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Intentos Permitidos (0 para ilimitado)</mat-label>
+                    <input matInput type="number" formControlName="intent" required min="0">
+                    <mat-error *ngIf="level1Form.get('intent')?.hasError('required') && level1Form.get('intent')?.touched">
+                      Los intentos son requeridos.
+                    </mat-error>
+                    <mat-error *ngIf="level1Form.get('intent')?.hasError('min') && level1Form.get('intent')?.touched">
+                      Mínimo 0 intentos.
+                    </mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Cantidad de Tarjetas</mat-label>
+                    <input matInput [value]="LEVEL_CARD_COUNTS.level1" readonly>
+                    <mat-hint>Este nivel tiene {{ LEVEL_CARD_COUNTS.level1 }} tarjetas ({{ LEVEL_CARD_COUNTS.level1 / 2 }} pares).</mat-hint>
+                  </mat-form-field>
+
+                  <mat-slide-toggle formControlName="isActive" (change)="onLevelActiveChange($event, 'level1')">
+                    Nivel Activo
+                  </mat-slide-toggle>
+
+                  <div class="save-button-container" style="margin-top: 20px;">
+                    <button mat-raised-button color="primary" class="colorbutton-btn"
+                            (click)="saveLevelConfig('level1')"
+                            [disabled]="level1Form.invalid">
+                      Guardar Configuración
                     </button>
                   </div>
                 </div>
+
+                <!-- Columna derecha: Carga de imágenes -->
+                <div class="level-images-column">
+                  <h3>Cargar Imágenes ({{ LEVEL_CARD_COUNTS.level1 / 2 }} pares necesarios)</h3>
+                  <input type="file" (change)="onFileSelected($event, 'level1')" accept="image/*" multiple>
+                  <mat-error *ngIf="level1Form.hasError('notEnoughImages')">
+                    Debes subir {{ LEVEL_CARD_COUNTS.level1 / 2 }} imágenes para este nivel.
+                  </mat-error>
+
+                  <div *ngIf="getImagesForLevel('level1').length > 0" class="image-previews">
+                    <div *ngFor="let file of getImagesForLevel('level1'); let i = index" class="image-preview-item">
+                      <img [src]="file.preview" alt="Preview" width="80" height="80">
+                      <span>{{ file.file?.name || 'Imagen existente' }}</span>
+                      <button mat-icon-button color="warn" (click)="removeImage('level1', i)">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
               </div>
+            </mat-tab>
 
-              <div class="active-level-toggle">
-                <mat-slide-toggle formControlName="isActive" (change)="onLevelActiveChange($event, 'level1')">
-                  Nivel Activo
-                </mat-slide-toggle>
-              </div>
+            <!-- NIVEL 2 -->
+            <mat-tab label="Nivel 2">
+              <div [formGroup]="level2Form" class="level-settings-flex-container">
 
-              <div class="save-button-container">
-                <button mat-raised-button color="primary" class="colorbutton-btn" (click)="saveLevelConfig('level1')" [disabled]="level1Form.invalid">Guardar Configuración Nivel 1</button>
-              </div>
-            </div>
-          </mat-tab>
+                <div class="level-form-column">
+                  <h2 class="h2">{{ level2Form.get('level_name')?.value }}</h2>
 
-          <!-- Nivel 2 -->
-          <mat-tab label="Nivel 2">
-            <div [formGroup]="level2Form" class="level-settings-container">
-              <h2 class="h2">{{ level2Form.get('level_name')?.value }}</h2>
+                  <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Nombre del Nivel</mat-label>
+                    <input matInput formControlName="level_name" required>
+                    <mat-error *ngIf="level2Form.get('level_name')?.hasError('required') && level2Form.get('level_name')?.touched">
+                      El nombre del nivel es requerido.
+                    </mat-error>
+                  </mat-form-field>
 
-              <mat-form-field appearance="fill" class="full-width">
-                <mat-label>Nombre del Nivel</mat-label>
-                <input matInput formControlName="level_name" required>
-                <mat-error *ngIf="level2Form.get('level_name')?.hasError('required') && level2Form.get('level_name')?.touched">
-                  El nombre del nivel es requerido.
-                </mat-error>
-              </mat-form-field>
+                  <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Límite de Tiempo (segundos)</mat-label>
+                    <input matInput type="number" formControlName="time_limit" required min="1">
+                    <mat-error *ngIf="level2Form.get('time_limit')?.hasError('required') && level2Form.get('time_limit')?.touched">
+                      El tiempo es requerido.
+                    </mat-error>
+                    <mat-error *ngIf="level2Form.get('time_limit')?.hasError('min') && level2Form.get('time_limit')?.touched">
+                      Mínimo 1 segundo.
+                    </mat-error>
+                  </mat-form-field>
 
-              <mat-form-field appearance="fill" class="full-width">
-                <mat-label>Límite de Tiempo (segundos)</mat-label>
-                <input matInput type="number" formControlName="time_limit" required min="1">
-                <mat-error *ngIf="level2Form.get('time_limit')?.hasError('required') && level2Form.get('time_limit')?.touched">
-                  El tiempo es requerido.
-                </mat-error>
-                <mat-error *ngIf="level2Form.get('time_limit')?.hasError('min') && level2Form.get('time_limit')?.touched">
-                  Mínimo 1 segundo.
-                </mat-error>
-              </mat-form-field>
+                  <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Intentos Permitidos (0 para ilimitado)</mat-label>
+                    <input matInput type="number" formControlName="intent" required min="0">
+                    <mat-error *ngIf="level2Form.get('intent')?.hasError('required') && level2Form.get('intent')?.touched">
+                      Los intentos son requeridos.
+                    </mat-error>
+                    <mat-error *ngIf="level2Form.get('intent')?.hasError('min') && level2Form.get('intent')?.touched">
+                      Mínimo 0 intentos.
+                    </mat-error>
+                  </mat-form-field>
 
-              <mat-form-field appearance="fill" class="full-width">
-                <mat-label>Intentos Permitidos (0 para ilimitado)</mat-label>
-                <input matInput type="number" formControlName="intent" required min="0">
-                <mat-error *ngIf="level2Form.get('intent')?.hasError('required') && level2Form.get('intent')?.touched">
-                  Los intentos son requeridos.
-                </mat-error>
-                <mat-error *ngIf="level2Form.get('intent')?.hasError('min') && level2Form.get('intent')?.touched">
-                  Mínimo 0 intentos.
-                </mat-error>
-              </mat-form-field>
+                  <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Cantidad de Tarjetas</mat-label>
+                    <input matInput [value]="LEVEL_CARD_COUNTS.level2" readonly>
+                    <mat-hint>Este nivel tiene {{ LEVEL_CARD_COUNTS.level2 }} tarjetas ({{ LEVEL_CARD_COUNTS.level2 / 2 }} pares).</mat-hint>
+                  </mat-form-field>
 
-              <mat-form-field appearance="fill" class="full-width">
-                <mat-label>Cantidad de Tarjetas</mat-label>
-                <input matInput [value]="LEVEL_CARD_COUNTS.level2" readonly>
-                <mat-hint>Este nivel tiene {{ LEVEL_CARD_COUNTS.level2 }} tarjetas ({{ LEVEL_CARD_COUNTS.level2 / 2 }} pares).</mat-hint>
-              </mat-form-field>
+                  <mat-slide-toggle formControlName="isActive" (change)="onLevelActiveChange($event, 'level2')">
+                    Nivel Activo
+                  </mat-slide-toggle>
 
-              <div class="image-upload-section">
-                <h3>Cargar Imágenes ({{ LEVEL_CARD_COUNTS.level2 / 2 }} pares necesarios)</h3>
-                <input type="file" (change)="onFileSelected($event, 'level2')" accept="image/*" multiple>
-                <mat-error *ngIf="level2Form.hasError('notEnoughImages')">
-                  Debes subir {{ LEVEL_CARD_COUNTS.level2 / 2 }} imágenes para este nivel.
-                </mat-error>
-
-                <div *ngIf="getImagesForLevel('level2').length > 0" class="image-previews">
-                  <div *ngFor="let file of getImagesForLevel('level2'); let i = index" class="image-preview-item">
-                    <img [src]="file.preview" alt="Preview" width="80" height="80">
-                    <span>{{ file.file?.name || 'Imagen existente' }}</span>
-                    <button mat-icon-button color="warn" (click)="removeImage('level2', i)">
-                      <mat-icon>delete</mat-icon>
+                  <div class="save-button-container" style="margin-top: 20px;">
+                    <button mat-raised-button color="primary" class="colorbutton-btn"
+                            (click)="saveLevelConfig('level2')"
+                            [disabled]="level2Form.invalid">
+                      Guardar Configuración
                     </button>
                   </div>
                 </div>
+
+                <div class="level-images-column">
+                  <h3>Cargar Imágenes ({{ LEVEL_CARD_COUNTS.level2 / 2 }} pares necesarios)</h3>
+                  <input type="file" (change)="onFileSelected($event, 'level2')" accept="image/*" multiple>
+                  <mat-error *ngIf="level2Form.hasError('notEnoughImages')">
+                    Debes subir {{ LEVEL_CARD_COUNTS.level2 / 2 }} imágenes para este nivel.
+                  </mat-error>
+
+                  <div *ngIf="getImagesForLevel('level2').length > 0" class="image-previews">
+                    <div *ngFor="let file of getImagesForLevel('level2'); let i = index" class="image-preview-item">
+                      <img [src]="file.preview" alt="Preview" width="80" height="80">
+                      <span>{{ file.file?.name || 'Imagen existente' }}</span>
+                      <button mat-icon-button color="warn" (click)="removeImage('level2', i)">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
               </div>
+            </mat-tab>
 
-              <div class="active-level-toggle">
-                <mat-slide-toggle formControlName="isActive" (change)="onLevelActiveChange($event, 'level2')">
-                  Nivel Activo
-                </mat-slide-toggle>
-              </div>
+            <!-- NIVEL 3 -->
+            <mat-tab label="Nivel 3">
+              <div [formGroup]="level3Form" class="level-settings-flex-container">
 
-              <div class="save-button-container">
-                <button mat-raised-button color="primary" class="colorbutton-btn" (click)="saveLevelConfig('level2')" [disabled]="level2Form.invalid">Guardar Configuración Nivel 2</button>
-              </div>
-            </div>
-          </mat-tab>
+                <div class="level-form-column">
+                  <h2 class="h2">{{ level3Form.get('level_name')?.value }}</h2>
 
-          <!-- Nivel 3 -->
-          <mat-tab label="Nivel 3">
-            <div [formGroup]="level3Form" class="level-settings-container">
-              <h2 class="h2">{{ level3Form.get('level_name')?.value }}</h2>
+                  <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Nombre del Nivel</mat-label>
+                    <input matInput formControlName="level_name" required>
+                    <mat-error *ngIf="level3Form.get('level_name')?.hasError('required') && level3Form.get('level_name')?.touched">
+                      El nombre del nivel es requerido.
+                    </mat-error>
+                  </mat-form-field>
 
-              <mat-form-field appearance="fill" class="full-width">
-                <mat-label>Nombre del Nivel</mat-label>
-                <input matInput formControlName="level_name" required>
-                <mat-error *ngIf="level3Form.get('level_name')?.hasError('required') && level3Form.get('level_name')?.touched">
-                  El nombre del nivel es requerido.
-                </mat-error>
-              </mat-form-field>
+                  <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Límite de Tiempo (segundos)</mat-label>
+                    <input matInput type="number" formControlName="time_limit" required min="1">
+                    <mat-error *ngIf="level3Form.get('time_limit')?.hasError('required') && level3Form.get('time_limit')?.touched">
+                      El tiempo es requerido.
+                    </mat-error>
+                    <mat-error *ngIf="level3Form.get('time_limit')?.hasError('min') && level3Form.get('time_limit')?.touched">
+                      Mínimo 1 segundo.
+                    </mat-error>
+                  </mat-form-field>
 
-              <mat-form-field appearance="fill" class="full-width">
-                <mat-label>Límite de Tiempo (segundos)</mat-label>
-                <input matInput type="number" formControlName="time_limit" required min="1">
-                <mat-error *ngIf="level3Form.get('time_limit')?.hasError('required') && level3Form.get('time_limit')?.touched">
-                  El tiempo es requerido.
-                </mat-error>
-                <mat-error *ngIf="level3Form.get('time_limit')?.hasError('min') && level3Form.get('time_limit')?.touched">
-                  Mínimo 1 segundo.
-                </mat-error>
-              </mat-form-field>
+                  <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Intentos Permitidos (0 para ilimitado)</mat-label>
+                    <input matInput type="number" formControlName="intent" required min="0">
+                    <mat-error *ngIf="level3Form.get('intent')?.hasError('required') && level3Form.get('intent')?.touched">
+                      Los intentos son requeridos.
+                    </mat-error>
+                    <mat-error *ngIf="level3Form.get('intent')?.hasError('min') && level3Form.get('intent')?.touched">
+                      Mínimo 0 intentos.
+                    </mat-error>
+                  </mat-form-field>
 
-              <mat-form-field appearance="fill" class="full-width">
-                <mat-label>Intentos Permitidos (0 para ilimitado)</mat-label>
-                <input matInput type="number" formControlName="intent" required min="0">
-                <mat-error *ngIf="level3Form.get('intent')?.hasError('required') && level3Form.get('intent')?.touched">
-                  Los intentos son requeridos.
-                </mat-error>
-                <mat-error *ngIf="level3Form.get('intent')?.hasError('min') && level3Form.get('intent')?.touched">
-                  Mínimo 0 intentos.
-                </mat-error>
-              </mat-form-field>
+                  <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Cantidad de Tarjetas</mat-label>
+                    <input matInput [value]="LEVEL_CARD_COUNTS.level3" readonly>
+                    <mat-hint>Este nivel tiene {{ LEVEL_CARD_COUNTS.level3 }} tarjetas ({{ LEVEL_CARD_COUNTS.level3 / 2 }} pares).</mat-hint>
+                  </mat-form-field>
 
-              <mat-form-field appearance="fill" class="full-width">
-                <mat-label>Cantidad de Tarjetas</mat-label>
-                <input matInput [value]="LEVEL_CARD_COUNTS.level3" readonly>
-                <mat-hint>Este nivel tiene {{ LEVEL_CARD_COUNTS.level3 }} tarjetas ({{ LEVEL_CARD_COUNTS.level3 / 2 }} pares).</mat-hint>
-              </mat-form-field>
+                  <mat-slide-toggle formControlName="isActive" (change)="onLevelActiveChange($event, 'level3')">
+                    Nivel Activo
+                  </mat-slide-toggle>
 
-              <div class="image-upload-section">
-                <h3>Cargar Imágenes ({{ LEVEL_CARD_COUNTS.level3 / 2 }} pares necesarios)</h3>
-                <input type="file" (change)="onFileSelected($event, 'level3')" accept="image/*" multiple>
-                <mat-error *ngIf="level3Form.hasError('notEnoughImages')">
-                  Debes subir {{ LEVEL_CARD_COUNTS.level3 / 2 }} imágenes para este nivel.
-                </mat-error>
-
-                <div *ngIf="getImagesForLevel('level3').length > 0" class="image-previews">
-                  <div *ngFor="let file of getImagesForLevel('level3'); let i = index" class="image-preview-item">
-                    <img [src]="file.preview" alt="Preview" width="80" height="80">
-                    <span>{{ file.file?.name || 'Imagen existente' }}</span>
-                    <button mat-icon-button color="warn" (click)="removeImage('level3', i)">
-                      <mat-icon>delete</mat-icon>
+                  <div class="save-button-container" style="margin-top: 20px;">
+                    <button mat-raised-button color="primary" class="colorbutton-btn"
+                            (click)="saveLevelConfig('level3')"
+                            [disabled]="level3Form.invalid">
+                      Guardar Configuración
                     </button>
                   </div>
                 </div>
-              </div>
 
-              <div class="active-level-toggle">
-                <mat-slide-toggle formControlName="isActive" (change)="onLevelActiveChange($event, 'level3')">
-                  Nivel Activo
-                </mat-slide-toggle>
-              </div>
+                <div class="level-images-column">
+                  <h3>Cargar Imágenes ({{ LEVEL_CARD_COUNTS.level3 / 2 }} pares necesarios)</h3>
+                  <input type="file" (change)="onFileSelected($event, 'level3')" accept="image/*" multiple>
+                  <mat-error *ngIf="level3Form.hasError('notEnoughImages')">
+                    Debes subir {{ LEVEL_CARD_COUNTS.level3 / 2 }} imágenes para este nivel.
+                  </mat-error>
 
-              <div class="save-button-container">
-                <button mat-raised-button color="primary" class="colorbutton-btn" (click)="saveLevelConfig('level3')" [disabled]="level3Form.invalid">Guardar Configuración Nivel 3</button>
+                  <div *ngIf="getImagesForLevel('level3').length > 0" class="image-previews">
+                    <div *ngFor="let file of getImagesForLevel('level3'); let i = index" class="image-preview-item">
+                      <img [src]="file.preview" alt="Preview" width="80" height="80">
+                      <span>{{ file.file?.name || 'Imagen existente' }}</span>
+                      <button mat-icon-button color="warn" (click)="removeImage('level3', i)">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
               </div>
-            </div>
-          </mat-tab>
-        </mat-tab-group>
+            </mat-tab>
+
+          </mat-tab-group>
+        </mat-card-content>
+        </mat-card>
       </mat-card-content>
     </mat-card>
   </mat-sidenav-content>

@@ -7,6 +7,10 @@
           <input type="text" id="name" [(ngModel)]="name" name="name" required />
         </div>
 
+        <div class="input-group">
+          <label for="lastname">Ingrese su apellido:</label>
+          <input type="text" id="lastname" [(ngModel)]="lastname" name="lastname" required />
+        </div>
         <div *ngIf="errorMessage" class="error-message">
             {{ errorMessage }}
         </div>

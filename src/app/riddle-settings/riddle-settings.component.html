@@ -78,7 +78,7 @@
                       <mat-error *ngIf="level1Form.get('timeLimit')?.hasError('min')">Debe ser al menos 10 segundos</mat-error>
                     </mat-form-field>
 
-                    <h3>Palabras para Nivel 1</h3>
+                    <h3 class="h2">Palabras para Nivel 1</h3>
                     <div class="word-input-container">
                       <mat-form-field appearance="fill" class="word-input-field">
                         <mat-label>Añadir Nueva Palabra</mat-label>
@@ -135,7 +135,7 @@
                       <mat-error *ngIf="level2Form.get('timeLimit')?.hasError('min')">Debe ser al menos 10 segundos</mat-error>
                     </mat-form-field>
 
-                    <h3>Palabras para Nivel 2</h3>
+                    <h3 class="h2">Palabras para Nivel 2</h3>
                     <div class="word-input-container">
                       <mat-form-field appearance="fill" class="word-input-field">
                         <mat-label>Añadir Nueva Palabra</mat-label>
@@ -192,7 +192,7 @@
                       <mat-error *ngIf="level3Form.get('timeLimit')?.hasError('min')">Debe ser al menos 10 segundos</mat-error>
                     </mat-form-field>
 
-                    <h3>Palabras para Nivel 3</h3>
+                    <h3 class="h2">Palabras para Nivel 3</h3>
                     <div class="word-input-container">
                       <mat-form-field appearance="fill" class="word-input-field">
                         <mat-label>Añadir Nueva Palabra (con pista)</mat-label>
@@ -226,7 +226,7 @@
                 </div>
               </mat-tab>
             </mat-tab-group>
-            <button mat-raised-button color="primary" class="colorbutton-btn" (click)="saveSettings()">Guardar Configuración de Niveles</button>
+            <button mat-raised-button color="primary" class="colorbutton-btn" (click)="saveSettings()">Guardar Configuración</button>
           </mat-card-content>
         </mat-card>
       </mat-card-content>

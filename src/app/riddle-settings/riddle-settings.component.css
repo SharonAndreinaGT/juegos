@@ -136,14 +136,15 @@
 }
 
 .add-word-button {
-  height: 56px;
-  padding: 0 20px;
+  margin-left: 600px;
+  height: 40px;
+  padding: 0 10px;
   border-radius: 8px;
   font-weight: 600;
 }
 
 .word-list {
-  margin-top: 15px;
+  margin-right: 800px;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   padding: 10px;
@@ -191,32 +192,37 @@
   padding: 0;
 }
 
-/* --- Estilos del botón de guardar (posicionamiento absoluto) --- */
 .colorbutton-btn {
-  padding: 10px 20px;
-  border: 2px solid #3f51b5;
-  border-radius: 20px;
-  background-color: #cfe0ff;
-  color: #3f51b5;
-  font-weight: bold;
-  font-family: 'Verdana', sans-serif;
-  transition: border-color 0.3s ease, background-color 0.3s ease, transform 0.3s ease;
-  outline: none;
-  cursor: pointer;
-  
-  /* POSICIONAMIENTO ABSOLUTO y lo bajamos un poco */
-  position: absolute;
-  bottom: 10px; /* Reducimos el valor para que baje más */
-  right: 30px; 
+  padding: 10px 20px; /* Relleno interno del botón */
+  border: 2px solid #3f51b5; /* Borde sólido azul oscuro */
+  border-radius: 20px; /* Bordes muy redondeados (forma de píldora) */
+  background-color: #cfe0ff; /* Color de fondo azul claro */
+  color: #3f51b5; /* Color de texto azul oscuro */
+  font-weight: bold; /* Texto en negrita */
+  font-family: 'Verdana', sans-serif; /* Fuente Verdana o genérica sans-serif */
+  transition: border-color 0.3s ease, background-color 0.3s ease,
+    transform 0.3s ease; /* Transiciones suaves para efectos hover */
+  outline: none; /* Elimina el contorno al hacer clic */
+  cursor: pointer; /* Cambia el cursor a una mano */
+
+  /* POSICIONAMIENTO ABSOLUTO */
+  position: absolute; /* Posicionamiento absoluto respecto al ancestro posicionado */
+  bottom: 20px; /* A 20px del borde inferior */
+  right: 30px; /* A 30px del borde derecho */
 }
 
+/* Estilos para el botón de la esquina al pasar el ratón por encima */
 .colorbutton-btn:hover {
-  background-color: #bbd3ff; 
-  border-color: #303f9f; 
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  background-color: #bbd3ff; /* Color de fondo un poco más oscuro */
+  border-color: #303f9f; /* Color del borde un poco más oscuro */
+  transform: translateY(-2px); /* Ligeramente elevado */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra sutil */
 }
 
 .settings-card {
   background-color: #cfe0ff; /* Color de fondo azul claro */
+}
+
+.full-width{
+  margin-left: 15px;
 }

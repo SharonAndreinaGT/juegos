@@ -491,7 +491,7 @@ export class ChartComponent implements OnInit {
 
   public barChartType2: ChartType = 'bar';
   public barChartData2: ChartData<'bar'> = {
-    labels: ['Rompecabezas', 'Memoria', 'Acertijos'],
+    labels: ['Rompecabezas', 'Memoria', 'Adivinanzas'],
     datasets: [
       {
         data: [45, 32, 23],

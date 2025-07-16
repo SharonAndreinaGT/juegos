@@ -61,15 +61,7 @@
 
                 <!-- Columna izquierda: Formulario -->
                 <div class="level-form-column">
-                  <h2 class="h2">{{ level1Form.get('level_name')?.value }}</h2>
-
-                  <mat-form-field appearance="fill" class="full-width">
-                    <mat-label>Nombre del Nivel</mat-label>
-                    <input matInput formControlName="level_name" required>
-                    <mat-error *ngIf="level1Form.get('level_name')?.hasError('required') && level1Form.get('level_name')?.touched">
-                      El nombre del nivel es requerido.
-                    </mat-error>
-                  </mat-form-field>
+                  <h2 class="h2">Fácil</h2>
 
                   <mat-form-field appearance="fill" class="full-width">
                     <mat-label>Límite de Tiempo (segundos)</mat-label>
@@ -99,7 +91,7 @@
                     <mat-hint>Este nivel tiene {{ LEVEL_CARD_COUNTS.level1 }} tarjetas ({{ LEVEL_CARD_COUNTS.level1 / 2 }} pares).</mat-hint>
                   </mat-form-field>
 
-                  <mat-slide-toggle formControlName="isActive" (change)="onLevelActiveChange($event, 'level1')">
+                  <mat-slide-toggle formControlName="isActive" (change)="onLevelActiveChange($event, 'level1')" class="active-level-toggle">
                     Nivel Activo
                   </mat-slide-toggle>
 
@@ -139,15 +131,7 @@
               <div [formGroup]="level2Form" class="level-settings-flex-container">
 
                 <div class="level-form-column">
-                  <h2 class="h2">{{ level2Form.get('level_name')?.value }}</h2>
-
-                  <mat-form-field appearance="fill" class="full-width">
-                    <mat-label>Nombre del Nivel</mat-label>
-                    <input matInput formControlName="level_name" required>
-                    <mat-error *ngIf="level2Form.get('level_name')?.hasError('required') && level2Form.get('level_name')?.touched">
-                      El nombre del nivel es requerido.
-                    </mat-error>
-                  </mat-form-field>
+                  <h2 class="h2">Medio</h2>
 
                   <mat-form-field appearance="fill" class="full-width">
                     <mat-label>Límite de Tiempo (segundos)</mat-label>
@@ -177,7 +161,7 @@
                     <mat-hint>Este nivel tiene {{ LEVEL_CARD_COUNTS.level2 }} tarjetas ({{ LEVEL_CARD_COUNTS.level2 / 2 }} pares).</mat-hint>
                   </mat-form-field>
 
-                  <mat-slide-toggle formControlName="isActive" (change)="onLevelActiveChange($event, 'level2')">
+                  <mat-slide-toggle formControlName="isActive" (change)="onLevelActiveChange($event, 'level2')" class="active-level-toggle">
                     Nivel Activo
                   </mat-slide-toggle>
 
@@ -216,15 +200,7 @@
               <div [formGroup]="level3Form" class="level-settings-flex-container">
 
                 <div class="level-form-column">
-                  <h2 class="h2">{{ level3Form.get('level_name')?.value }}</h2>
-
-                  <mat-form-field appearance="fill" class="full-width">
-                    <mat-label>Nombre del Nivel</mat-label>
-                    <input matInput formControlName="level_name" required>
-                    <mat-error *ngIf="level3Form.get('level_name')?.hasError('required') && level3Form.get('level_name')?.touched">
-                      El nombre del nivel es requerido.
-                    </mat-error>
-                  </mat-form-field>
+                  <h2 class="h2">Difícil</h2>
 
                   <mat-form-field appearance="fill" class="full-width">
                     <mat-label>Límite de Tiempo (segundos)</mat-label>
@@ -254,7 +230,7 @@
                     <mat-hint>Este nivel tiene {{ LEVEL_CARD_COUNTS.level3 }} tarjetas ({{ LEVEL_CARD_COUNTS.level3 / 2 }} pares).</mat-hint>
                   </mat-form-field>
 
-                  <mat-slide-toggle formControlName="isActive" (change)="onLevelActiveChange($event, 'level3')">
+                  <mat-slide-toggle formControlName="isActive" (change)="onLevelActiveChange($event, 'level3')" class="active-level-toggle">
                     Nivel Activo
                   </mat-slide-toggle>
 

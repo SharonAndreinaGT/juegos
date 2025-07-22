@@ -15,8 +15,8 @@ export class CreateUserFormComponent {
     private dialogRef: MatDialogRef<CreateUserFormComponent>
   ) {
     this.studentForm = this.fb.group({
-      name: ['', Validators.required],
-      lastname: ['', Validators.required],
+      name: ['', [Validators.required, this.lettersOnlyValidator()]], 
+      lastname: ['', [Validators.required, this.lettersOnlyValidator()]], 
       section: ['', [Validators.required, this.sectionABValidator()]],
       score: [0, [Validators.min(0), Validators.max(100)]]
     });
@@ -39,6 +39,22 @@ export class CreateUserFormComponent {
         return null; // El valor es válido
       } else {
         return { 'invalidSectionAB': { value: value } }; // El valor es inválido
+      }
+    };
+  }
+
+  // Validador personalizado para permitir solo letras
+  lettersOnlyValidator(): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+      const value = control.value;
+      if (value === null || value.length === 0) {
+        return null;
+      }
+      const onlyLetters = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ]*$/; // Permite solo letras
+      if (onlyLetters.test(value)) {
+        return null;
+      } else {
+        return { 'lettersOnly': { value: value } };
       }
     };
   }
@@ -68,20 +84,27 @@ export class CreateUserFormComponent {
     }
   }
 
-  registrarEstudiante(): void {
-    this.studentForm.markAllAsTouched();
-    if (this.studentForm.valid) {
-      //se obtiene el valor del formulario
-      const formValue = this.studentForm.value;
+ registrarEstudiante(): void {
+  this.studentForm.markAllAsTouched();
+  if (this.studentForm.valid) {
+    const formValue = this.studentForm.value;
 
-      // se convierte la sección a mayúscula antes de cerrarlo 
-      if (formValue.section) { 
-        formValue.section = formValue.section.toUpperCase();
-      }
-
-      this.dialogRef.close(formValue); // se envia el valor modificado
+    // Estandarizar la sección a mayúsculas
+    if (formValue.section) {
+      formValue.section = formValue.section.toUpperCase();
     }
+
+    // Estandarizar nombre y apellido a minúsculas antes de guardar
+    if (formValue.name) {
+      formValue.name = formValue.name.toLowerCase();
+    }
+    if (formValue.lastname) {
+      formValue.lastname = formValue.lastname.toLowerCase();
+    }
+
+    this.dialogRef.close(formValue);
   }
+}
 
   cerrarModal(): void {
     this.dialogRef.close();

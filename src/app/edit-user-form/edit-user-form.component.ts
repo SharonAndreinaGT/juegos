@@ -1,6 +1,6 @@
-import { Component, Inject, HostListener } from '@angular/core'; // Agregamos HostListener
+import { Component, Inject, HostListener } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { FormBuilder, FormGroup, Validators, AbstractControl, ValidatorFn } from '@angular/forms'; // Agregamos AbstractControl, ValidatorFn
+import { FormBuilder, FormGroup, Validators, AbstractControl, ValidatorFn } from '@angular/forms';
 
 @Component({
   selector: 'app-edit-user-form',
@@ -17,31 +17,45 @@ export class EditUserFormComponent {
   ) {
     this.studentForm = this.fb.group({
       id: [data.id],
-      name: [data.name || '', Validators.required],
-      lastname: [data.lastname || '', Validators.required],
+      name: [data.name || '', [Validators.required, this.lettersOnlyValidator()]],
+      lastname: [data.lastname || '', [Validators.required, this.lettersOnlyValidator()]],
       score: [data.score ?? 0, [Validators.required, Validators.min(0), Validators.max(100)]],
-      // se aplica el validador personalizado 'sectionABValidator'
-      section: [data.section || '', [Validators.required, this.sectionABValidator()]] // Valor inicial de la sección para edición
+      section: [data.section || '', [Validators.required, this.sectionABValidator()]]
     });
   }
 
-  // Validador personalizado para permitir solo 'A' o 'B' 
+  // Validador para permitir solo 'A' o 'B'
   sectionABValidator(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } | null => {
-      const value = control.value; //con value se obtiene el valor actual
+      const value = control.value;
 
       if (value === null || value === undefined || value === '') {
-        return null; // permite que Validators.required maneje el campo vacío
+        return null;
       }
 
-      // Validar si es 'A', 'a', 'B' o 'b'
       const isValidChar = (value.toLowerCase() === 'a' || value.toLowerCase() === 'b');
 
-      // Validar que sea solo una letra
       if (isValidChar && value.length === 1) {
-        return null; // El valor es válido
+        return null;
       } else {
-        return { 'invalidSectionAB': { value: value } }; // El valor es inválido
+        return { 'invalidSectionAB': { value: value } };
+      }
+    };
+  }
+
+  // Validador para permitir solo letras y convertir a minúsculas
+  lettersOnlyValidator(): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+      const value = control.value;
+      if (value === null || value.length === 0) {
+        return null;
+      }
+      // permite solo letras y asegura que sean minúsculas
+      const onlyLowercaseLetters = /^[a-záéíóúñü]*$/;
+      if (onlyLowercaseLetters.test(value)) {
+        return null;
+      } else {
+        return { 'lettersOnly': { value: value } };
       }
     };
   }
@@ -50,16 +64,15 @@ export class EditUserFormComponent {
   @HostListener('input', ['$event'])
   onInput(event: Event): void {
     const target = event.target as HTMLInputElement;
+    const formControlName = target.id; // Obtener el nombre del control del formulario
 
-    if (target.id === 'section') {
+    if (formControlName === 'section') {
       let value = target.value;
 
-      // Limitar la entrada a una sola letra, con la longitud
       if (value.length > 1) {
         value = value.charAt(0);
       }
 
-      // Si la letra ingresada no es 'A', 'a', 'B', 'b' y no está vacía, la resetea a vacío
       if (value !== '' && value.toLowerCase() !== 'a' && value.toLowerCase() !== 'b') {
         value = '';
       }
@@ -68,21 +81,30 @@ export class EditUserFormComponent {
         this.studentForm.get('section')?.setValue(value, { emitEvent: false });
         this.studentForm.get('section')?.updateValueAndValidity();
       }
+    } else if (formControlName === 'name' || formControlName === 'lastname') {
+      let value = target.value;
+
+      // Convertir a minúsculas y remover caracteres no permitidos
+      const cleanedValue = value.toLowerCase().replace(/[^a-záéíóúñü]/g, '');
+
+      if (this.studentForm.get(formControlName)?.value !== cleanedValue) {
+        this.studentForm.get(formControlName)?.setValue(cleanedValue, { emitEvent: false });
+        this.studentForm.get(formControlName)?.updateValueAndValidity();
+      }
     }
   }
 
   guardarCambios() {
-    this.studentForm.markAllAsTouched(); // Para mostrar errores si el formulario no es válido
+    this.studentForm.markAllAsTouched();
     if (this.studentForm.valid) {
-      // Obtenemos el valor del formulario
       const formValue = this.studentForm.value;
 
-      // convierte la sección a mayúscula antes de cerrar y enviarlo al backend
-      if (formValue.section) { 
+      // Estandarizar la sección a mayúsculas
+      if (formValue.section) {
         formValue.section = formValue.section.toUpperCase();
       }
 
-      this.dialogRef.close(formValue); // Envia el valor modificado
+      this.dialogRef.close(formValue);
     }
   }
 

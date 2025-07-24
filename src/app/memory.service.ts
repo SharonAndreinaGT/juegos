@@ -117,7 +117,7 @@ export class MemoryService {
   getStudentMemoryResults(studentId: string): Observable<MemoryResult[]> {
     console.log(`[MemoryService] Obteniendo resultados de memoria para estudiante ID: ${studentId}`);
     return this.http.get<any>(
-      `${this.memoryResultsApiUrl}?filter[student_id][_eq]=${studentId}`
+      `${this.memoryResultsApiUrl}?filter[student_id][_eq]=${studentId}&sort=-created_at`
     ).pipe(
       // Primer map para obtener los datos crudos de memory_results
       map(response => {

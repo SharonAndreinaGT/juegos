@@ -115,7 +115,6 @@ export class PuzzleService {
   getStudentPuzzleResults(studentId: string): Observable<PuzzleResult[]> {
   console.log(`[PuzzleService] Obteniendo resultados para estudiante ID: ${studentId}`);
   return this.http.get<any>(
-    // Asegúrate de que esta URL esté exactamente así:
     `${this.directusBaseUrl}/items/${this.puzzleResultsCollection}?filter[student_id][_eq]=${studentId}&fields=*,level_name&sort=-created_at`
   ).pipe(
     map(response => {

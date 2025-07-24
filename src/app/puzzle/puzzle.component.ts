@@ -102,12 +102,12 @@ export class PuzzleComponent implements OnInit, OnDestroy {
           console.warn(`[PuzzleComponent] No se encontró configuración para ${this.currentLevelName}. Usando valores por defecto.`);
           this.resetToDefaultConfig();
         }
-        this.initializeGame(); // Esta llamada se moverá para ser más oportuna en resetGame
+        this.initializeGame();
       },
       (error) => {
         console.error(`[PuzzleComponent] Error al cargar la configuración del rompecabezas para ${this.currentLevelName}:`, error);
         this.resetToDefaultConfig();
-        this.initializeGame(); // Esta llamada se moverá para ser más oportuna en resetGame
+        this.initializeGame();
       }
     );
   }
@@ -187,8 +187,8 @@ export class PuzzleComponent implements OnInit, OnDestroy {
   playWinSound(): void {
     try {
       if (this.winSound && this.winSound.nativeElement) {
-        this.winSound.nativeElement.currentTime = 0;
-        this.winSound.nativeElement.volume = 0.7;
+        this.winSound.nativeElement.currentTime = 0; // Reiniciar el audio
+        this.winSound.nativeElement.volume = 0.7; // Volumen al 70%
         const playPromise = this.winSound.nativeElement.play();
         
         if (playPromise !== undefined) {
@@ -209,8 +209,8 @@ export class PuzzleComponent implements OnInit, OnDestroy {
   playLoseSound(): void {
     try {
       if (this.loseSound && this.loseSound.nativeElement) {
-        this.loseSound.nativeElement.currentTime = 0;
-        this.loseSound.nativeElement.volume = 0.7;
+        this.loseSound.nativeElement.currentTime = 0; // Reiniciar el audio
+        this.loseSound.nativeElement.volume = 0.7; // Volumen al 70%
         const playPromise = this.loseSound.nativeElement.play();
         
         if (playPromise !== undefined) {
@@ -314,30 +314,8 @@ export class PuzzleComponent implements OnInit, OnDestroy {
     this.elapsedTime = `${minutes}:${seconds}`;
   }
 
-  /**
-   * Reinicia el juego. Primero, establece el estado inicial y desordena las piezas,
-   * luego carga la configuración del rompecabezas de forma asíncrona.
-   */
   resetGame(): void {
-    // 1. Reinicia las variables de estado del juego de forma síncrona
-    this.moves = 0;
-    this.score = 0;
-    this.isComplete = false; // Importante: marca como no completo para que se renderice el grid
-    this.stars = 0;
-    this.draggedIndex = null;
-    this.stopTimer(); // Asegúrate de detener cualquier temporizador anterior
-
-    // 2. Genera un rompecabezas desordenado *inmediatamente*
-    // para que la UI no muestre la imagen completa.
-    this.generatePuzzle(); 
-    this.startTimer(); // Inicia el temporizador para el nuevo juego
-    this.setCssVariables(); // Asegura que las variables CSS estén actualizadas
-
-    // 3. Luego, carga la configuración del rompecabezas.
-    // Una vez que esta llamada asíncrona regrese, initializeGame() se llamará de nuevo,
-    // lo que re-generará el rompecabezas con la nueva configuración, pero para entonces
-    // la vista ya habrá mostrado un rompecabezas desordenado inicial.
-    this.loadPuzzleConfiguration(); 
+    this.loadPuzzleConfiguration();
   }
 
   options(): void {

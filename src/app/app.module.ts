@@ -51,6 +51,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatChipsModule } from '@angular/material/chips';
 import { NgChartsModule } from 'ng2-charts';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 
 @NgModule({
@@ -103,6 +104,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
       MatChipsModule,
       NgChartsModule,
       MatProgressSpinnerModule,
+      MatSnackBarModule,
       HttpClientModule
     ],
     providers: [

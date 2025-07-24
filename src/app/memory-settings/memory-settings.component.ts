@@ -1,12 +1,13 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms'; 
-import { MatSnackBar } from '@angular/material/snack-bar'; // Para mostrar mensajes al guardar
-import { MatSlideToggleChange } from '@angular/material/slide-toggle'; // Para el evento del slide toggle
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { MemoryGameStateService } from '../memory-game-state.service';
 import { MemoryConfig } from '../memory-config-model';
 import { MemoryService } from '../memory.service';
-
+import { forkJoin } from 'rxjs'; // Importar forkJoin para peticiones concurrentes
+import { take } from 'rxjs/operators'; // Para desuscribirse automáticamente de observables que completan
 
 @Component({
   selector: 'app-memory-settings',
@@ -32,11 +33,20 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
     level3: 12
   };
 
+  // Define una configuración por defecto para cuando no hay un nivel activo
+  readonly DEFAULT_MEMORY_CONFIG: MemoryConfig = {
+    level_name: '', 
+    card_count: 0,
+    time_limit: 0,
+    intent: 0,
+    isActive: false,
+    images: []
+  };
+
   constructor(
     private route: ActivatedRoute,
     private fb: FormBuilder,
     private snackBar: MatSnackBar,
-    // --- NUEVA LÍNEA: Inyectar el servicio de estado del juego ---
     private gameStateService: MemoryGameStateService,
     private memoryService: MemoryService
   ) {
@@ -75,7 +85,6 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
   }
 
   getLevelForm(levelKey: string): FormGroup {
-
     switch (levelKey) {
       case 'level1': return this.level1Form;
       case 'level2': return this.level2Form;
@@ -93,6 +102,7 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
     if (files && files.length > 0) {
       const requiredPairs = this.LEVEL_CARD_COUNTS[levelKey as keyof typeof this.LEVEL_CARD_COUNTS] / 2;
 
+      // Limpiar las imágenes seleccionadas previamente para este nivel
       this.selectedFilesByLevel[levelKey] = [];
 
       for (let i = 0; i < files.length; i++) {
@@ -107,14 +117,14 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
             };
             reader.readAsDataURL(file);
           } else {
-            this.snackBar.open(`Ya has seleccionado el máximo de ${requiredPairs} imágenes para este nivel.`, 'Cerrar', { duration: 3000 });
+            this.showSnackbar(`Ya has seleccionado el máximo de ${requiredPairs} imágenes para este nivel.`, 'Cerrar', 3000);
             break;
           }
         } else {
-          this.snackBar.open(`Archivo no permitido: ${file.name}. Solo se aceptan imágenes.`, 'Cerrar', { duration: 3000 });
+          this.showSnackbar(`Archivo no permitido: ${file.name}. Solo se aceptan imágenes.`, 'Cerrar', 3000);
         }
       }
-      event.target.value = '';
+      event.target.value = ''; // Limpiar el input de archivo para permitir seleccionar los mismos archivos de nuevo
     } else {
         this.selectedFilesByLevel[levelKey] = [];
         this.updateImageValidation(levelKey);
@@ -123,7 +133,7 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
 
   removeImage(levelKey: string, index: number): void {
     this.selectedFilesByLevel[levelKey].splice(index, 1);
-    this.selectedFilesByLevel[levelKey].forEach((img, i) => img.id = i);
+    this.selectedFilesByLevel[levelKey].forEach((img, i) => img.id = i); // Reindexar IDs locales
     this.updateImageValidation(levelKey);
   }
 
@@ -132,7 +142,7 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
     const requiredPairs = this.LEVEL_CARD_COUNTS[levelKey as keyof typeof this.LEVEL_CARD_COUNTS] / 2;
     const levelFormGroup = this.getLevelForm(levelKey);
 
-      console.log(`Validación de imagen para ${levelKey}:`, { imagesCount, requiredPairs });
+    console.log(`Validación de imagen para ${levelKey}:`, { imagesCount, requiredPairs });
 
     if (imagesCount !== requiredPairs) {
       levelFormGroup.setErrors({ notEnoughImages: true });
@@ -143,25 +153,35 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Maneja el cambio del slide toggle de 'Nivel Activo'.
+   * Actualiza el estado local y el servicio de estado del juego,
+   * pero NO guarda la configuración en la base de datos de inmediato.
+   * El guardado ocurre solo al hacer clic en el botón "Guardar Configuración".
+   */
   onLevelActiveChange(event: MatSlideToggleChange, levelKey: string): void {
     const isActive = event.checked;
     const currentLevelForm = this.getLevelForm(levelKey);
 
-    // Si se activa este nivel, desactivar los demás
+    // Si se activa este nivel, desactivar los demás en el modelo local de la UI
     if (isActive) {
       ['level1', 'level2', 'level3'].forEach(key => {
         if (key !== levelKey) {
           this.getLevelForm(key).get('isActive')?.setValue(false, { emitEvent: false }); 
         }
       });
+      // Actualizar el servicio de estado del juego inmediatamente con el nivel activo
+      this.gameStateService.setActiveLevel(currentLevelForm.value);
+    } else {
+      // Si se desactiva el nivel actual y era el que estaba activo en el servicio de estado
+      if (this.gameStateService.getActiveLevel()?.level_name === currentLevelForm.get('level_name')?.value) {
+        this.gameStateService.setActiveLevel(this.DEFAULT_MEMORY_CONFIG); // Limpiar el nivel activo en el servicio de estado
+      }
     }
 
-    // Actualizar el estado 'isActive' en el formulario
+    // Actualizar el estado 'isActive' en el formulario local
     currentLevelForm.get('isActive')?.setValue(isActive);
 
-    // Guardar la configuración del nivel actual
-    // Lo hacemos de forma asíncrona para no bloquear el UI.
-    this.saveLevelConfig(levelKey);
   }
 
   async saveLevelConfig(levelKey: string): Promise<void> {
@@ -170,55 +190,60 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
     // Asegurarse de que el número de imágenes coincida antes de guardar
     const requiredPairs = this.LEVEL_CARD_COUNTS[levelKey as keyof typeof this.LEVEL_CARD_COUNTS] / 2;
     if (this.selectedFilesByLevel[levelKey].length !== requiredPairs) {
-      this.snackBar.open(`El Nivel ${levelKey.replace('level', '')} requiere ${requiredPairs} imágenes para guardar.`, 'Cerrar', { duration: 5000 });
+      this.showSnackbar(`El Nivel ${levelKey.replace('level', '')} requiere ${requiredPairs} imágenes para guardar.`, 'Cerrar', 5000);
       levelForm.setErrors({ notEnoughImages: true }); 
       return;
     } else {
-        if (levelForm.hasError('notEnoughImages')) {
-            levelForm.setErrors(null); 
-        }
+      if (levelForm.hasError('notEnoughImages')) {
+          levelForm.setErrors(null); 
+      }
     }
-  console.log(`Intentando guardar configuración para ${levelKey}:`, { levelFormValue: levelForm.value, levelFormValidity: levelForm.valid });
 
-    console.log(levelForm)
+    console.log(`Intentando guardar configuración para ${levelKey}:`, { levelFormValue: levelForm.value, levelFormValidity: levelForm.valid });
+
     if (levelForm.invalid) {
-      this.snackBar.open('Por favor, completa todos los campos requeridos para el nivel seleccionado.', 'Cerrar', { duration: 5000 });
+      this.showSnackbar('Por favor, completa todos los campos requeridos para el nivel seleccionado.', 'Cerrar', 5000);
       levelForm.markAllAsTouched(); 
       return;
     }
 
-   // Obtener los archivos de imagen del nivel actual que necesitan ser cargados
-    const imageFiles = this.selectedFilesByLevel[levelKey]
-      .map(fileItem => fileItem.file)
-      .filter(file => file != null) as File[];
+    // Obtener los archivos de imagen del nivel actual que necesitan ser cargados
+    // Filtrar solo los archivos que son instancias de File (nuevos archivos seleccionados)
+    const newImageFiles = this.selectedFilesByLevel[levelKey]
+      .filter(fileItem => fileItem.file instanceof File)
+      .map(fileItem => fileItem.file as File);
+
+    // Obtener las URLs de imágenes existentes (que no son archivos nuevos)
+    const existingImageUrls = this.selectedFilesByLevel[levelKey]
+      .filter(fileItem => typeof fileItem.preview === 'string' && fileItem.preview.startsWith('http'))
+      .map(fileItem => fileItem.preview);
 
     try {
-      let imageUrls: string[] = [];
+      let uploadedImageUrls: string[] = [];
       
       // Solo subir imágenes si hay archivos nuevos
-      if (imageFiles.length > 0) {
-        const imageUploads = imageFiles.map(file => this.memoryService.uploadImage(file).toPromise());
-        console.log(imageUploads)
+      if (newImageFiles.length > 0) {
+        const imageUploads = newImageFiles.map(file => this.memoryService.uploadImage(file).toPromise());
         const imageResponses = await Promise.all(imageUploads);
-        console.log(imageResponses)
 
-        imageUrls = imageResponses.map(response => {
+        uploadedImageUrls = imageResponses.map(response => {
           const fileId = response.data.id;
-          return `http://localhost:8055/assets/${fileId}`;
+          // Asegúrate de que esta URL sea correcta para tu Directus.
+          // Si Directus espera solo el ID del archivo en el campo 'images',
+          // entonces deberías guardar solo 'fileId' aquí y construir la URL al cargar.
+          return `http://localhost:8055/assets/${fileId}`; 
         });
-      } else {
-        // Si no hay archivos nuevos, usar las URLs existentes
-        imageUrls = this.selectedFilesByLevel[levelKey]
-          .map(fileItem => fileItem.preview)
-          .filter(preview => preview && preview.startsWith('http'));
       }
-
-      console.log('URLs de imágenes a guardar:', imageUrls);
+      
+      // Combinar las URLs de imágenes subidas y las existentes
+      const finalImageUrls = [...existingImageUrls, ...uploadedImageUrls];
+      console.log('URLs de imágenes a guardar:', finalImageUrls);
 
       const levelName = levelForm.get('level_name')?.value;
       
-      // Verificar si ya existe un registro con el mismo level_name
-      const existingConfig = await this.memoryService.getMemoryConfigByLevel(levelName).toPromise();
+      // Obtener la configuración existente de Directus para este nivel
+      const existingConfigResponse = await this.memoryService.getMemoryConfigByLevel(levelName).toPromise();
+      const existingConfigData = existingConfigResponse?.data?.[0];
       
       const configToSave: MemoryConfig = {
         level_name: levelName,
@@ -226,109 +251,168 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
         time_limit: levelForm.get('time_limit')?.value,
         intent: levelForm.get('intent')?.value,
         isActive: levelForm.get('isActive')?.value,
-        images: imageUrls
+        images: finalImageUrls
       };
 
       // Si existe un registro, asignar el ID para que se actualice en lugar de crear
-      if (existingConfig && existingConfig.data && existingConfig.data.length > 0) {
-        configToSave.id = existingConfig.data[0].id;
+      if (existingConfigData && existingConfigData.id) {
+        configToSave.id = existingConfigData.id;
         console.log(`Actualizando configuración existente con ID: ${configToSave.id}`);
       } else {
         console.log('Creando nueva configuración');
       }
 
-      // Si este nivel se va a activar, desactivar todos los demás niveles primero
+      // Si este nivel se va a activar, desactivar todos los demás niveles primero en la DB
       if (configToSave.isActive) {
-        try {
-          // Obtener todas las configuraciones existentes
-          const allConfigs = await this.memoryService.getAllMemoryConfigs().toPromise();
-          
-          // Desactivar todos los niveles excepto el actual
-          const deactivationPromises = allConfigs.data
-            .filter((config: MemoryConfig) => config.id !== configToSave.id && config.isActive)
-            .map((config: MemoryConfig) => {
-              const deactivatedConfig = { ...config, isActive: false };
-              return this.memoryService.saveMemoryConfig(deactivatedConfig).toPromise();
-            });
+        // Obtener todas las configuraciones existentes de Directus
+        const allConfigsResponse = await this.memoryService.getAllMemoryConfigs().toPromise();
+        const allConfigs: MemoryConfig[] = allConfigsResponse?.data || [];
+        
+        // Desactivar todos los niveles que están activos y no son el nivel actual
+        const deactivationPromises = allConfigs
+          .filter((config: MemoryConfig) => config.id !== configToSave.id && config.isActive)
+          .map(async (config: MemoryConfig) => {
+            console.log(`Desactivando nivel ${config.level_name} (ID: ${config.id}) en la DB.`);
+            // Obtener la configuración completa del nivel a desactivar antes de enviarla
+            const currentDbConfigResponse = await this.memoryService.getMemoryConfigByLevel(config.level_name!).toPromise();
+            const currentDbConfig = currentDbConfigResponse?.data?.[0];
 
-          if (deactivationPromises.length > 0) {
-            await Promise.all(deactivationPromises);
-            console.log('Otros niveles desactivados exitosamente');
-          }
-        } catch (error) {
-          console.error('Error al desactivar otros niveles:', error);
-          this.snackBar.open('Error al desactivar otros niveles. Por favor, inténtalo de nuevo.', 'Cerrar', { duration: 5000 });
-          return;
+            if (currentDbConfig && currentDbConfig.id) {
+                // Modificar la copia completa y enviarla
+                currentDbConfig.isActive = false;
+                return this.memoryService.saveMemoryConfig(currentDbConfig).toPromise();
+            }
+            return Promise.resolve(); // Si no se encuentra o no tiene ID, no hacer nada
+          });
+
+        if (deactivationPromises.length > 0) {
+          await Promise.all(deactivationPromises);
+          console.log('Otros niveles desactivados exitosamente en la base de datos.');
         }
+
+        // Después de desactivar en la DB, actualizar el estado local de los otros toggles
+        // para que la UI refleje el cambio inmediatamente al guardar.
+        ['level1', 'level2', 'level3'].forEach(key => {
+          const form = this.getLevelForm(key);
+          if (form.get('level_name')?.value !== configToSave.level_name) {
+            form.get('isActive')?.setValue(false, { emitEvent: false });
+          }
+        });
       }
       
-      const allLevelsConfig = JSON.parse(localStorage.getItem('memoryGameLevelsConfig') || '{}');
-      allLevelsConfig[levelKey] = configToSave;
-
-      localStorage.setItem('memoryGameLevelsConfig', JSON.stringify(allLevelsConfig));
-      this.snackBar.open(`Configuración del Nivel ${levelKey.replace('level', '')} guardada exitosamente.`, 'Cerrar', { duration: 3000 });
-      console.log(`Configuración del Nivel ${levelKey.replace('level', '')} Guardada:`, configToSave);
-
-      // Si este nivel se acaba de activar, lo enviamos al servicio de estado ---
-    if (configToSave.isActive) {
-      this.gameStateService.setActiveLevel(configToSave);
-    }
-
-      console.log(configToSave)
-     // Enviar la configuración al backend usando MemoryService
+      // Guardar la configuración (crear o actualizar) en Directus
       const savedConfig = await this.memoryService.saveMemoryConfig(configToSave).toPromise();
-      this.snackBar.open(`Configuración del Nivel ${levelKey.replace('level', '')} guardada exitosamente.`, 'Cerrar', { duration: 3000 });
+      
+      this.showSnackbar(`Configuración del Nivel ${levelKey.replace('level', '')} guardada exitosamente.`, 'Ok', 3000);
       console.log(`Configuración del Nivel ${levelKey.replace('level', '')} Guardada:`, savedConfig);
-    } catch (error) {
-      // Manejo de errores al guardar la configuración
-      console.error(`Error al guardar la configuración del Nivel ${levelKey.replace('level', '')}:`, error);
-      this.snackBar.open(`Error al guardar la configuración del Nivel ${levelKey.replace('level', '')}.`, 'Cerrar', { duration: 5000 });
-    }
-}
 
-  // Cargar la configuración al iniciar el componente
-loadSettings(): void {
-  console.log('Intentando cargar configuración desde localStorage...', localStorage);
-  const savedConfig = localStorage.getItem('memoryGameLevelsConfig');
-  if (savedConfig) {
-    const parsedConfig: { [key: string]: MemoryConfig } = JSON.parse(savedConfig);
-
-      console.log('Configuración cargada desde localStorage:', parsedConfig);
-
-    ['level1', 'level2', 'level3'].forEach(levelKey => {
-      const levelData = parsedConfig[levelKey];
-      if (levelData) {
-        const levelForm = this.getLevelForm(levelKey);
-
-        levelForm.patchValue({
-          level_name: levelData.level_name,
-          card_count: levelData.card_count, 
-          time_limit: levelData.time_limit,
-          intent: levelData.intent,
-          isActive: levelData.isActive
-        });
-
-        // Verifica si 'images' es un arreglo antes de intentar mapear
-        if (Array.isArray(levelData.images)) {
-          this.selectedFilesByLevel[levelKey] = levelData.images.map(img => ({
-            file: null,
-            preview: img
-          }));
-        } else {
-          // Si 'images' no es un arreglo, establece un arreglo vacío
-          this.selectedFilesByLevel[levelKey] = [];
-          console.log(`Advertencia: 'images' no está definido o no es un arreglo en la configuración del nivel '${levelKey}'.`);
-        }
-        
-        this.updateImageValidation(levelKey); 
-
-        // --- NUEVA LÓGICA: Si este nivel estaba activo al cargar, también lo establecemos en el servicio de estado. ---
-        if (levelData.isActive) {
-          this.gameStateService.setActiveLevel(levelData); 
+      // Actualizar el servicio de estado del juego con la configuración recién guardada y activa
+      if (savedConfig && savedConfig.isActive) {
+        this.gameStateService.setActiveLevel(savedConfig);
+      } else if (savedConfig && this.gameStateService.getActiveLevel()?.level_name === savedConfig.level_name) {
+        this.gameStateService.setActiveLevel(this.DEFAULT_MEMORY_CONFIG);
+      } else if (!savedConfig) {
+        if (this.gameStateService.getActiveLevel()?.level_name === configToSave.level_name) {
+          this.gameStateService.setActiveLevel(this.DEFAULT_MEMORY_CONFIG);
         }
       }
-    });
-    this.snackBar.open('Configuración cargada.', 'Cerrar', { duration: 2000 });
+
+    } catch (error) {
+      console.error(`Error al guardar la configuración del Nivel ${levelKey.replace('level', '')}:`, error);
+      this.showSnackbar(`Error al guardar la configuración del Nivel ${levelKey.replace('level', '')}.`, 'Cerrar', 5000);
+    }
   }
-}
+
+  /**
+   * Carga la configuración de todos los niveles desde Directus al iniciar el componente.
+   * Asegura que los toggles 'isActive' reflejen el estado real de la base de datos.
+   */
+  loadSettings(): void {
+    console.log('Cargando configuración desde Directus...');
+    
+    const levelNames = ['Nivel1', 'Nivel2', 'Nivel3'];
+    const fetchPromises = levelNames.map(name => this.memoryService.getMemoryConfigByLevel(name).pipe(take(1)).toPromise());
+
+    forkJoin(fetchPromises).subscribe({
+      next: (responses: any[]) => {
+        let activeLevelFound: MemoryConfig | null = null;
+
+        responses.forEach((response, index) => {
+          const levelName = levelNames[index];
+          const levelKey = `level${index + 1}`;
+          const configData: MemoryConfig | undefined = response.data?.[0];
+
+          if (configData) {
+            console.log(`Configuración de ${levelName} cargada:`, configData);
+            const levelForm = this.getLevelForm(levelKey);
+            
+            // PatchValue con los datos cargados, incluyendo isActive
+            levelForm.patchValue({
+              level_name: configData.level_name,
+              card_count: configData.card_count, 
+              time_limit: configData.time_limit,
+              intent: configData.intent,
+              isActive: configData.isActive // Esto establecerá el toggle correctamente
+            });
+
+            // Cargar imágenes existentes si las hay
+            if (Array.isArray(configData.images)) {
+              this.selectedFilesByLevel[levelKey] = configData.images.map(imgUrl => ({
+                file: null, // No hay archivo File para imágenes ya en el servidor
+                preview: imgUrl // Usar la URL como preview
+              }));
+            } else {
+              this.selectedFilesByLevel[levelKey] = [];
+            }
+            this.updateImageValidation(levelKey);
+
+            // Si este nivel está activo en Directus, marcarlo como el activo principal
+            if (configData.isActive) {
+              activeLevelFound = configData;
+            }
+          } else {
+            console.log(`No se encontró configuración para ${levelName}. Usando valores por defecto.`);
+            // Asegurarse de que el toggle isActive esté en false si no hay config
+            this.getLevelForm(levelKey).get('isActive')?.setValue(false, { emitEvent: false });
+            this.selectedFilesByLevel[levelKey] = []; // Asegurarse de que no haya imágenes
+            this.updateImageValidation(levelKey);
+          }
+        });
+
+        // Después de cargar todos los niveles, establecer el nivel activo en el gameStateService
+        // Esto asegura que solo el nivel que Directus dice que está activo sea el activo en el juego.
+        if (activeLevelFound) {
+          this.gameStateService.setActiveLevel(activeLevelFound);
+        } else {
+          // Si no se encontró ningún nivel activo, explícitamente se establece la configuración por defecto.
+          this.gameStateService.setActiveLevel(this.DEFAULT_MEMORY_CONFIG); 
+        }
+      },
+      error: (err) => {
+        console.error('Error al cargar la configuración de memoria desde Directus:', err);
+        this.showSnackbar('Error al cargar la configuración. Se usarán valores por defecto.', 'Cerrar', 5000);
+        // En caso de error, asegúrate de que todos los toggles estén en false en la UI
+        ['level1', 'level2', 'level3'].forEach(key => {
+          this.getLevelForm(key).get('isActive')?.setValue(false, { emitEvent: false });
+          this.selectedFilesByLevel[key] = [];
+          this.updateImageValidation(key);
+        });
+        this.gameStateService.setActiveLevel(this.DEFAULT_MEMORY_CONFIG);
+      }
+    });
+  }
+
+  /**
+   * Muestra un mensaje de Snackbar.
+   * @param message El mensaje a mostrar.
+   * @param action La etiqueta del botón de acción (opcional).
+   * @param duration La duración en milisegundos antes de que el snackbar se cierre automáticamente (opcional).
+   */
+  private showSnackbar(message: string, action: string = '', duration: number = 5000): void {
+    this.snackBar.open(message, action, {
+      duration: duration,
+      horizontalPosition: 'center', // Centrado horizontal
+      verticalPosition: 'bottom', // Abajo
+    });
+  }
 }

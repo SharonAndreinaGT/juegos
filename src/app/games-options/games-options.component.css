@@ -2,7 +2,7 @@
     display: flex; /* Para que los contenedores se coloquen en fila */
     justify-content: space-around; /* Espacio igual entre los contenedores */
     align-items: center; 
-    min-height: 100vh;
+    min-height: 94.2vh;
     background: rgba(128, 128, 128, 0.419); 
     padding: 20px; /* Espacio alrededor de los contenedores */
   }
@@ -49,4 +49,24 @@
     transform: scale(1.1);
   }
 
+.buttonExit {
+  text-align: center;
+  position: fixed; 
+  bottom: 20px;    /* Margen desde el borde inferior */
+  right: 20px;     /* Margen desde el borde derecho */
+  z-index: 1000;  
+  background-color: #374af7; 
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 18px;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease;
+}
+
+.buttonExit:hover {
+  background-color: #2138bd; 
+}
   

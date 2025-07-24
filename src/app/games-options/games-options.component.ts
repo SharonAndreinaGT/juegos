@@ -63,4 +63,8 @@ export class GamesOptionsComponent implements OnInit {
   gamesRiddle(): void {
     this.router.navigate(['/riddle']);
   }
+
+  exit(){
+    this.router.navigate(['/welcome']);
+  }
 }

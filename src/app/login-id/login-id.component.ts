@@ -25,8 +25,6 @@ export class LoginIDComponent {
     this.errorMessage = '';
 
     // Convertimos el nombre a minúsculas para la búsqueda.
-    // ASEGÚRATE de que el campo 'name' en Directus también esté en minúsculas
-    // o manejes la sensibilidad a mayúsculas y minúsculas de otra forma.
 const url = `http://localhost:8055/items/users?filter[name][_eq]=${this.name.toLowerCase()}&filter[lastname][_eq]=${this.lastname.toLowerCase()}`;
     this.http.get<any>(url).subscribe({
       next: (respuesta) => {

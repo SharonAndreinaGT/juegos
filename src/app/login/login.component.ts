@@ -45,7 +45,7 @@ showPassword: boolean = false;
       }
     });
   }
-    // <-- Nueva función para alternar la visibilidad de la contraseña
+    //función para alternar la visibilidad de la contraseña
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword;
   }

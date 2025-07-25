@@ -4,6 +4,7 @@ import { RiddleLevel, RiddleWord } from '../riddle.model';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatTabChangeEvent } from '@angular/material/tabs';
 import { lastValueFrom } from 'rxjs';
+import { MatSnackBar } from '@angular/material/snack-bar'; // Importar MatSnackBar
 
 @Component({
   selector: 'app-riddle-settings',
@@ -27,7 +28,12 @@ export class RiddleSettingsComponent implements OnInit {
   activeTabIndex: number = 0;
   activeLevelNumber: number = 1;
 
-  constructor(private riddleService: RiddleService, private fb: FormBuilder) { }
+  // Inyectar MatSnackBar en el constructor
+  constructor(
+    private riddleService: RiddleService,
+    private fb: FormBuilder,
+    private snackBar: MatSnackBar // Inyección de MatSnackBar
+  ) { }
 
   ngOnInit(): void {
     this.riddleService.levels$.subscribe((levels: RiddleLevel[]) => {
@@ -84,7 +90,14 @@ export class RiddleSettingsComponent implements OnInit {
     let hint: string | undefined = undefined;
 
     if (!value) {
-      alert('Por favor, introduce una palabra.');
+      this.snackBar.open('Por favor, introduce una palabra.', 'Cerrar', { duration: 3000 });
+      return;
+    }
+
+    // Validación para no aceptar caracteres especiales, acentos, números ni espacios
+    const regex = /^[A-Z]*$/; // Solo letras mayúsculas
+    if (!regex.test(value)) {
+      this.snackBar.open('La palabra no puede contener espacios, números, caracteres especiales ni acentos.', 'Cerrar', { duration: 5000 });
       return;
     }
 
@@ -94,7 +107,7 @@ export class RiddleSettingsComponent implements OnInit {
         value = match[1].trim();
         hint = match[2].trim();
       } else {
-        alert('Para el Nivel 3, el formato de palabra con pista debe ser: PALABRA (Pista)');
+        this.snackBar.open('Para el Nivel 3, el formato de palabra con pista debe ser: PALABRA (Pista)', 'Cerrar', { duration: 5000 });
         return;
       }
     }
@@ -107,15 +120,18 @@ export class RiddleSettingsComponent implements OnInit {
       levelConfig.words.push({ word: value, hint: hint });
       this.newWordInput = '';
       await this.saveSingleLevelConfig(levelConfig);
+      this.snackBar.open(`Palabra "${value}" añadida al nivel ${levelConfig.level_number}.`, 'Cerrar', { duration: 3000 });
     } else {
-      alert(`La palabra "${value}" ya existe en el nivel ${levelConfig.level_number}.`);
+      this.snackBar.open(`La palabra "${value}" ya existe en el nivel ${levelConfig.level_number}.`, 'Cerrar', { duration: 3000 });
     }
   }
 
   async removeWord(levelConfig: RiddleLevel, index: number): Promise<void> {
     if (index >= 0 && index < levelConfig.words.length) {
+      const removedWord = levelConfig.words[index].word;
       levelConfig.words.splice(index, 1);
       await this.saveSingleLevelConfig(levelConfig);
+      this.snackBar.open(`Palabra "${removedWord}" eliminada del nivel ${levelConfig.level_number}.`, 'Cerrar', { duration: 3000 });
     }
   }
 
@@ -144,13 +160,13 @@ export class RiddleSettingsComponent implements OnInit {
         formToValidate = this.level3Form;
         break;
       default:
-        alert('No se pudo determinar el nivel a guardar.');
+        this.snackBar.open('No se pudo determinar el nivel a guardar.', 'Cerrar', { duration: 3000 });
         return;
     }
 
     if (formToValidate && formToValidate.invalid) {
       formToValidate.markAllAsTouched();
-      alert('Por favor, corrige los errores en la configuración antes de guardar.');
+      this.snackBar.open('Por favor, corrige los errores en la configuración antes de guardar.', 'Cerrar', { duration: 5000 });
       console.error(`[RiddleSettingsComponent] El formulario para el Nivel ${this.activeLevelNumber} es inválido.`);
       return;
     }
@@ -161,7 +177,7 @@ export class RiddleSettingsComponent implements OnInit {
       levelToSave.time_limit = formToValidate.value.timeLimit; // Guarda el nuevo campo de tiempo
 
       await this.saveSingleLevelConfig(levelToSave);
-      alert('Configuración guardada exitosamente.');
+      this.snackBar.open('Configuración guardada exitosamente.', 'Cerrar', { duration: 3000 });
     }
   }
 
@@ -178,11 +194,11 @@ export class RiddleSettingsComponent implements OnInit {
         console.log(`[RiddleSettingsComponent] Nivel ${config.level_name} guardado/actualizado en Directus.`, savedConfig);
       } else {
         console.error(`[RiddleSettingsComponent] Error inesperado: saveRiddleLevel no devolvió una configuración válida para el nivel ${config.level_name}.`);
-        alert(`Error inesperado al guardar la configuración del nivel ${config.level_name}.`);
+        this.snackBar.open(`Error inesperado al guardar la configuración del nivel ${config.level_name}.`, 'Cerrar', { duration: 5000 });
       }
     } catch (error) {
       console.error(`[RiddleSettingsComponent] Error al guardar la configuración del nivel ${config.level_name}:`, error);
-      alert(`Error al guardar la configuración del nivel ${config.level_name}. Por favor, inténtalo de nuevo.`);
+      this.snackBar.open(`Error al guardar la configuración del nivel ${config.level_name}. Por favor, inténtalo de nuevo.`, 'Cerrar', { duration: 5000 });
     }
   }
 
@@ -199,6 +215,7 @@ export class RiddleSettingsComponent implements OnInit {
           console.log(`[RiddleSettingsComponent] Nivel ${level.level_name} desactivado en Directus.`);
         } catch (error) {
           console.error(`[RiddleSettingsComponent] Error al desactivar nivel ${level.level_name} en Directus:`, error);
+          this.snackBar.open(`Error al desactivar el nivel ${level.level_name}.`, 'Cerrar', { duration: 3000 });
         }
       }
     }

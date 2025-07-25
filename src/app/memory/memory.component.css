@@ -68,6 +68,15 @@
   grid-auto-rows: minmax(100px, auto); /* Ajustar según el minmax de las columnas */
 }
 
+/* --- ESTILO ESPECÍFICO PARA EL JUEGO DE 6 TARJETAS (3 PARES) */
+.game-board.game-board--6-cards {
+  grid-template-columns: repeat(3, minmax(120px, 1fr));
+  gap: 15px;
+  width: fit-content; /* El ancho del grid se ajusta al contenido (3 columnas + gaps + padding) */
+  margin: 0 auto;     /* Centra el grid si su ancho es menor que el de su padre */
+  padding: 15px; 
+}
+
 .memory-wrapper {
   display: flex;
   flex-direction: column;
@@ -119,7 +128,7 @@
   justify-content: center;
   align-items: center;
   border-radius: 6px;
-  box-sizing: border-box; /* Importante para padding y border */
+  box-sizing: border-box; 
 }
 
 .memory-card .card-front {

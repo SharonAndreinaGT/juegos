@@ -24,6 +24,7 @@
     <div class="memory-wrapper">
       <div class="memory-wrapper">
         <div class="game-board"
+          [ngClass]="{'game-board--6-cards': totalPairs === 3}"
           *ngIf="gameStarted && matchedPairs !== totalPairs && !intentExceeded && !timeExceeded">
           <app-memory-card
             *ngFor="let card of cards"

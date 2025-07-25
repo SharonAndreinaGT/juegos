@@ -1,7 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar'; // Necesitas MatSnackBar para los mensajes del juego.
 
-// --- NUEVAS LÍNEAS ---
 import { MemoryGameStateService } from '../memory-game-state.service';
 import { MemoryConfig, MemoryResult } from '../memory-config-model'; // Importa MemoryConfig
 import { MemoryService } from '../memory.service';
@@ -54,15 +53,6 @@ export class MemoryComponent implements OnInit {
     private snackBar: MatSnackBar // Inyectar MatSnackBar para notificaciones
   ) { }
 
-/*************  ✨ Windsurf Command ⭐  *************/
-  /**
-   * ngOnInit
-   *
-   * Se llama justo antes de que el componente se vuelva a dibujar.
-   * En este caso, se llama a loadActiveMemoryConfig() para obtener la configuración
-   * del nivel activo cuando se inicia el componente.
-   */
-/*******  42785c72-6dab-4d7d-b731-0b90d52fc6d7  *******/
   ngOnInit(): void {
     this.sharedDataService.loggedInStudentId$.subscribe((studentId: string | null) => {
       this.currentStudentId = studentId;
@@ -72,7 +62,7 @@ export class MemoryComponent implements OnInit {
     this.loadActiveMemoryConfig();
   }
 
-  // --- LÓGICA DEL JUEGO (asegúrate de que las funciones existan en tu componente) ---
+
   loadActiveMemoryConfig(): void {
     // Obtener la configuración activa (isActive: true) desde la base de datos
     this.memoryService.getActiveMemoryConfig().subscribe(

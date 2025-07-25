@@ -171,6 +171,12 @@ export class RiddleSettingsComponent implements OnInit {
       return;
     }
 
+    // Nueva validación para asegurar que haya al menos una palabra
+    if (levelToSave && (!levelToSave.words || levelToSave.words.length === 0)) {
+      this.snackBar.open('Debe añadir al menos una palabra para guardar la configuración del nivel.', 'Cerrar', { duration: 5000 });
+      return;
+    }
+
     if (levelToSave && formToValidate) {
       levelToSave.max_intents = formToValidate.value.maxIntents;
       levelToSave.words_level = formToValidate.value.wordsPerLevel;

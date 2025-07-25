@@ -1,6 +1,7 @@
 import { Component, HostListener } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidatorFn } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar'; 
 
 @Component({
   selector: 'app-create-user-form',
@@ -12,7 +13,9 @@ export class CreateUserFormComponent {
 
   constructor(
     private fb: FormBuilder,
-    private dialogRef: MatDialogRef<CreateUserFormComponent>
+    private dialogRef: MatDialogRef<CreateUserFormComponent>,
+    private snackBar: MatSnackBar 
+
   ) {
     this.studentForm = this.fb.group({
       name: ['', [Validators.required, this.lettersOnlyValidator()]], 
@@ -101,6 +104,12 @@ export class CreateUserFormComponent {
     if (formValue.lastname) {
       formValue.lastname = formValue.lastname.toLowerCase();
     }
+
+    // Mostrar el mensaje de éxito 
+    this.snackBar.open('Estudiante registrado con éxito.', 'Cerrar', {
+      duration: 3000, // Duración en milisegundos
+      panelClass: ['snackbar-success'] 
+    });
 
     this.dialogRef.close(formValue);
   }

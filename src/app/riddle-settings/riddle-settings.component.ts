@@ -94,10 +94,10 @@ export class RiddleSettingsComponent implements OnInit {
       return;
     }
 
-    // Validación para no aceptar caracteres especiales, acentos, números ni espacios
-    const regex = /^[A-Z]*$/; // Solo letras mayúsculas
+    // Validación para no aceptar caracteres especiales, acentos, números 
+    const regex = /^[A-Z\s]*$/; // Solo letras mayúsculas y espacio
     if (!regex.test(value)) {
-      this.snackBar.open('La palabra no puede contener espacios, números, caracteres especiales ni acentos.', 'Cerrar', { duration: 5000 });
+      this.snackBar.open('La palabra no puede contener números, caracteres especiales ni acentos.', 'Cerrar', { duration: 5000 });
       return;
     }
 

@@ -49,5 +49,10 @@ showPassword: boolean = false;
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword;
   }
+
+  //función para regresar a welcome
+  goBack() {
+    this.router.navigate(['/welcome']);
+  }
 }
 

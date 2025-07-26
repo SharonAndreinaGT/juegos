@@ -24,7 +24,10 @@
       <div *ngIf="errorMessage" class="error-message">
         {{ errorMessage }}
       </div>
-      <button type="submit" class="login-button">Ingresar</button>
+      <div class="button-group">
+        <button type="submit" class="login-button">Ingresar</button>
+        <button type="button" class="back-button" (click)="goBack()">Regresar</button>
+      </div>
     </form>
   </div>
 </div>

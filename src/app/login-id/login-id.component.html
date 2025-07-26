@@ -15,7 +15,10 @@
             {{ errorMessage }}
         </div>
 
-        <button type="submit" class="login-button">JUGAR</button> 
+        <div class="button-group">
+          <button type="submit" class="login-button">JUGAR</button>
+          <button type="button" class="back-button" (click)="goBack()">Regresar</button>
+        </div>
       </form>
     </div>
   </div>

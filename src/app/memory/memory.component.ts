@@ -1,11 +1,13 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar'; // Necesitas MatSnackBar para los mensajes del juego.
+import { Observable } from 'rxjs';
 
 import { MemoryGameStateService } from '../memory-game-state.service';
 import { MemoryConfig, MemoryResult } from '../memory-config-model'; // Importa MemoryConfig
 import { MemoryService } from '../memory.service';
 import { SharedDataService } from '../sharedData.service';
 import { Router } from '@angular/router';
+import { CanComponentDeactivate, NavigationGuardService } from '../navigation-guard.service';
 
 export interface Card {
   id?: number | null;
@@ -19,7 +21,7 @@ export interface Card {
   templateUrl: './memory.component.html',
   styleUrls: ['./memory.component.scss']
 })
-export class MemoryComponent implements OnInit {
+export class MemoryComponent implements OnInit, CanComponentDeactivate {
   @ViewChild('winSound') winSound!: ElementRef<HTMLAudioElement>;
   @ViewChild('loseSound') loseSound!: ElementRef<HTMLAudioElement>;
 
@@ -50,7 +52,8 @@ export class MemoryComponent implements OnInit {
     private gameStateService: MemoryGameStateService,
     private router: Router,
     private memoryService: MemoryService,
-    private snackBar: MatSnackBar // Inyectar MatSnackBar para notificaciones
+    private snackBar: MatSnackBar, // Inyectar MatSnackBar para notificaciones
+    private navigationGuardService: NavigationGuardService
   ) { }
 
   ngOnInit(): void {
@@ -358,5 +361,15 @@ initializeGame(config: MemoryConfig): void {
 
   options(): void {
     this.router.navigate(['/options']);
+  }
+
+  canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
+    // Si el juego está completado o no ha comenzado, permitir salir sin confirmación
+    if (this.matchedPairs === this.totalPairs || !this.gameStarted) {
+      return true;
+    }
+    
+    // Si el juego está en progreso, mostrar confirmación
+    return this.navigationGuardService.showNavigationConfirmDialog();
   }
 }

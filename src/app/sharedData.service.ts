@@ -61,4 +61,19 @@ export class SharedDataService {
       console.log(`[SharedDataService] ID de estudiante logueado limpiado.`);
     }
   }
+
+  /**
+   * Obtiene el ID del estudiante que ha iniciado sesión.
+   * @returns El ID del estudiante o null si no hay ninguno.
+   */
+  getLoggedInStudentId(): string | null {
+    return this.loggedInStudentIdSubject.getValue();
+  }
+
+  /**
+   * Limpia el ID del estudiante logueado (logout).
+   */
+  clearLoggedInStudentId(): void {
+    this.setLoggedInStudentId(null);
+  }
 }

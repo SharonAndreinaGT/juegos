@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { Route, Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { Router, ActivatedRoute } from '@angular/router';
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-login',
@@ -16,25 +16,25 @@ errorMessage: string = '';
 showPassword: boolean = false;
 
   //utilizando servicio de ruteo para poder navegar entre los componentes
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(
+    private authService: AuthService, 
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
 
 
   //función de inicio de sesion
   login(){
     this.errorMessage = ''; 
 
-    //constante que va a guardar los datos
-    const data = {
-      email: this.email,
-      password: this.password
-    };
-
-   // petición al backend para el inicio de sesion
-    this.http.post('http://localhost:8055/auth/login', data).subscribe({
+    this.authService.login(this.email, this.password).subscribe({
       next: (respuesta: any) => {
         console.log(respuesta) 
-        localStorage.setItem('token', respuesta.data.access_token);
-        this.router.navigate(['/main']);
+        this.authService.setToken(respuesta.data.access_token);
+        
+        // Obtener la URL de retorno si existe
+        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/main';
+        this.router.navigate([returnUrl]);
       },
       error: (error) => {
         if (error.status === 401 || error.status === 403) {
@@ -48,6 +48,11 @@ showPassword: boolean = false;
     //función para alternar la visibilidad de la contraseña
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword;
+  }
+
+  //función para regresar a welcome
+  goBack() {
+    this.router.navigate(['/welcome']);
   }
 }
 

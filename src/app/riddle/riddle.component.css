@@ -27,13 +27,19 @@
 /* Header que contiene el título del juego y el estado (intentos/palabra) */
 .header {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
   width: 100%;
   margin-bottom: 40px; /* Espacio entre el header y el contenido del juego */
   padding: 0 10px; 
 }
 
+.header-top {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  margin-bottom: 20px;
+}
 .game-title {
   margin: 0;
   font-size: 2.5em; /* Tamaño del título del juego */

@@ -41,15 +41,35 @@
     margin-left: 6%;
   }
   
+  .button-group {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+  }
+
   .login-button {
-    width: 50%;
+    flex: 1;
     padding: 10px;
     background: linear-gradient(to right, #4563f8, #0799f4);
     color: #fff;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    margin-left: 25%;
+    font-size: 16px;
+    transition: all 0.3s ease;
+  }
+
+  .back-button {
+    flex: 1;
+    padding: 10px;
+    background: linear-gradient(to right, #6c757d, #495057);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
   }
   
   .login-box button:hover {

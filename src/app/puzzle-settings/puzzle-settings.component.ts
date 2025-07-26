@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { PuzzleService } from '../puzzle.service';
 import { PuzzleConfig } from '../puzzle-config.model';
 import { SharedDataService } from '../sharedData.service';
@@ -29,6 +30,7 @@ export class PuzzleSettingsComponent implements OnInit {
   level3ImageFile: File | null = null;
 
   constructor(
+    private router: Router,
     private puzzleService: PuzzleService,
     private sharedDataService: SharedDataService,
     private snackBar: MatSnackBar // Inyectar MatSnackBar
@@ -377,5 +379,10 @@ export class PuzzleSettingsComponent implements OnInit {
         // Considera mostrar un snackbar de error aquí si es crítico para el usuario saber
       }
     }
+  }
+
+  //función para regresar a settings
+  goBack() {
+    this.router.navigate(['/settings']);
   }
 }

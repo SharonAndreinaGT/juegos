@@ -65,6 +65,8 @@ export class GamesOptionsComponent implements OnInit {
   }
 
   exit(){
+    // Limpiar el ID del estudiante al salir
+    this.sharedDataService.clearLoggedInStudentId();
     this.router.navigate(['/welcome']);
   }
 }

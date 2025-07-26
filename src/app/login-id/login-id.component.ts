@@ -46,4 +46,9 @@ const url = `http://localhost:8055/items/users?filter[name][_eq]=${this.name.toL
       }
     });
   }
+
+  //función para regresar a welcome
+  goBack() {
+    this.router.navigate(['/welcome']);
+  }
 }

@@ -47,7 +47,12 @@
     <mat-card class="welcome-container">
       <mat-card-content class="">
         <div class="welcome-content">
-          <h1>{{ title }}</h1>
+          <div class="header-container">
+            <button mat-icon-button class="back-button" (click)="goBack()" matTooltip="Regresar">
+              <mat-icon>arrow_back</mat-icon>
+            </button>
+            <h1>{{ title }}</h1>
+          </div>
         </div>
 
         <mat-card class="settings-card">

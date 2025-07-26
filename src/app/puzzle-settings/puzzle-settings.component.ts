@@ -4,6 +4,7 @@ import { PuzzleService } from '../puzzle.service';
 import { PuzzleConfig } from '../puzzle-config.model';
 import { SharedDataService } from '../sharedData.service';
 import { MatSnackBar } from '@angular/material/snack-bar'; // Importar MatSnackBar
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-puzzle-settings',
@@ -33,7 +34,8 @@ export class PuzzleSettingsComponent implements OnInit {
     private router: Router,
     private puzzleService: PuzzleService,
     private sharedDataService: SharedDataService,
-    private snackBar: MatSnackBar // Inyectar MatSnackBar
+    private snackBar: MatSnackBar, // Inyectar MatSnackBar
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -384,5 +386,9 @@ export class PuzzleSettingsComponent implements OnInit {
   //función para regresar a settings
   goBack() {
     this.router.navigate(['/settings']);
+  }
+
+  logout() {
+    this.authService.logout();
   }
 }

@@ -7,6 +7,7 @@ import { UserService } from '../user.service';
 import { PuzzleService } from '../puzzle.service';
 import { MemoryService } from '../memory.service';
 import { RiddleService } from '../riddle.service';
+import { AuthService } from '../auth.service';
 
 // Importa jsPDF
 import jsPDF from 'jspdf';
@@ -50,7 +51,8 @@ export class ChartComponent implements OnInit {
     private userService: UserService,
     private puzzleService: PuzzleService,
     private memoryService: MemoryService,
-    private riddleService: RiddleService
+    private riddleService: RiddleService,
+    private authService: AuthService
   ) {}
 
   actualizarDistribucionPorGrado(countFirst: number, countSecond: number, countThird: number) {
@@ -677,5 +679,9 @@ export class ChartComponent implements OnInit {
     });
 
     doc.save('reporte_graficas.pdf');
+  }
+
+  logout() {
+    this.authService.logout();
   }
 }

@@ -4,6 +4,7 @@ import { UserService } from '../user.service';
 import { PuzzleService } from '../puzzle.service';
 import { MemoryService } from '../memory.service';
 import { RiddleService } from '../riddle.service';
+import { AuthService } from '../auth.service';
 
 import { User } from '../puzzle-config.model';
 import { PuzzleResult } from '../puzzle-config.model';
@@ -102,7 +103,8 @@ export class ProgressComponent implements OnInit, AfterViewInit {
     private userService: UserService,
     private puzzleService: PuzzleService,
     private memoryService: MemoryService,
-    private riddleService: RiddleService
+    private riddleService: RiddleService,
+    private authService: AuthService
   ) { }
 
   ngOnInit(): void {
@@ -484,5 +486,9 @@ export class ProgressComponent implements OnInit, AfterViewInit {
 
     // Guardar el PDF
     doc.save('reporte_progreso_general.pdf');
+  }
+
+  logout() {
+    this.authService.logout();
   }
 }

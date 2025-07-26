@@ -6,6 +6,7 @@ import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { MemoryGameStateService } from '../memory-game-state.service';
 import { MemoryConfig } from '../memory-config-model';
 import { MemoryService } from '../memory.service';
+import { AuthService } from '../auth.service';
 import { forkJoin } from 'rxjs'; // Importar forkJoin para peticiones concurrentes
 import { take } from 'rxjs/operators'; // Para desuscribirse automáticamente de observables que completan
 
@@ -49,7 +50,8 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private snackBar: MatSnackBar,
     private gameStateService: MemoryGameStateService,
-    private memoryService: MemoryService
+    private memoryService: MemoryService,
+    private authService: AuthService
   ) {
     this.level1Form = this.fb.group({
       level_name: ['Nivel1', Validators.required],
@@ -420,5 +422,9 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
   //función para regresar a settings
   goBack() {
     this.router.navigate(['/settings']);
+  }
+
+  logout() {
+    this.authService.logout();
   }
 }

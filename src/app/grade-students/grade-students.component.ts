@@ -5,7 +5,8 @@ import { CreateUserFormComponent } from '../create-user-form/create-user-form.co
 import { EditUserFormComponent } from '../edit-user-form/edit-user-form.component';
 import { UserService } from '../user.service';
 import { MatPaginator } from '@angular/material/paginator'; 
-import { MatTableDataSource } from '@angular/material/table'; 
+import { MatTableDataSource } from '@angular/material/table';
+import { AuthService } from '../auth.service'; 
 
 @Component({
   selector: 'app-grade-students',
@@ -28,7 +29,8 @@ export class GradeStudentsComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private dialog: MatDialog,
-    private userService: UserService
+    private userService: UserService,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
@@ -105,5 +107,9 @@ export class GradeStudentsComponent implements OnInit {
         });
       }
     });
+  }
+
+  logout() {
+    this.authService.logout();
   }
 }

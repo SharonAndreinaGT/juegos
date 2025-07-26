@@ -6,6 +6,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatTabChangeEvent } from '@angular/material/tabs';
 import { lastValueFrom } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar'; // Importar MatSnackBar
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-riddle-settings',
@@ -35,7 +36,8 @@ export class RiddleSettingsComponent implements OnInit {
     private router: Router,
     private riddleService: RiddleService,
     private fb: FormBuilder,
-    private snackBar: MatSnackBar // Inyección de MatSnackBar
+    private snackBar: MatSnackBar, // Inyección de MatSnackBar
+    private authService: AuthService
   ) { }
 
   ngOnInit(): void {
@@ -230,5 +232,9 @@ export class RiddleSettingsComponent implements OnInit {
   //función para regresar a settings
   goBack() {
     this.router.navigate(['/settings']);
+  }
+
+  logout() {
+    this.authService.logout();
   }
 }

@@ -42,6 +42,8 @@
   margin-left: 20px;
   display: flex;
   background-color: #f0f8ff;
+  overflow-x: hidden; /* Evita desbordamiento horizontal */
+  box-sizing: border-box; /* Incluye padding y border en el ancho/alto total */
 }
 
 /* Estilos para el contenedor del header con botón de regresar */
@@ -108,6 +110,9 @@
   background-color: #cfe0ff; /* Color de fondo azul claro */
   padding-bottom: 8px; /* Añadido padding para que el contenido no esté pegado a los bordes */
   border-radius: 10px; /* Bordes redondeados para la tarjeta */
+  overflow: hidden; /* Evita que el contenido se desborde */
+  box-sizing: border-box; /* Incluye padding y border en el ancho/alto total */
+  max-width: 100%; /* Asegura que no exceda el ancho del contenedor */
 }
 
 .level-settings-flex-container {

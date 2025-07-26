@@ -45,6 +45,8 @@
   margin-left: 20px; /* Margen izquierdo un poco mayor */
   display: flex; /* Utiliza flexbox para el diseño interno */
   background-color: #f0f8ff; /* Color de fondo blanco azulado */
+  overflow-x: hidden; /* Evita desbordamiento horizontal */
+  box-sizing: border-box; /* Incluye padding y border en el ancho/alto total */
 }
 
 /* Estilos para el contenedor del header con botón de regresar */
@@ -177,6 +179,9 @@
 /* Estilos para una tarjeta de configuración */
 .settings-card {
   background-color: #cfe0ff; /* Color de fondo azul claro */
+  overflow: hidden; /* Evita que el contenido se desborde */
+  box-sizing: border-box; /* Incluye padding y border en el ancho/alto total */
+  max-width: 100%; /* Asegura que no exceda el ancho del contenedor */
 }
 
 /* Añadido padding-bottom al contenido de la tarjeta de configuración */

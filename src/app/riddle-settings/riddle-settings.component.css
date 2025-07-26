@@ -78,7 +78,9 @@
   /* Posicionamiento relativo para que el botón esté anclado a este contenedor */
   position: relative;
   /* Habilitamos el scroll para el contenido interno si es necesario */
-  overflow-y: auto; 
+  overflow-y: auto;
+  overflow-x: hidden; /* Evita desbordamiento horizontal */
+  box-sizing: border-box; /* Incluye padding y border en el ancho/alto total */
 }
 
 /* Estilos para el contenedor del header con botón de regresar */
@@ -266,6 +268,9 @@
 
 .settings-card {
   background-color: #cfe0ff; /* Color de fondo azul claro */
+  overflow: hidden; /* Evita que el contenido se desborde */
+  box-sizing: border-box; /* Incluye padding y border en el ancho/alto total */
+  max-width: 100%; /* Asegura que no exceda el ancho del contenedor */
 }
 
 .full-width{

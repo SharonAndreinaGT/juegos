@@ -66,9 +66,8 @@
 
 /* Contenedor principal de la tarjeta de contenido */
 .welcome-container {
-  /* Dimensiones y posición de la tarjeta principal, como en tu ejemplo */
   /* Ajustamos la altura para dejar espacio en la parte inferior para el botón */
-  height: calc(100vh - 65px - 30px); /* Restamos 30px extra para un margen inferior */
+  height: calc(100vh - 65px); /* Restamos 30px extra para un margen inferior */
   border-radius: 10px;
   margin: 16px;
   margin-left: 20px;
@@ -206,9 +205,8 @@
   cursor: pointer; /* Cambia el cursor a una mano */
 
   /* POSICIONAMIENTO ABSOLUTO */
-  position: absolute; /* Posicionamiento absoluto respecto al ancestro posicionado */
-  bottom: 20px; /* A 20px del borde inferior */
-  right: 30px; /* A 30px del borde derecho */
+  bottom: 10px; /* A 20px del borde inferior */
+  left: 950px; /* A 30px del borde derecho */
 }
 
 /* Estilos para el botón de la esquina al pasar el ratón por encima */

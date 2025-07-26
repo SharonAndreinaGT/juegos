@@ -23,6 +23,7 @@ import { ProgressComponent } from './progress/progress.component';
 import { GamesOptionsComponent } from './games-options/games-options.component';
 import { MemoryCardComponent } from './memory-card/memory-card.component';
 import { ChartComponent } from './chart/chart.component';
+import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
 
 
 //importaciones de angular material
@@ -52,6 +53,8 @@ import { MatChipsModule } from '@angular/material/chips';
 import { NgChartsModule } from 'ng2-charts';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { AuthInterceptor } from './auth.interceptor';
 
 
 @NgModule({
@@ -74,7 +77,8 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
       ProgressComponent,
       GamesOptionsComponent,
       MemoryCardComponent,
-      ChartComponent
+      ChartComponent,
+      UnauthorizedComponent
     ],
     imports: [
       BrowserModule,
@@ -108,7 +112,11 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
       HttpClientModule
     ],
     providers: [
-     
+      {
+        provide: HTTP_INTERCEPTORS,
+        useClass: AuthInterceptor,
+        multi: true
+      },
       provideAnimationsAsync() //configura el cliente HTTP aquí, ahora se usa esta forma y no httpClientModule
     ],
     bootstrap: [AppComponent] // lo coloco asi para que luego se rediriga a login

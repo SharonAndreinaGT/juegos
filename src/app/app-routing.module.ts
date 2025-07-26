@@ -15,29 +15,33 @@ import { MemorySettingsComponent } from './memory-settings/memory-settings.compo
 import { RiddleSettingsComponent } from './riddle-settings/riddle-settings.component';
 import { ProgressComponent } from './progress/progress.component';
 import { ChartComponent } from './chart/chart.component';
+import { AuthGuard } from './auth.guard';
+import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
 
 //rutas de navegacion
 
 const routes: Routes = [
+  // Rutas públicas (no requieren autenticación)
   { path: 'welcome', component: WelcomeComponent },
   { path: 'loginID', component: LoginIDComponent },
   { path: 'login', component: LoginComponent },
-  { path: 'main', component: MainComponent },
-  { path: 'options', component: GamesOptionsComponent },
-  { path: 'puzzle/:levelName', component: PuzzleComponent },
-  { path: 'memory', component: MemoryComponent },
-  { path: 'riddle', component: RiddleComponent },
-  { path: 'progress', component: ProgressComponent },
-  { path: 'chart', component: ChartComponent },
-
- 
-  { path: 'firstGrade', component: GradeStudentsComponent, data: { gradeTitle: 'Primer Grado', gradeFilter: 'first' }},
-  { path: 'secondGrade', component: GradeStudentsComponent, data: { gradeTitle: 'Segundo Grado', gradeFilter: 'second' }},
-  { path: 'thirdGrade', component: GradeStudentsComponent, data: { gradeTitle: 'Tercer Grado', gradeFilter: 'third' }},
-  { path: 'settings', component: GamesSettingsComponent, data: { title: 'Configuración de Juegos'}},
-  { path: 'puzzleSettings', component: PuzzleSettingsComponent, data: { title: 'Rompecabezas'}},
-  { path: 'memorySettings', component: MemorySettingsComponent, data: { title: 'Memoria'}},
-  { path: 'riddleSettings', component: RiddleSettingsComponent, data: { title: 'Adivina la Palabra Oculta'}},
+  { path: 'unauthorized', component: UnauthorizedComponent },
+  
+  // Rutas protegidas (requieren autenticación)
+  { path: 'main', component: MainComponent, canActivate: [AuthGuard] },
+  { path: 'options', component: GamesOptionsComponent, canActivate: [AuthGuard] },
+  { path: 'puzzle/:levelName', component: PuzzleComponent, canActivate: [AuthGuard] },
+  { path: 'memory', component: MemoryComponent, canActivate: [AuthGuard] },
+  { path: 'riddle', component: RiddleComponent, canActivate: [AuthGuard] },
+  { path: 'progress', component: ProgressComponent, canActivate: [AuthGuard] },
+  { path: 'chart', component: ChartComponent, canActivate: [AuthGuard] },
+  { path: 'firstGrade', component: GradeStudentsComponent, canActivate: [AuthGuard], data: { gradeTitle: 'Primer Grado', gradeFilter: 'first' }},
+  { path: 'secondGrade', component: GradeStudentsComponent, canActivate: [AuthGuard], data: { gradeTitle: 'Segundo Grado', gradeFilter: 'second' }},
+  { path: 'thirdGrade', component: GradeStudentsComponent, canActivate: [AuthGuard], data: { gradeTitle: 'Tercer Grado', gradeFilter: 'third' }},
+  { path: 'settings', component: GamesSettingsComponent, canActivate: [AuthGuard], data: { title: 'Configuración de Juegos'}},
+  { path: 'puzzleSettings', component: PuzzleSettingsComponent, canActivate: [AuthGuard], data: { title: 'Rompecabezas'}},
+  { path: 'memorySettings', component: MemorySettingsComponent, canActivate: [AuthGuard], data: { title: 'Memoria'}},
+  { path: 'riddleSettings', component: RiddleSettingsComponent, canActivate: [AuthGuard], data: { title: 'Adivina la Palabra Oculta'}},
 
   { path: '', redirectTo: 'welcome', pathMatch: 'full' },
 ];

@@ -47,6 +47,28 @@
   background-color: #f0f8ff; /* Color de fondo blanco azulado */
 }
 
+/* Estilos para el contenedor del header con botón de regresar */
+.header-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+/* Estilos para el botón de regresar */
+.back-button {
+  color: #3f51b5;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.back-button:hover {
+  color: #303f9f;
+  transform: translateX(-2px);
+}
+
 /* Estilos para el título principal H1 dentro del contenido de bienvenida */
 .welcome-content h1 {
   font-size: 2.5em; /* Tamaño de fuente grande */

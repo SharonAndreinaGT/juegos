@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { RiddleService } from '../riddle.service';
 import { RiddleLevel, RiddleWord } from '../riddle.model';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -30,6 +31,7 @@ export class RiddleSettingsComponent implements OnInit {
 
   // Inyectar MatSnackBar en el constructor
   constructor(
+    private router: Router,
     private riddleService: RiddleService,
     private fb: FormBuilder,
     private snackBar: MatSnackBar // Inyección de MatSnackBar
@@ -225,5 +227,10 @@ export class RiddleSettingsComponent implements OnInit {
         }
       }
     }
+  }
+
+  //función para regresar a settings
+  goBack() {
+    this.router.navigate(['/settings']);
   }
 }

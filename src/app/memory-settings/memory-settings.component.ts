@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms'; 
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
@@ -45,6 +45,7 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private fb: FormBuilder,
     private snackBar: MatSnackBar,
     private gameStateService: MemoryGameStateService,
@@ -414,5 +415,10 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
       horizontalPosition: 'center', // Centrado horizontal
       verticalPosition: 'bottom', // Abajo
     });
+  }
+
+  //función para regresar a settings
+  goBack() {
+    this.router.navigate(['/settings']);
   }
 }

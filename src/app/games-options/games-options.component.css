@@ -55,7 +55,7 @@
   bottom: 20px;    /* Margen desde el borde inferior */
   right: 20px;     /* Margen desde el borde derecho */
   z-index: 1000;  
-  background-color: #374af7; 
+  background-color: #fe2b2b; 
   color: white;
   border: none;
   padding: 10px 20px;
@@ -67,6 +67,6 @@
 }
 
 .buttonExit:hover {
-  background-color: #2138bd; 
+  background-color: #cd0202; 
 }
   

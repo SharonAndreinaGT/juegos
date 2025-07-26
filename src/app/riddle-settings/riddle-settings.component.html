@@ -85,10 +85,16 @@
 
                     <h3 class="h2">Palabras para Nivel 1</h3>
                     <div class="word-input-container">
-                      <mat-form-field appearance="fill" class="word-input-field">
-                        <mat-label>Añadir Nueva Palabra</mat-label>
-                        <input matInput [(ngModel)]="newWordInput" [ngModelOptions]="{standalone: true}" placeholder="Ej: GATO">
-                      </mat-form-field>
+                      <div class="word-hint-inputs">
+                        <mat-form-field appearance="fill" class="word-input-field">
+                          <mat-label>Palabra</mat-label>
+                          <input matInput [(ngModel)]="newWordInput" [ngModelOptions]="{standalone: true}" placeholder="Ej: GATO">
+                        </mat-form-field>
+                        <mat-form-field appearance="fill" class="hint-input-field">
+                          <mat-label>Pista (Opcional)</mat-label>
+                          <input matInput [(ngModel)]="newHintInput" [ngModelOptions]="{standalone: true}" placeholder="Ej: Animal doméstico">
+                        </mat-form-field>
+                      </div>
                       <button mat-raised-button color="accent" (click)="addWord(level1Config)" class="add-word-button">
                         <mat-icon>add</mat-icon> Añadir
                       </button>
@@ -199,11 +205,16 @@
 
                     <h3 class="h2">Palabras para Nivel 3</h3>
                     <div class="word-input-container">
-                      <mat-form-field appearance="fill" class="word-input-field">
-                        <mat-label>Añadir Nueva Palabra (con pista)</mat-label>
-                        <input matInput [(ngModel)]="newWordInput" [ngModelOptions]="{standalone: true}" placeholder="Ej: ORDENADOR (Máquina electrónica)">
-                        <mat-hint>Para el Nivel 3, añade también una pista. Formato: PALABRA (Pista)</mat-hint>
-                      </mat-form-field>
+                      <div class="word-hint-inputs">
+                        <mat-form-field appearance="fill" class="word-input-field">
+                          <mat-label>Palabra</mat-label>
+                          <input matInput [(ngModel)]="newWordInput" [ngModelOptions]="{standalone: true}" placeholder="Ej: ORDENADOR">
+                        </mat-form-field>
+                        <mat-form-field appearance="fill" class="hint-input-field">
+                          <mat-label>Pista (Obligatoria)</mat-label>
+                          <input matInput [(ngModel)]="newHintInput" [ngModelOptions]="{standalone: true}" placeholder="Ej: Máquina electrónica">
+                        </mat-form-field>
+                      </div>
                       <button mat-raised-button color="accent" (click)="addWord(level3Config)" class="add-word-button">
                         <mat-icon>add</mat-icon> Añadir
                       </button>

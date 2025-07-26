@@ -156,6 +156,16 @@
   flex-grow: 1;
 }
 
+.word-hint-inputs {
+  display: flex;
+  gap: 10px;
+  flex-grow: 1;
+}
+
+.hint-input-field {
+  flex-grow: 1;
+}
+
 .add-word-button {
   margin-left: 600px;
   height: 40px;

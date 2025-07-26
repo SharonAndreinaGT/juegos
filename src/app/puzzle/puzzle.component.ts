@@ -1,10 +1,11 @@
 import { Component, OnInit, OnDestroy, ElementRef, Renderer2, ViewChild } from '@angular/core';
-import { interval, Subscription } from 'rxjs';
+import { interval, Subscription, Observable } from 'rxjs';
 import { PuzzleService } from '../puzzle.service';
 import { SharedDataService } from '../sharedData.service';
 import { PuzzleConfig, PuzzleResult, User } from '../puzzle-config.model';
 import { ActivatedRoute } from '@angular/router'; 
 import { Router } from '@angular/router';
+import { CanComponentDeactivate, NavigationGuardService } from '../navigation-guard.service';
 
 interface PuzzlePiece {
   index: number;
@@ -16,7 +17,7 @@ interface PuzzlePiece {
   templateUrl: './puzzle.component.html',
   styleUrls: ['./puzzle.component.css']
 })
-export class PuzzleComponent implements OnInit, OnDestroy {
+export class PuzzleComponent implements OnInit, OnDestroy, CanComponentDeactivate {
 
   @ViewChild('winSound') winSound!: ElementRef<HTMLAudioElement>;
   @ViewChild('loseSound') loseSound!: ElementRef<HTMLAudioElement>;
@@ -48,7 +49,8 @@ export class PuzzleComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private el: ElementRef,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private navigationGuardService: NavigationGuardService
   ) {}
 
   ngOnInit(): void {
@@ -320,5 +322,15 @@ export class PuzzleComponent implements OnInit, OnDestroy {
 
   options(): void {
     this.router.navigate(['/options']);
+  }
+
+  canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
+    // Si el juego está completado o no ha comenzado, permitir salir sin confirmación
+    if (this.isComplete || this.timeLeft === this.timeLimit) {
+      return true;
+    }
+    
+    // Si el juego está en progreso, mostrar confirmación
+    return this.navigationGuardService.showNavigationConfirmDialog();
   }
 }

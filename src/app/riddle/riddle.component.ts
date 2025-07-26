@@ -4,15 +4,16 @@ import { Component, OnInit, HostListener, OnDestroy, ViewChild, ElementRef } fro
 import { RiddleLevel, RiddleWord, RiddleResult } from '../riddle.model';
 import { RiddleService } from '../riddle.service';
 import { SharedDataService } from '../sharedData.service';
-import { Subscription, interval } from 'rxjs';
+import { Subscription, interval, Observable } from 'rxjs';
 import { Router } from '@angular/router';
+import { CanComponentDeactivate, NavigationGuardService } from '../navigation-guard.service';
 
 @Component({
   selector: 'app-riddle',
   templateUrl: './riddle.component.html',
   styleUrls: ['./riddle.component.css']
 })
-export class RiddleComponent implements OnInit, OnDestroy {
+export class RiddleComponent implements OnInit, OnDestroy, CanComponentDeactivate {
   // propiedades para el sonido
   @ViewChild('winSound') winSound!: ElementRef<HTMLAudioElement>;
   @ViewChild('loseSound') loseSound!: ElementRef<HTMLAudioElement>;
@@ -59,7 +60,8 @@ export class RiddleComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private riddleService: RiddleService,
-    private sharedDataService: SharedDataService
+    private sharedDataService: SharedDataService,
+    private navigationGuardService: NavigationGuardService
   ) { }
 
   ngOnInit(): void {
@@ -464,5 +466,15 @@ export class RiddleComponent implements OnInit, OnDestroy {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  }
+
+  canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
+    // Si el juego está completado o no ha comenzado, permitir salir sin confirmación
+    if (this.gameStatus === 'level-complete' || this.gameStatus === 'time-up' || this.gameStatus === 'lost') {
+      return true;
+    }
+    
+    // Si el juego está en progreso, mostrar confirmación
+    return this.navigationGuardService.showNavigationConfirmDialog();
   }
 }

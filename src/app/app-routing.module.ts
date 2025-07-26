@@ -17,6 +17,7 @@ import { ProgressComponent } from './progress/progress.component';
 import { ChartComponent } from './chart/chart.component';
 import { AuthGuard } from './auth.guard';
 import { StudentAuthGuard } from './student-auth.guard';
+import { NavigationGuardService } from './navigation-guard.service';
 import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
 
 //rutas de navegacion
@@ -33,9 +34,9 @@ const routes: Routes = [
   
   // Rutas de estudiantes (no requieren autenticación de administrador)
   { path: 'options', component: GamesOptionsComponent, canActivate: [StudentAuthGuard] },
-  { path: 'puzzle/:levelName', component: PuzzleComponent, canActivate: [StudentAuthGuard] },
-  { path: 'memory', component: MemoryComponent, canActivate: [StudentAuthGuard] },
-  { path: 'riddle', component: RiddleComponent, canActivate: [StudentAuthGuard] },
+  { path: 'puzzle/:levelName', component: PuzzleComponent, canActivate: [StudentAuthGuard], canDeactivate: [NavigationGuardService] },
+  { path: 'memory', component: MemoryComponent, canActivate: [StudentAuthGuard], canDeactivate: [NavigationGuardService] },
+  { path: 'riddle', component: RiddleComponent, canActivate: [StudentAuthGuard], canDeactivate: [NavigationGuardService] },
   { path: 'progress', component: ProgressComponent, canActivate: [AuthGuard] },
   { path: 'chart', component: ChartComponent, canActivate: [AuthGuard] },
   { path: 'firstGrade', component: GradeStudentsComponent, canActivate: [AuthGuard], data: { gradeTitle: 'Primer Grado', gradeFilter: 'first' }},

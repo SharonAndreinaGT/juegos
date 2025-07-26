@@ -191,3 +191,15 @@ button.mat-raised-button.mat-primary {
   min-width: 120px; /* Asegura que el botón no sea demasiado estrecho */
   height: auto; /* Permite que la altura se ajuste en función del padding y el contenido */
 }
+
+/* Estilos para el toggle de nivel reposicionado */
+.level-toggle {
+  margin-left: 16px;
+  margin-bottom: 30px;
+  display: block;
+}
+
+/* Estilos para los campos de formulario de puzzle */
+mat-form-field {
+  width: 85%;
+}

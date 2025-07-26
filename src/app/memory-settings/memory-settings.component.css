@@ -138,6 +138,13 @@
   margin-bottom: 20px; /* Espacio debajo del switch */
 }
 
+/* Estilos para el toggle de nivel reposicionado */
+.level-toggle {
+  margin-left: 16px;
+  margin-bottom: 30px;
+  display: block;
+}
+
 /* Sección para el input de carga de archivos y su título (REVISADO) */
 .image-upload-section {
   display: flex;

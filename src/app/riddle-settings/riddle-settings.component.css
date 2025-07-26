@@ -147,31 +147,46 @@
 
 .word-input-container {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 10px;
   margin-bottom: 20px;
+  width: 70%;
 }
 
 .word-input-field {
-  flex-grow: 1;
+  flex: 1;
 }
 
 .word-hint-inputs {
   display: flex;
   gap: 10px;
-  flex-grow: 1;
+  flex: 1;
+  width: 100%;
 }
 
 .hint-input-field {
-  flex-grow: 1;
+  flex: 1;
+}
+
+.button-container {
+  display: flex;
+  align-items: flex-end;
+  flex-shrink: 0;
 }
 
 .add-word-button {
-  margin-left: 600px;
-  height: 40px;
-  padding: 0 10px;
+  height: 56px;
+  padding: 0 16px;
   border-radius: 8px;
   font-weight: 600;
+  margin-left: 10px;
+  flex-shrink: 0;
+}
+
+.level-toggle {
+  margin-left: 16px;
+  margin-bottom: 30px;
+  display: block;
 }
 
 .word-list {
@@ -238,7 +253,7 @@
 
   /* POSICIONAMIENTO ABSOLUTO */
   bottom: 10px; /* A 20px del borde inferior */
-  left: 950px; /* A 30px del borde derecho */
+  left: 900px; /* A 30px del borde derecho */
 }
 
 /* Estilos para el botón de la esquina al pasar el ratón por encima */
@@ -254,5 +269,5 @@
 }
 
 .full-width{
-  margin-left: 15px;
+  width: 85%;
 }

@@ -61,22 +61,29 @@
               <mat-tab label="Nivel 1">
                 <div class="tab-content-form">
                   <h2 class="h2">Fácil</h2>
+                  <mat-slide-toggle
+                      color="primary"
+                      [checked]="level1Config.isActive"
+                      (change)="toggleLevelActive(level1Config)"
+                      class="level-toggle">
+                      Activo
+                  </mat-slide-toggle>
                   <form [formGroup]="level1Form">
-                    <mat-form-field appearance="fill" class="full-width">
+                    <mat-form-field appearance="outline" class="full-width">
                       <mat-label>Máximo de Intentos</mat-label>
                       <input matInput type="number" formControlName="maxIntents">
                       <mat-error *ngIf="level1Form.get('maxIntents')?.hasError('required')">Los intentos son obligatorios</mat-error>
                       <mat-error *ngIf="level1Form.get('maxIntents')?.hasError('min')">Debe ser al menos 1</mat-error>
                     </mat-form-field>
 
-                    <mat-form-field appearance="fill" class="full-width">
+                    <mat-form-field appearance="outline" class="full-width">
                       <mat-label>Cantidad de Palabras por Nivel</mat-label>
                       <input matInput type="number" formControlName="wordsPerLevel">
                       <mat-error *ngIf="level1Form.get('wordsPerLevel')?.hasError('required')">La cantidad de palabras es obligatoria</mat-error>
                       <mat-error *ngIf="level1Form.get('wordsPerLevel')?.hasError('min')">Debe ser al menos 1</mat-error>
                     </mat-form-field>
 
-                    <mat-form-field appearance="fill" class="full-width">
+                    <mat-form-field appearance="outline" class="full-width">
                       <mat-label>Tiempo Límite de Partida (segundos)</mat-label>
                       <input matInput type="number" formControlName="timeLimit">
                       <mat-error *ngIf="level1Form.get('timeLimit')?.hasError('required')">El tiempo límite es obligatorio</mat-error>
@@ -86,24 +93,16 @@
                     <h3 class="h2">Palabras para Nivel 1</h3>
                     <div class="word-input-container">
                       <div class="word-hint-inputs">
-                        <mat-form-field appearance="fill" class="word-input-field">
+                        <mat-form-field appearance="outline" class="word-input-field">
                           <mat-label>Palabra</mat-label>
                           <input matInput [(ngModel)]="newWordInput" [ngModelOptions]="{standalone: true}" placeholder="Ej: GATO">
                         </mat-form-field>
-                        <mat-form-field appearance="fill" class="hint-input-field">
-                          <mat-label>Pista (Opcional)</mat-label>
-                          <input matInput [(ngModel)]="newHintInput" [ngModelOptions]="{standalone: true}" placeholder="Ej: Animal doméstico">
-                        </mat-form-field>
                       </div>
-                      <button mat-raised-button color="accent" (click)="addWord(level1Config)" class="add-word-button">
-                        <mat-icon>add</mat-icon> Añadir
-                      </button>
-                      <mat-slide-toggle
-                          color="primary"
-                          [checked]="level1Config.isActive"
-                          (change)="toggleLevelActive(level1Config)">
-                          Activo
-                      </mat-slide-toggle>
+                      <div class="button-container">
+                        <button mat-raised-button color="accent" (click)="addWord(level1Config)" class="add-word-button">
+                          <mat-icon>add</mat-icon> Añadir
+                        </button>
+                      </div>
                     </div>
 
                     <div class="word-list">
@@ -112,6 +111,7 @@
                       </div>
                       <div *ngFor="let wordObj of level1Config.words; let i = index" class="word-item mat-elevation-z1">
                         <span>{{ wordObj.word }}</span>
+                        <span *ngIf="wordObj.hint" class="word-hint"> ({{ wordObj.hint }})</span>
                         <button mat-icon-button color="warn" (click)="removeWord(level1Config, i)" class="remove-word-button">
                           <mat-icon>close</mat-icon>
                         </button>
@@ -124,22 +124,29 @@
               <mat-tab label="Nivel 2">
                 <div class="tab-content-form">
                   <h2 class="h2">Medio</h2>
+                  <mat-slide-toggle
+                      color="primary"
+                      [checked]="level2Config.isActive"
+                      (change)="toggleLevelActive(level2Config)"
+                      class="level-toggle">
+                      Activo
+                  </mat-slide-toggle>
                   <form [formGroup]="level2Form">
-                    <mat-form-field appearance="fill" class="full-width">
+                    <mat-form-field appearance="outline" class="full-width">
                       <mat-label>Máximo de Intentos</mat-label>
                       <input matInput type="number" formControlName="maxIntents">
                       <mat-error *ngIf="level2Form.get('maxIntents')?.hasError('required')">Los intentos son obligatorios</mat-error>
                       <mat-error *ngIf="level2Form.get('maxIntents')?.hasError('min')">Debe ser al menos 1</mat-error>
                     </mat-form-field>
 
-                    <mat-form-field appearance="fill" class="full-width">
+                    <mat-form-field appearance="outline" class="full-width">
                       <mat-label>Cantidad de Palabras por Nivel</mat-label>
                       <input matInput type="number" formControlName="wordsPerLevel">
                       <mat-error *ngIf="level2Form.get('wordsPerLevel')?.hasError('required')">La cantidad de palabras es obligatoria</mat-error>
                       <mat-error *ngIf="level2Form.get('wordsPerLevel')?.hasError('min')">Debe ser al menos 1</mat-error>
                     </mat-form-field>
 
-                    <mat-form-field appearance="fill" class="full-width">
+                    <mat-form-field appearance="outline" class="full-width">
                       <mat-label>Tiempo Límite de Partida (segundos)</mat-label>
                       <input matInput type="number" formControlName="timeLimit">
                       <mat-error *ngIf="level2Form.get('timeLimit')?.hasError('required')">El tiempo límite es obligatorio</mat-error>
@@ -148,19 +155,17 @@
 
                     <h3 class="h2">Palabras para Nivel 2</h3>
                     <div class="word-input-container">
-                      <mat-form-field appearance="fill" class="word-input-field">
-                        <mat-label>Añadir Nueva Palabra</mat-label>
-                        <input matInput [(ngModel)]="newWordInput" [ngModelOptions]="{standalone: true}" placeholder="Ej: ORDENADOR">
-                      </mat-form-field>
-                      <button mat-raised-button color="accent" (click)="addWord(level2Config)" class="add-word-button">
-                        <mat-icon>add</mat-icon> Añadir
-                      </button>
-                      <mat-slide-toggle
-                          color="primary"
-                          [checked]="level2Config.isActive"
-                          (change)="toggleLevelActive(level2Config)">
-                          Activo
-                      </mat-slide-toggle>
+                      <div class="word-hint-inputs">
+                        <mat-form-field appearance="outline" class="word-input-field">
+                          <mat-label>Palabra</mat-label>
+                          <input matInput [(ngModel)]="newWordInput" [ngModelOptions]="{standalone: true}" placeholder="Ej: ORDENADOR">
+                        </mat-form-field>
+                      </div>
+                      <div class="button-container">
+                        <button mat-raised-button color="accent" (click)="addWord(level2Config)" class="add-word-button">
+                          <mat-icon>add</mat-icon> Añadir
+                        </button>
+                      </div>
                     </div>
 
                     <div class="word-list">
@@ -169,6 +174,7 @@
                       </div>
                       <div *ngFor="let wordObj of level2Config.words; let i = index" class="word-item mat-elevation-z1">
                         <span>{{ wordObj.word }}</span>
+                        <span *ngIf="wordObj.hint" class="word-hint"> ({{ wordObj.hint }})</span>
                         <button mat-icon-button color="warn" (click)="removeWord(level2Config, i)" class="remove-word-button">
                           <mat-icon>close</mat-icon>
                         </button>
@@ -181,22 +187,29 @@
               <mat-tab label="Nivel 3">
                 <div class="tab-content-form">
                   <h2 class="h2">Difícil</h2>
+                  <mat-slide-toggle
+                      color="primary"
+                      [checked]="level3Config.isActive"
+                      (change)="toggleLevelActive(level3Config)"
+                      class="level-toggle">
+                      Activo
+                  </mat-slide-toggle>
                   <form [formGroup]="level3Form">
-                    <mat-form-field appearance="fill" class="full-width">
+                    <mat-form-field appearance="outline" class="full-width">
                       <mat-label>Máximo de Intentos</mat-label>
                       <input matInput type="number" formControlName="maxIntents">
                       <mat-error *ngIf="level3Form.get('maxIntents')?.hasError('required')">Los intentos son obligatorios</mat-error>
                       <mat-error *ngIf="level3Form.get('maxIntents')?.hasError('min')">Debe ser al menos 1</mat-error>
                     </mat-form-field>
 
-                    <mat-form-field appearance="fill" class="full-width">
+                    <mat-form-field appearance="outline" class="full-width">
                       <mat-label>Cantidad de Palabras por Nivel</mat-label>
                       <input matInput type="number" formControlName="wordsPerLevel">
                       <mat-error *ngIf="level3Form.get('wordsPerLevel')?.hasError('required')">La cantidad de palabras es obligatoria</mat-error>
                       <mat-error *ngIf="level3Form.get('wordsPerLevel')?.hasError('min')">Debe ser al menos 1</mat-error>
                     </mat-form-field>
 
-                    <mat-form-field appearance="fill" class="full-width">
+                    <mat-form-field appearance="outline" class="full-width">
                       <mat-label>Tiempo Límite de Partida (segundos)</mat-label>
                       <input matInput type="number" formControlName="timeLimit">
                       <mat-error *ngIf="level3Form.get('timeLimit')?.hasError('required')">El tiempo límite es obligatorio</mat-error>
@@ -206,24 +219,20 @@
                     <h3 class="h2">Palabras para Nivel 3</h3>
                     <div class="word-input-container">
                       <div class="word-hint-inputs">
-                        <mat-form-field appearance="fill" class="word-input-field">
+                        <mat-form-field appearance="outline" class="word-input-field">
                           <mat-label>Palabra</mat-label>
                           <input matInput [(ngModel)]="newWordInput" [ngModelOptions]="{standalone: true}" placeholder="Ej: ORDENADOR">
                         </mat-form-field>
-                        <mat-form-field appearance="fill" class="hint-input-field">
+                        <mat-form-field appearance="outline" class="hint-input-field">
                           <mat-label>Pista (Obligatoria)</mat-label>
                           <input matInput [(ngModel)]="newHintInput" [ngModelOptions]="{standalone: true}" placeholder="Ej: Máquina electrónica">
                         </mat-form-field>
                       </div>
-                      <button mat-raised-button color="accent" (click)="addWord(level3Config)" class="add-word-button">
-                        <mat-icon>add</mat-icon> Añadir
-                      </button>
-                      <mat-slide-toggle
-                          color="primary"
-                          [checked]="level3Config.isActive"
-                          (change)="toggleLevelActive(level3Config)">
-                          Activo
-                      </mat-slide-toggle>
+                      <div class="button-container">
+                        <button mat-raised-button color="accent" (click)="addWord(level3Config)" class="add-word-button">
+                          <mat-icon>add</mat-icon> Añadir
+                        </button>
+                      </div>
                     </div>
 
                     <div class="word-list">

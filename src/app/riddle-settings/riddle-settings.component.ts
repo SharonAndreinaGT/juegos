@@ -97,22 +97,17 @@ export class RiddleSettingsComponent implements OnInit {
       return;
     }
 
-    // Validación para no aceptar caracteres especiales, acentos, números 
-    const regex = /^[A-Z\s]*$/; // Solo letras mayúsculas y espacio
-    if (!regex.test(value)) {
-      this.snackBar.open('La palabra no puede contener números, caracteres especiales ni acentos.', 'Cerrar', { duration: 5000 });
+    // Validación para no aceptar caracteres especiales, acentos, números ni espacios en la palabra
+    const wordRegex = /^[A-Z]*$/; // Solo letras mayúsculas
+    if (!wordRegex.test(value)) {
+      this.snackBar.open('La palabra no puede contener espacios, números, caracteres especiales ni acentos.', 'Cerrar', { duration: 5000 });
       return;
     }
 
-    if (levelConfig.level_number === 3 && value.includes('(') && value.includes(')')) {
-      const match = value.match(/(.*?)\((.*)\)/);
-      if (match && match.length === 3) {
-        value = match[1].trim();
-        hint = match[2].trim();
-      } else {
-        this.snackBar.open('Para el Nivel 3, el formato de palabra con pista debe ser: PALABRA (Pista)', 'Cerrar', { duration: 5000 });
-        return;
-      }
+    // Para el Nivel 3, la pista es obligatoria
+    if (levelConfig.level_number === 3 && !hint) {
+      this.snackBar.open('Para el Nivel 3, debes añadir una pista para la palabra.', 'Cerrar', { duration: 5000 });
+      return;
     }
 
     if (!levelConfig.words) {

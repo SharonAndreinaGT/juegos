@@ -34,12 +34,18 @@
 
 .header {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
   width: 100%;
   margin-bottom: 40px;
 }
 
+.header-top {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  margin-bottom: 20px;
+}
 .game-title {
   margin: 0;
   font-size: 2em;

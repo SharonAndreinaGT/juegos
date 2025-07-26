@@ -25,6 +25,7 @@ export class RiddleSettingsComponent implements OnInit {
   level3Form!: FormGroup;
 
   newWordInput: string = '';
+  newHintInput: string = '';
 
   activeTabIndex: number = 0;
   activeLevelNumber: number = 1;
@@ -89,7 +90,7 @@ export class RiddleSettingsComponent implements OnInit {
 
   async addWord(levelConfig: RiddleLevel): Promise<void> {
     let value = this.newWordInput.trim().toUpperCase();
-    let hint: string | undefined = undefined;
+    let hint: string | undefined = this.newHintInput.trim() || undefined;
 
     if (!value) {
       this.snackBar.open('Por favor, introduce una palabra.', 'Cerrar', { duration: 3000 });
@@ -121,6 +122,7 @@ export class RiddleSettingsComponent implements OnInit {
     if (!levelConfig.words.some((w: RiddleWord) => w.word === value)) {
       levelConfig.words.push({ word: value, hint: hint });
       this.newWordInput = '';
+      this.newHintInput = '';
       await this.saveSingleLevelConfig(levelConfig);
       this.snackBar.open(`Palabra "${value}" añadida al nivel ${levelConfig.level_number}.`, 'Cerrar', { duration: 3000 });
     } else {
@@ -139,6 +141,7 @@ export class RiddleSettingsComponent implements OnInit {
 
   onTabChange(event: MatTabChangeEvent): void {
     this.newWordInput = '';
+    this.newHintInput = '';
     this.activeTabIndex = event.index;
     this.activeLevelNumber = event.index + 1;
     console.log(`[RiddleSettingsComponent] Pestaña activa: ${this.activeTabIndex}, Nivel activo: ${this.activeLevelNumber}`);

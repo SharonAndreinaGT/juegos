@@ -415,7 +415,6 @@ export class ProgressComponent implements OnInit, AfterViewInit {
       },
       didDrawPage: (data) => {
         // Si la tabla de rompecabezas se extiende a una nueva página,
-        // puedes agregar encabezados o pie de página específicos aquí.
       }
     });
 

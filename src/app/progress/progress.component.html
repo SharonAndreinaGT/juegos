@@ -318,8 +318,8 @@
                   <span class="value">{{ progressData.memory.length }}</span>
                 </div>
                 <div class="stat-item">
-                  <span class="label">Mejor Tiempo:</span>
-                  <span class="value">{{ getBestScore(progressData.memory, 'elapsedTime') }}s</span>
+                  <span class="label">Mejor Puntaje:</span>
+                  <span class="value">{{ getBestScore(progressData.memory, 'score') }}</span>
                 </div>
                 <div class="stat-item">
                   <span class="label">Promedio Pares:</span>
@@ -335,11 +335,11 @@
                 </div>
                 <div class="stat-item">
                   <span class="label">Mejor Puntaje:</span>
-                  <span class="value">{{ getBestScore(progressData.riddle, 'words_guessed') }}</span>
+                  <span class="value">{{ getBestScore(progressData.riddle, 'score') }}</span>
                 </div>
                 <div class="stat-item">
-                  <span class="label">Promedio Palabras:</span>
-                  <span class="value">{{ getAverageScore(progressData.riddle, 'words_guessed') | number:'1.0-1' }}</span>
+                  <span class="label">Promedio:</span>
+                  <span class="value">{{ getAverageScore(progressData.riddle, 'score') | number:'1.0-1' }}</span>
                 </div>
               </div>
             </div>

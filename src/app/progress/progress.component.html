@@ -103,6 +103,17 @@
                     </td>
                   </ng-container>
 
+                  <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                    <td mat-cell *matCellDef="let student">
+                      <button mat-icon-button color="primary" 
+                              (click)="viewStudentProgress(student.id, student.name + ' ' + student.lastname)"
+                              matTooltip="Ver Progreso">
+                        <mat-icon>timeline</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
+
                   <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
                   <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
                 </table>
@@ -163,6 +174,17 @@
                     <td mat-cell *matCellDef="let result"> {{ result.intentRemaining ?? '0' }} </td>
                   </ng-container>
 
+                  <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                    <td mat-cell *matCellDef="let result">
+                      <button mat-icon-button color="primary" 
+                              (click)="viewStudentProgress(result.id, result.name + ' ' + result.lastname)"
+                              matTooltip="Ver Progreso">
+                        <mat-icon>timeline</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
+
                   <tr mat-header-row *matHeaderRowDef="displayedMemoryColumns"></tr>
                   <tr mat-row *matRowDef="let row; columns: displayedMemoryColumns;"></tr>
                 </table>
@@ -218,6 +240,17 @@
                     <td mat-cell *matCellDef="let result"> {{ result.words_guessed ?? '0' }} </td>
                   </ng-container>
 
+                  <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                    <td mat-cell *matCellDef="let result">
+                      <button mat-icon-button color="primary" 
+                              (click)="viewStudentProgress(result.id, result.name + ' ' + result.lastname)"
+                              matTooltip="Ver Progreso">
+                        <mat-icon>timeline</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
+
                   <tr mat-header-row *matHeaderRowDef="displayedRiddleColumns"></tr>
                   <tr mat-row *matRowDef="let row; columns: displayedRiddleColumns;"></tr>
                 </table>
@@ -233,5 +266,86 @@
         </mat-card>
       </mat-card-content>
     </mat-card>
+
+    <!-- Modal de Progreso Individual -->
+    <div class="progress-modal" *ngIf="showProgressModal">
+      <div class="modal-overlay" (click)="closeProgressModal()"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Progreso de {{ selectedStudentName }}</h3>
+          <button mat-icon-button (click)="closeProgressModal()" class="close-button">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+        
+        <div class="modal-body">
+          <div *ngIf="loadingProgressData" class="loading-container">
+            <mat-spinner></mat-spinner>
+            <p>Cargando datos de progreso...</p>
+          </div>
+
+          <div *ngIf="!loadingProgressData" class="progress-content">
+            <!-- Gráfico de Progreso -->
+            <div class="chart-container">
+              <h4>Progreso Temporal</h4>
+              <div class="chart-wrapper">
+                <canvas #progressChart></canvas>
+              </div>
+            </div>
+
+            <!-- Resumen de Estadísticas -->
+            <div class="stats-summary">
+              <div class="stat-card">
+                <h5>Puzzle</h5>
+                <div class="stat-item">
+                  <span class="label">Total Juegos:</span>
+                  <span class="value">{{ progressData.puzzle.length }}</span>
+                </div>
+                <div class="stat-item">
+                  <span class="label">Mejor Puntaje:</span>
+                  <span class="value">{{ getBestScore(progressData.puzzle, 'score') }}</span>
+                </div>
+                <div class="stat-item">
+                  <span class="label">Promedio:</span>
+                  <span class="value">{{ getAverageScore(progressData.puzzle, 'score') | number:'1.0-1' }}</span>
+                </div>
+              </div>
+
+              <div class="stat-card">
+                <h5>Memoria</h5>
+                <div class="stat-item">
+                  <span class="label">Total Juegos:</span>
+                  <span class="value">{{ progressData.memory.length }}</span>
+                </div>
+                <div class="stat-item">
+                  <span class="label">Mejor Tiempo:</span>
+                  <span class="value">{{ getBestScore(progressData.memory, 'elapsedTime') }}s</span>
+                </div>
+                <div class="stat-item">
+                  <span class="label">Promedio Pares:</span>
+                  <span class="value">{{ getAverageScore(progressData.memory, 'totalPairs') | number:'1.0-1' }}</span>
+                </div>
+              </div>
+
+              <div class="stat-card">
+                <h5>Riddle</h5>
+                <div class="stat-item">
+                  <span class="label">Total Juegos:</span>
+                  <span class="value">{{ progressData.riddle.length }}</span>
+                </div>
+                <div class="stat-item">
+                  <span class="label">Mejor Puntaje:</span>
+                  <span class="value">{{ getBestScore(progressData.riddle, 'words_guessed') }}</span>
+                </div>
+                <div class="stat-item">
+                  <span class="label">Promedio Palabras:</span>
+                  <span class="value">{{ getAverageScore(progressData.riddle, 'words_guessed') | number:'1.0-1' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </mat-sidenav-content>
 </mat-sidenav-container>

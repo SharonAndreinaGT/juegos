@@ -1,10 +1,11 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { UserService } from '../user.service';
 import { PuzzleService } from '../puzzle.service';
 import { MemoryService } from '../memory.service';
 import { RiddleService } from '../riddle.service';
 import { AuthService } from '../auth.service';
+import { Chart, ChartConfiguration } from 'chart.js';
 
 import { User } from '../puzzle-config.model';
 import { PuzzleResult } from '../puzzle-config.model';
@@ -62,7 +63,7 @@ interface RiddleStudentDisplay {
 })
 export class ProgressComponent implements OnInit, AfterViewInit {
 
-  displayedColumns: string[] = ['name', 'lastname', 'grade', 'level_name', 'score', 'time'];
+  displayedColumns: string[] = ['name', 'lastname', 'grade', 'level_name', 'score', 'time', 'actions'];
   displayedMemoryColumns: string[] = [
     'name',
     'lastname',
@@ -71,6 +72,7 @@ export class ProgressComponent implements OnInit, AfterViewInit {
     'score',
     'elapsedTime',
     'totalPairs',
+    'actions',
   ];
   displayedRiddleColumns: string[] = [
     'name',
@@ -80,6 +82,7 @@ export class ProgressComponent implements OnInit, AfterViewInit {
     'score',
     'time_taken',
     'words_guessed',
+    'actions',
   ];
 
   studentProgressData = new MatTableDataSource<StudentProgress>([]);
@@ -96,6 +99,18 @@ export class ProgressComponent implements OnInit, AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild('memoryPaginator') memoryPaginator!: MatPaginator;
   @ViewChild('riddlePaginator') riddlePaginator!: MatPaginator;
+  @ViewChild('progressChart', { static: false }) progressChartRef!: ElementRef<HTMLCanvasElement>;
+
+  // Propiedades para el modal de progreso
+  selectedStudentId: string | null = null;
+  selectedStudentName: string = '';
+  showProgressModal = false;
+  progressData: any = {
+    puzzle: [],
+    memory: [],
+    riddle: []
+  };
+  loadingProgressData = false;
 
 
   constructor(
@@ -490,5 +505,154 @@ export class ProgressComponent implements OnInit, AfterViewInit {
 
   logout() {
     this.authService.logout();
+  }
+
+  // Método para abrir el modal de progreso individual
+  viewStudentProgress(studentId: string, studentName: string): void {
+    this.selectedStudentId = studentId;
+    this.selectedStudentName = studentName;
+    this.showProgressModal = true;
+    this.loadingProgressData = true;
+    
+    // Cargar datos de progreso del estudiante
+    this.loadStudentProgressData(studentId);
+  }
+
+  // Método para cargar datos de progreso de un estudiante
+  private loadStudentProgressData(studentId: string): void {
+    forkJoin({
+      puzzleResults: this.puzzleService.getStudentPuzzleResults(studentId),
+      memoryResults: this.memoryService.getStudentMemoryResults(studentId),
+      riddleResults: this.riddleService.getStudentRiddleResults(studentId)
+    }).subscribe({
+      next: (results) => {
+        this.progressData = {
+          puzzle: results.puzzleResults || [],
+          memory: results.memoryResults || [],
+          riddle: results.riddleResults || []
+        };
+        this.loadingProgressData = false;
+        
+        // Crear el gráfico después de cargar los datos
+        setTimeout(() => {
+          this.createProgressChart();
+        }, 100);
+      },
+      error: (error) => {
+        console.error('Error cargando datos de progreso:', error);
+        this.loadingProgressData = false;
+      }
+    });
+  }
+
+  // Método para crear el gráfico de progreso
+  private createProgressChart(): void {
+    if (!this.progressChartRef) return;
+
+    const ctx = this.progressChartRef.nativeElement.getContext('2d');
+    if (!ctx) return;
+
+    const chartData = this.getProgressChartData();
+    
+    new Chart(ctx, {
+      type: 'line',
+      data: chartData,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'top',
+          },
+          title: {
+            display: false
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              maxTicksLimit: 8
+            }
+          },
+          x: {
+            ticks: {
+              maxTicksLimit: 10
+            }
+          }
+        },
+        elements: {
+          point: {
+            radius: 4,
+            hoverRadius: 6
+          },
+          line: {
+            tension: 0.4
+          }
+        }
+      }
+    });
+  }
+
+  // Método para cerrar el modal
+  closeProgressModal(): void {
+    this.showProgressModal = false;
+    this.selectedStudentId = null;
+    this.selectedStudentName = '';
+    this.progressData = { puzzle: [], memory: [], riddle: [] };
+  }
+
+  // Método para obtener datos del gráfico de progreso
+  getProgressChartData(): any {
+    const allResults = [
+      ...this.progressData.puzzle.map((r: any) => ({ ...r, game: 'Puzzle', date: r.created_at })),
+      ...this.progressData.memory.map((r: any) => ({ ...r, game: 'Memoria', date: r.created_at })),
+      ...this.progressData.riddle.map((r: any) => ({ ...r, game: 'Riddle', date: r.created_at }))
+    ];
+
+    // Ordenar por fecha
+    allResults.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    return {
+      labels: allResults.map((r: any) => {
+        const date = new Date(r.date);
+        return `${date.getDate()}/${date.getMonth() + 1}`;
+      }),
+      datasets: [
+        {
+          label: 'Puzzle',
+          data: allResults.filter((r: any) => r.game === 'Puzzle').map((r: any) => r.score || 0),
+          borderColor: '#3f51b5',
+          backgroundColor: 'rgba(63, 81, 181, 0.1)',
+          tension: 0.4
+        },
+        {
+          label: 'Memoria',
+          data: allResults.filter((r: any) => r.game === 'Memoria').map((r: any) => r.totalPairs || 0),
+          borderColor: '#ff9800',
+          backgroundColor: 'rgba(255, 152, 0, 0.1)',
+          tension: 0.4
+        },
+        {
+          label: 'Riddle',
+          data: allResults.filter((r: any) => r.game === 'Riddle').map((r: any) => r.words_guessed || 0),
+          borderColor: '#4caf50',
+          backgroundColor: 'rgba(76, 175, 80, 0.1)',
+          tension: 0.4
+        }
+      ]
+    };
+  }
+
+  // Métodos auxiliares para estadísticas
+  getBestScore(results: any[], field: string): number {
+    if (!results || results.length === 0) return 0;
+    return Math.max(...results.map((r: any) => r[field] || 0));
+  }
+
+  getAverageScore(results: any[], field: string): number {
+    if (!results || results.length === 0) return 0;
+    const sum = results.reduce((acc: number, r: any) => acc + (r[field] || 0), 0);
+    return sum / results.length;
   }
 }

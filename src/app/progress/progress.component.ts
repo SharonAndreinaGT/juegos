@@ -414,7 +414,7 @@ export class ProgressComponent implements OnInit, AfterViewInit {
         5: { cellWidth: 30 }
       },
       didDrawPage: (data) => {
-        // Si la tabla de rompecabezas se extiende a una nueva página,
+        // Si la tabla de rompecabezas se extiende a una nueva página
       }
     });
 
@@ -619,7 +619,7 @@ export class ProgressComponent implements OnInit, AfterViewInit {
       }),
       datasets: [
         {
-          label: 'Puzzle',
+          label: 'Rompecabezas',
           data: allResults.filter((r: any) => r.game === 'Puzzle').map((r: any) => r.score || 0),
           borderColor: '#3f51b5',
           backgroundColor: 'rgba(63, 81, 181, 0.1)',
@@ -633,7 +633,7 @@ export class ProgressComponent implements OnInit, AfterViewInit {
           tension: 0.4
         },
         {
-          label: 'Riddle',
+          label: 'Adivina la palabra oculta',
           data: allResults.filter((r: any) => r.game === 'Riddle').map((r: any) => r.words_guessed || 0),
           borderColor: '#4caf50',
           backgroundColor: 'rgba(76, 175, 80, 0.1)',

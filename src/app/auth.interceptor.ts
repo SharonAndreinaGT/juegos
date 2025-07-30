@@ -34,10 +34,22 @@ export class AuthInterceptor implements HttpInterceptor {
 
     return next.handle(request).pipe(
       catchError((error: HttpErrorResponse) => {
-        // Si el error es 401 (Unauthorized), cerrar sesión y redirigir al login
+        console.log(`[AuthInterceptor] Error HTTP ${error.status} en ${request.url}:`, error);
+        
+        // Si el error es 401 (Unauthorized), verificar si es un problema de autenticación real
         if (error.status === 401) {
-          this.authService.logout();
+          // Solo cerrar sesión si el error viene de endpoints de autenticación
+          // o si es un error persistente de permisos
+          if (request.url.includes('/auth/') || request.url.includes('/login')) {
+            console.log('[AuthInterceptor] Error 401 en endpoint de autenticación, cerrando sesión');
+            this.authService.logout();
+          } else {
+            console.log('[AuthInterceptor] Error 401 en operación de datos, intentando continuar sin cerrar sesión');
+            // Para operaciones de datos, no cerrar sesión automáticamente
+            // El componente puede manejar el error específicamente
+          }
         }
+        
         return throwError(() => error);
       })
     );

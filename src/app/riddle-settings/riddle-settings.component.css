@@ -210,3 +210,48 @@
 .full-width{
   width: 85%;
 }
+
+/* Contenedor de la imagen de vista previa */
+.image-preview-container {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.image-preview {
+  max-width: 150px; /* Tamaño máximo para la vista previa de la imagen */
+  max-height: 150px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Contenedor de la palabra y la pista */
+.word-details {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Espacio entre el texto y la imagen de la pista */
+}
+
+/* Estilo para el texto de la palabra */
+.word-item span {
+  font-weight: 500;
+  color: #333;
+}
+
+/* Estilo para la pista de texto */
+.word-hint {
+  font-size: 0.85em;
+  color: #666;
+  white-space: nowrap; /* Evita que el texto de la pista se rompa */
+  overflow: hidden; /* Oculta cualquier texto que se desborde */
+  text-overflow: ellipsis; /* Muestra puntos suspensivos para el texto desbordado */
+  max-width: 250px; /* Limita el ancho de la pista de texto */
+}
+
+/* Estilo para la imagen de la pista */
+.hint-image {
+  max-width: 50px; /* Tamaño más pequeño para la imagen en la lista */
+  max-height: 50px;
+  object-fit: contain;
+  border-radius: 4px;
+}

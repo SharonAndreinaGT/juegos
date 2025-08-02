@@ -77,7 +77,7 @@
   font-size: 3em; /* Tamaño grande para la palabra oculta */
   letter-spacing: 5px; /* Mucho espaciado entre letras */
   margin-bottom: 20px;
-  color: #333;
+  color: #0b1e9b;
   font-weight: bold;
   word-break: break-all; /* Útil para palabras muy largas */
   white-space: nowrap; /* Intentar mantener la palabra en una sola línea */
@@ -98,14 +98,23 @@
 /* ESTILOS APLICADOS PARA LAS PISTAS (IMAGEN) */
 
 .hint-image-container {
-  margin-bottom: 16px;
   display: flex;
   justify-content: center;
+  margin-bottom: 16px;
+  /* Asegura que el contenedor no afecte el tamaño de la imagen */
+  width: auto;
+  height: auto;
 }
 
 .word-hint-image {
-  max-width: 200px; /* Hacemos la imagen más pequeña */
-  height: auto;
+  /* Establece un tamaño fijo para la imagen */
+  width: 250px;
+  height: 150px;
+  
+  /* Mantiene la relación de aspecto de la imagen sin distorsionarla */
+  object-fit: contain;
+
+  /* Estilos visuales */
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }

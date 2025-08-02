@@ -1,9 +1,11 @@
 import { Component, OnInit, ViewChild } from '@angular/core'; 
 import { ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { CreateUserFormComponent } from '../create-user-form/create-user-form.component';
 import { EditUserFormComponent } from '../edit-user-form/edit-user-form.component';
 import { UserService } from '../user.service';
+import { DataExportService } from '../data-export.service';
 import { MatPaginator } from '@angular/material/paginator'; 
 import { MatTableDataSource } from '@angular/material/table';
 import { AuthService } from '../auth.service'; 
@@ -31,7 +33,9 @@ export class GradeStudentsComponent implements OnInit {
     private route: ActivatedRoute,
     private dialog: MatDialog,
     private userService: UserService,
-    private authService: AuthService
+    private authService: AuthService,
+    private snackBar: MatSnackBar,
+    private exportService: DataExportService
   ) {}
 
   ngOnInit() {
@@ -133,5 +137,13 @@ export class GradeStudentsComponent implements OnInit {
 
   logout() {
     this.authService.logout();
+  }
+
+  exportStudents() {
+    this.exportService.exportAllCollectionsAsZIP();
+    this.snackBar.open('Exportando base de datos completa...', 'Cerrar', {
+      duration: 4000,
+      panelClass: ['snackbar-success']
+    });
   }
 }

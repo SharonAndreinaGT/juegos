@@ -627,14 +627,14 @@ export class ProgressComponent implements OnInit, AfterViewInit {
         },
         {
           label: 'Memoria',
-          data: allResults.filter((r: any) => r.game === 'Memoria').map((r: any) => r.totalPairs || 0),
+          data: allResults.filter((r: any) => r.game === 'Memoria').map((r: any) => r.score || 0),
           borderColor: '#ff9800',
           backgroundColor: 'rgba(255, 152, 0, 0.1)',
           tension: 0.4
         },
         {
           label: 'Adivina la palabra oculta',
-          data: allResults.filter((r: any) => r.game === 'Riddle').map((r: any) => r.words_guessed || 0),
+          data: allResults.filter((r: any) => r.game === 'Riddle').map((r: any) => r.score || 0),
           borderColor: '#4caf50',
           backgroundColor: 'rgba(76, 175, 80, 0.1)',
           tension: 0.4

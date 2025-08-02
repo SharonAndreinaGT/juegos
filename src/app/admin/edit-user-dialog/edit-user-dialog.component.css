@@ -1,0 +1,78 @@
+.edit-user-form {
+  display: flex;
+  flex-direction: column;
+  min-width: 400px;
+  max-width: 500px;
+  min-height: 400px;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+mat-dialog-content {
+  padding: 20px 24px;
+}
+
+mat-dialog-actions {
+  padding: 16px 24px;
+}
+
+mat-spinner {
+  display: inline-block;
+  margin-right: 8px;
+}
+
+/* Form field styling */
+.mat-mdc-form-field {
+  margin-bottom: 16px;
+}
+
+/* Dialog title styling */
+h2[mat-dialog-title] {
+  margin: 0 0 20px 0;
+  padding: 24px 24px 0 24px;
+  color: #3f51b5;
+  font-weight: 500;
+}
+
+/* Button styling */
+mat-dialog-actions button {
+  margin-left: 8px;
+}
+
+mat-dialog-actions button:first-child {
+  margin-left: 0;
+}
+
+/* Loading state */
+button[disabled] {
+  opacity: 0.6;
+}
+
+/* Error message styling */
+mat-error {
+  font-size: 12px;
+  color: #f44336;
+}
+
+/* Select field styling */
+.mat-mdc-select {
+  width: 100%;
+}
+
+.mat-mdc-option {
+  min-height: 48px;
+  padding: 0 16px;
+}
+
+/* Form field focus styling */
+.mat-mdc-form-field.mat-focused .mat-mdc-form-field-label {
+  color: #3f51b5;
+}
+
+/* Validation styling */
+.mat-mdc-form-field.mat-form-field-invalid .mat-mdc-form-field-label {
+  color: #f44336;
+}

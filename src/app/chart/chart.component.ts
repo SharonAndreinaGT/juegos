@@ -580,9 +580,9 @@ export class ChartComponent implements OnInit {
    */
   navigateToGradeStudents(grade: string): void {
     const routeMap: { [key: string]: string } = {
-      'first': 'firstGrade',
-      'second': 'secondGrade',
-      'third': 'thirdGrade'
+      'first': 'grade',
+      'second': 'grade',
+      'third': 'grade'
     };
 
     const route = routeMap[grade];

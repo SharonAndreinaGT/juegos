@@ -80,7 +80,7 @@ const routes: Routes = [
   { path: 'progress', component: ProgressComponent, canActivate: [AuthGuard] },
   { path: 'chart', component: ChartComponent, canActivate: [AuthGuard] },
   {
-    path: 'firstGrade',
+    path: 'grade',
     component: GradeStudentsComponent,
     canActivate: [AuthGuard],
     data: {

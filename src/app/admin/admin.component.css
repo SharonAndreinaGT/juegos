@@ -1,0 +1,128 @@
+.container {
+  background: rgba(128, 128, 128, 0.402);
+}
+
+.sidenav {
+  background-color: #9fd3f3d9;
+  border-radius: 0px;
+}
+
+.sidenav-bar {
+  width: 200px;
+  margin: 16px;
+  border-right: none;
+  border-radius: 10px;
+  background-color: #f0f8ff;
+}
+
+.menu-header-content {
+  display: flex; /* Convierte el contenedor en un flex container */
+  align-items: center; /* Alinea los elementos verticalmente al centro */
+  gap: 10px; /* Agrega un espacio entre el logo y el texto */
+  padding: 0 8px; /* Ajusta el padding para que no se vea pegado a los bordes */
+}
+
+.logo-sidebar {
+  height: 60px; /* Establece una altura para el logo. Ajusta según tus necesidades */
+  width: auto; /* Mantiene la proporción */
+}
+
+.menu-text {
+  font-size: 1.2em; /* Puedes ajustar el tamaño de la fuente del texto */
+}
+
+
+.content {
+  padding: 16.5px; /* propiedad para el espacio de los contenedores */
+}
+
+.menu-button{
+  width: 100%;
+  margin-right: 8px;
+  display: flex;
+  font-size: 1rem;
+  justify-content: flex-start;
+}
+  
+.welcome-card{
+  background-color: #f0f8ff;
+}
+
+.users-table-container {
+  height: calc(100vh - 65px);
+  border-radius: 10px;
+  margin: 16px;
+  margin-left: 20px;
+  display: flex;
+  background-color: #f0f8ff;
+}
+
+.users-table-container {
+  margin: 16px;
+  margin-left: 20px;
+  margin-top: 0;
+}
+
+.users-table {
+  width: 100%;
+}
+
+.users-table-card {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.users-table .mat-mdc-header-cell {
+  background-color: #3f51b5;
+  color: white;
+  font-weight: bold;
+}
+
+.users-table .mat-mdc-row:hover {
+  background-color: #f5f5f5;
+}
+
+.status-active {
+  color: #4caf50;
+  font-weight: bold;
+}
+
+.status-inactive {
+  color: #f44336;
+  font-weight: bold;
+}
+
+.no-users-message {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-style: italic;
+}
+
+.edit-button {
+  transition: all 0.3s ease;
+}
+
+.edit-button:hover {
+  background-color: rgba(63, 81, 181, 0.1);
+  transform: scale(1.1);
+}
+
+.users-table .mat-column-actions {
+  width: 100px;
+  text-align: center;
+}
+
+/* Dialog specific styles */
+.edit-user-dialog .mat-dialog-container {
+  padding: 0;
+}
+
+.edit-user-dialog .mat-dialog-title {
+  margin: 0 0 20px 0;
+  padding: 24px 24px 0 24px;
+}
+
+  

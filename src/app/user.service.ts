@@ -154,7 +154,6 @@ export class UserService {
   getGradeFilter(): Promise<any> {
     const token = this.authService.getToken();
     const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')[0];
-    console.log('User Info:', userInfo);
     const gradeId = userInfo.grade;
     if (!token || !gradeId) {
       return Promise.resolve('');

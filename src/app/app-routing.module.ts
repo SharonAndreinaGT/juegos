@@ -32,9 +32,11 @@ const getGradeFilter = () => {
 };
 
 const getGradeTitle = () => {
-  const grade = JSON.parse(localStorage.getItem('gradeFilter') || '{}').data[0];
-  console.log('Grade:', grade.grade);
-  return grade.grade;
+  const gradeFilter = JSON.parse(localStorage.getItem('gradeFilter') || '{}');
+  const gradeData = Array.isArray(gradeFilter.data) ? gradeFilter.data[0] : undefined;
+  const grade = gradeData && gradeData.grade ? gradeData.grade : '';
+  console.log('Grade:', grade);
+  return grade;
 };
 
 //rutas de navegacion

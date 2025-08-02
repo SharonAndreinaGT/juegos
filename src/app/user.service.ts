@@ -31,6 +31,10 @@ export class UserService {
     return this.http.post<any>(this.apiUrl, userData);
   }
 
+  updateStudent(id: number, studentData: any) {
+    return this.http.patch<any>(`${this.apiUrl}/${id}`, studentData);
+  }
+
   // Editar usuario por ID
   updateUser(id: number, userData: any) {
     return this.http.patch<any>(`${this.apiUrl}/${id}`, userData);

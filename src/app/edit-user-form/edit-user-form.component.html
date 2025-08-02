@@ -3,18 +3,22 @@
   <form [formGroup]="studentForm" (ngSubmit)="guardarCambios()">
     <mat-form-field class="full-width">
       <mat-label>Nombre</mat-label>
-      <input matInput formControlName="name" required>
+      <input matInput id="name" formControlName="name" required>
     </mat-form-field>
 
     <mat-form-field class="full-width">
       <mat-label>Apellido</mat-label>
-      <input matInput formControlName="lastname" required>
+      <input matInput id="lastname" formControlName="lastname" required>
     </mat-form-field>
 
 
     <mat-form-field class="full-width">
       <mat-label>Sección</mat-label>
-      <input matInput formControlName="section" required>
+      <mat-select formControlName="section" required>
+        <mat-option *ngFor="let section of sections" [value]="section.id">
+          {{ section.section }}
+        </mat-option>
+      </mat-select>
     </mat-form-field>
 
     <div class="button-group">

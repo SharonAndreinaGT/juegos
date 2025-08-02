@@ -87,13 +87,29 @@
 
 .word-hint {
   font-style: italic;
-  color: #888;
+  color: #0b1e9b;
   margin-top: 15px;
-  font-size: 1.2em; /* Tamaño de la pista */
+  font-size: 1.5em; /* Tamaño de la pista */
   max-width: 80%;
   margin-left: auto;
   margin-right: auto;
 }
+
+/* ESTILOS APLICADOS PARA LAS PISTAS (IMAGEN) */
+
+.hint-image-container {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.word-hint-image {
+  max-width: 200px; /* Hacemos la imagen más pequeña */
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
 
 /* ----------------------------------------------------------- */
 /* Estilos para el mensaje de fin de juego (cualitativo y estrellas) */

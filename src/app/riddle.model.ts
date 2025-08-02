@@ -2,6 +2,7 @@
 export interface RiddleWord {
   word: string; // La palabra en sí.
   hint?: string; // Pista opcional, usada principalmente para el Nivel 3.
+  hint_image?: string; // URL de la imagen
 }
 
 // Define la estructura de la configuración para un nivel específico del juego.

@@ -1,10 +1,8 @@
-<!-- Elemento de audio para el sonido de victoria -->
 <audio #winSound>
   <source src="assets/sounds/win.mp3" type="audio/mpeg">
   Tu navegador no soporta el elemento de audio.
 </audio>
 
-<!-- Elemento de audio para el sonido de derrota -->
 <audio #loseSound>
   <source src="assets/sounds/lose.mp3" type="audio/mpeg">
   Tu navegador no soporta el elemento de audio.
@@ -20,16 +18,22 @@
           <div class="intent-display">Intentos restantes: <span>{{ maxIncorrectGuesses - incorrectGuesses }}</span></div>
           <div class="word-progress">Palabra <span>{{ currentWordIndex + 1 }}</span> de <span>{{ activeLevelConfig.words_level }}</span></div>
           <div *ngIf="gameStatus === 'playing' || gameStatus === 'time-up'" class="game-timer">
-            Tiempo restante: {{ formatTime(timeRemaining) }}
+            Tiempo restante: <span> {{ formatTime(timeRemaining) }}</span> 
           </div>
         </div>
       </div>
 
       <div class="riddle-wrapper">
-        <p class="word-display">{{ displayWord }}</p>
+        <div *ngIf="activeLevelConfig.level_number === 3 && currentHintImage" class="hint-image-container">
+          <img [src]="currentHintImage" alt="Pista de la palabra" class="word-hint-image">
+        </div>
+        
         <p *ngIf="activeLevelConfig.level_number === 3 && currentHint" class="word-hint">
           Pista: {{ currentHint }}
         </p>
+
+        <p class="word-display">{{ displayWord }}</p>
+        
       </div>
     </div>
 
@@ -64,8 +68,9 @@
       <button mat-raised-button color="primary" (click)="resetGame()">
         Jugar de nuevo
       </button>
-       <button mat-raised-button color="primary" (click)="options()">
+      <button mat-raised-button color="primary" (click)="options()">
         Volver al menú
       </button>
     </div>
   </div>
+</mat-sidenav-container>

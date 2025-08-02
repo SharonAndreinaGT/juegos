@@ -13,6 +13,7 @@
       <mat-card class="settings-card">
         <mat-card-content>
           <mat-tab-group dynamicHeight (selectedTabChange)="onTabChange($event)">
+            
             <mat-tab label="Nivel 1">
               <div class="tab-content-form">
                 <h2 class="h2">Fácil</h2>
@@ -65,8 +66,11 @@
                       No hay palabras configuradas para este nivel.
                     </div>
                     <div *ngFor="let wordObj of level1Config.words; let i = index" class="word-item mat-elevation-z1">
-                      <span>{{ wordObj.word }}</span>
-                      <span *ngIf="wordObj.hint" class="word-hint"> ({{ wordObj.hint }})</span>
+                      <div class="word-details">
+                        <span>{{ wordObj.word }}</span>
+                        <span *ngIf="wordObj.hint" class="word-hint"> ({{ wordObj.hint }})</span>
+                        <img *ngIf="wordObj.hint_image" [src]="wordObj.hint_image" alt="Pista" class="hint-image">
+                      </div>
                       <button mat-icon-button color="warn" (click)="removeWord(level1Config, i)" class="remove-word-button">
                         <mat-icon>close</mat-icon>
                       </button>
@@ -75,7 +79,7 @@
                 </form>
               </div>
             </mat-tab>
-
+            
             <mat-tab label="Nivel 2">
               <div class="tab-content-form">
                 <h2 class="h2">Medio</h2>
@@ -128,8 +132,11 @@
                       No hay palabras configuradas para este nivel.
                     </div>
                     <div *ngFor="let wordObj of level2Config.words; let i = index" class="word-item mat-elevation-z1">
-                      <span>{{ wordObj.word }}</span>
-                      <span *ngIf="wordObj.hint" class="word-hint"> ({{ wordObj.hint }})</span>
+                      <div class="word-details">
+                        <span>{{ wordObj.word }}</span>
+                        <span *ngIf="wordObj.hint" class="word-hint"> ({{ wordObj.hint }})</span>
+                        <img *ngIf="wordObj.hint_image" [src]="wordObj.hint_image" alt="Pista" class="hint-image">
+                      </div>
                       <button mat-icon-button color="warn" (click)="removeWord(level2Config, i)" class="remove-word-button">
                         <mat-icon>close</mat-icon>
                       </button>
@@ -138,7 +145,7 @@
                 </form>
               </div>
             </mat-tab>
-
+            
             <mat-tab label="Nivel 3">
               <div class="tab-content-form">
                 <h2 class="h2">Difícil</h2>
@@ -178,10 +185,23 @@
                         <mat-label>Palabra</mat-label>
                         <input matInput [(ngModel)]="newWordInput" [ngModelOptions]="{standalone: true}" placeholder="Ej: ORDENADOR">
                       </mat-form-field>
+                      
                       <mat-form-field appearance="outline" class="hint-input-field">
                         <mat-label>Pista (Obligatoria)</mat-label>
                         <input matInput [(ngModel)]="newHintInput" [ngModelOptions]="{standalone: true}" placeholder="Ej: Máquina electrónica">
                       </mat-form-field>
+                      
+                      <div class="image-upload-area">
+                        <input type="file" (change)="onFileSelected($event)" accept="image/*" style="display: none;" #fileInput3>
+                        <button mat-stroked-button color="accent" (click)="fileInput3.click()">
+                          <mat-icon>cloud_upload</mat-icon> Subir Imagen
+                        </button>
+                        <span *ngIf="newHintImageFile">{{ newHintImageFile.name }}</span>
+                      </div>
+                      
+                      <div *ngIf="newHintImageUrl" class="image-preview-container">
+                        <img [src]="newHintImageUrl" alt="Vista previa" class="image-preview">
+                      </div>
                     </div>
                     <div class="button-container">
                       <button mat-raised-button color="accent" (click)="addWord(level3Config)" class="add-word-button">
@@ -195,8 +215,11 @@
                       No hay palabras configuradas para este nivel.
                     </div>
                     <div *ngFor="let wordObj of level3Config.words; let i = index" class="word-item mat-elevation-z1">
-                      <span>{{ wordObj.word }}</span>
-                      <span *ngIf="wordObj.hint" class="word-hint"> ({{ wordObj.hint }})</span>
+                      <div class="word-details">
+                        <span>{{ wordObj.word }}</span>
+                        <span *ngIf="wordObj.hint" class="word-hint"> ({{ wordObj.hint }})</span>
+                        <img *ngIf="wordObj.hint_image" [src]="wordObj.hint_image" alt="Pista" class="hint-image">
+                      </div>
                       <button mat-icon-button color="warn" (click)="removeWord(level3Config, i)" class="remove-word-button">
                         <mat-icon>close</mat-icon>
                       </button>

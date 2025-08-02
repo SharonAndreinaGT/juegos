@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../auth.service';
+import { firstValueFrom } from 'rxjs';
+import { UserService } from '../user.service';
 
 @Component({
   selector: 'app-login',
@@ -17,25 +19,27 @@ export class LoginComponent {
   //utilizando servicio de ruteo para poder navegar entre los componentes
   constructor(
     private authService: AuthService,
+    private userService: UserService,
     private router: Router,
     private route: ActivatedRoute
   ) {}
 
   //función de inicio de sesion
-  login() {
+  async login() {
     this.errorMessage = '';
 
     this.authService.login(this.email, this.password).subscribe({
-      next: (respuesta: any) => {
+      next: async (respuesta: any) => {
         console.log(respuesta);
         this.authService.setToken(respuesta.data.access_token);
 
-        this.authService.getUserInfo(this.email).subscribe({
-          next: (userInfo: any) => {
-            localStorage.setItem('userInfo', JSON.stringify(userInfo.data));
-            console.log('Información del usuario:', userInfo.data);
-          },
-        });
+        const userInfo = await this.userService.getUserInfo(this.email);
+        localStorage.setItem('userInfo', JSON.stringify(userInfo.data));
+
+        this.authService.isAuthenticatedSubject.next(true);
+
+        const gradeFilter = await this.userService.getGradeFilter();
+        localStorage.setItem('gradeFilter', JSON.stringify(gradeFilter));
 
         // Obtener la URL de retorno si existe
         const returnUrl =

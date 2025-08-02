@@ -20,13 +20,6 @@ import { StudentAuthGuard } from './student-auth.guard';
 import { NavigationGuardService } from './navigation-guard.service';
 import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
 
-// Grados Actuales
-const FIRST_GRADE = '87b4cb0a-81bb-4217-9f17-6a545fc39f73';
-const SECOND_GRADE = 'ef7220b7-7bc2-4b91-88d1-47892aa57576';
-const THIRD_GRADE = '0acec409-6850-4152-b640-662fe9217123';
-
-//rutas de navegacion
-
 const getGradeFilter = () => {
   try {
     const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')[0];
@@ -35,6 +28,17 @@ const getGradeFilter = () => {
     return '';
   }
 };
+
+const getGradeTitle = () => {
+  try {
+    const grade = JSON.parse(localStorage.getItem('gradeFilter') || '{}').data[0];
+    return grade.grade;
+  } catch {
+    return '';
+  }
+};
+
+//rutas de navegacion
 
 const routes: Routes = [
   // Rutas públicas (no requieren autenticación)
@@ -76,25 +80,7 @@ const routes: Routes = [
     path: 'firstGrade',
     component: GradeStudentsComponent,
     canActivate: [AuthGuard],
-    data: { gradeTitle: 'Primer Grado', gradeFilter: getGradeFilter() },
-  },
-  {
-    path: 'secondGrade',
-    component: GradeStudentsComponent,
-    canActivate: [AuthGuard],
-    data: {
-      gradeTitle: 'Segundo Grado',
-      gradeFilter: getGradeFilter(),
-    },
-  },
-  {
-    path: 'thirdGrade',
-    component: GradeStudentsComponent,
-    canActivate: [AuthGuard],
-    data: {
-      gradeTitle: 'Tercer Grado',
-      gradeFilter: getGradeFilter(),
-    },
+    data: { gradeTitle: `Grado: ${getGradeTitle()}`, gradeFilter: getGradeFilter() },
   },
   {
     path: 'settings',

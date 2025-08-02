@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, map, Observable } from 'rxjs';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 
@@ -7,7 +7,7 @@ import { HttpClient } from '@angular/common/http';
   providedIn: 'root',
 })
 export class AuthService {
-  private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
+  public isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
   constructor(private router: Router, private http: HttpClient) {
@@ -62,27 +62,6 @@ export class AuthService {
     localStorage.removeItem('token');
     this.isAuthenticatedSubject.next(false);
     this.router.navigate(['/welcome']);
-  }
-
-  /**
-   * Obtiene la información del usuario autenticado
-   */
-  getUserInfo(email: string): Observable<any> {
-    const token = this.getToken();
-    if (!token) {
-      return new Observable((observer) => {
-        observer.next(null);
-        observer.complete();
-      });
-    }
-
-    // Aquí puedes hacer una petición al servidor para obtener la información del usuario
-    return this.http.get(
-      `http://localhost:8055/users?filter[email][_eq]=${email}`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
   }
 
   /**

@@ -17,6 +17,7 @@ import { take } from 'rxjs/operators'; // Para desuscribirse automáticamente de
 })
 export class MemorySettingsComponent implements OnInit, OnDestroy {
   title: string = 'Memoria';
+  grade = JSON.parse(localStorage.getItem('gradeFilter') || '{}').data[0].id;
 
   level1Form: FormGroup;
   level2Form: FormGroup;
@@ -58,7 +59,8 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
       card_count: [this.LEVEL_CARD_COUNTS.level1, [Validators.required, Validators.min(this.LEVEL_CARD_COUNTS.level1), Validators.pattern('^[0-9]*$')]],
       time_limit: [120, [Validators.required, Validators.min(1)]],
       intent: [0, [Validators.required, Validators.min(0)]],
-      isActive: [false]
+      isActive: [false],
+      level: ['183770b3-0e66-4932-8769-b0c1b4738d79']
     });
 
     this.level2Form = this.fb.group({
@@ -66,7 +68,8 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
       card_count: [this.LEVEL_CARD_COUNTS.level2, [Validators.required, Validators.min(this.LEVEL_CARD_COUNTS.level2), Validators.pattern('^[0-9]*$')]],
       time_limit: [180, [Validators.required, Validators.min(1)]],
       intent: [0, [Validators.required, Validators.min(0)]],
-      isActive: [false]
+      isActive: [false],
+      level: ['98fd8047-6897-4a86-85e2-f430e48956bd']
     });
 
     this.level3Form = this.fb.group({
@@ -74,7 +77,8 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
       card_count: [this.LEVEL_CARD_COUNTS.level3, [Validators.required, Validators.min(this.LEVEL_CARD_COUNTS.level3), Validators.pattern('^[0-9]*$')]],
       time_limit: [240, [Validators.required, Validators.min(1)]],
       intent: [0, [Validators.required, Validators.min(0)]],
-      isActive: [false]
+      isActive: [false],
+      level: ['3c16b66e-0fa4-4ecc-a9ae-41dd832f0bc1']
     });
   }
 
@@ -189,6 +193,7 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
 
   async saveLevelConfig(levelKey: string): Promise<void> {
     const levelForm = this.getLevelForm(levelKey);
+    console.log(levelForm.get('level')?.value);
 
     // Asegurarse de que el número de imágenes coincida antes de guardar
     const requiredPairs = this.LEVEL_CARD_COUNTS[levelKey as keyof typeof this.LEVEL_CARD_COUNTS] / 2;
@@ -243,18 +248,21 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
       console.log('URLs de imágenes a guardar:', finalImageUrls);
 
       const levelName = levelForm.get('level_name')?.value;
+      const level = levelForm.get('level')?.value;
       
       // Obtener la configuración existente de Directus para este nivel
-      const existingConfigResponse = await this.memoryService.getMemoryConfigByLevel(levelName).toPromise();
+      const existingConfigResponse = await this.memoryService.getMemoryConfigByLevel(level).toPromise();
       const existingConfigData = existingConfigResponse?.data?.[0];
-      
+      console.log(levelForm.get('level')?.value);
       const configToSave: MemoryConfig = {
         level_name: levelName,
         card_count: levelForm.get('card_count')?.value,
         time_limit: levelForm.get('time_limit')?.value,
         intent: levelForm.get('intent')?.value,
         isActive: levelForm.get('isActive')?.value,
-        images: finalImageUrls
+        images: finalImageUrls,
+        level: levelForm.get('level')?.value,
+        grade: this.grade
       };
 
       // Si existe un registro, asignar el ID para que se actualice en lugar de crear
@@ -277,7 +285,7 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
           .map(async (config: MemoryConfig) => {
             console.log(`Desactivando nivel ${config.level_name} (ID: ${config.id}) en la DB.`);
             // Obtener la configuración completa del nivel a desactivar antes de enviarla
-            const currentDbConfigResponse = await this.memoryService.getMemoryConfigByLevel(config.level_name!).toPromise();
+            const currentDbConfigResponse = await this.memoryService.getMemoryConfigByLevel(config.level!).toPromise();
             const currentDbConfig = currentDbConfigResponse?.data?.[0];
 
             if (currentDbConfig && currentDbConfig.id) {
@@ -332,9 +340,9 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
    */
   loadSettings(): void {
     console.log('Cargando configuración desde Directus...');
-    
     const levelNames = ['Nivel1', 'Nivel2', 'Nivel3'];
-    const fetchPromises = levelNames.map(name => this.memoryService.getMemoryConfigByLevel(name).pipe(take(1)).toPromise());
+    const levelsIds = ['183770b3-0e66-4932-8769-b0c1b4738d79', '98fd8047-6897-4a86-85e2-f430e48956bd', '3c16b66e-0fa4-4ecc-a9ae-41dd832f0bc1'];
+    const fetchPromises = levelsIds.map(level => this.memoryService.getMemoryConfigByLevel(level).pipe(take(1)).toPromise());
 
     forkJoin(fetchPromises).subscribe({
       next: (responses: any[]) => {

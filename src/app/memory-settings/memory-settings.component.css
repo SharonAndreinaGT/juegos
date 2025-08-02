@@ -19,6 +19,23 @@
   background-color: #f0f8ff;
 }
 
+.menu-header-content {
+  display: flex; /* Convierte el contenedor en un flex container */
+  align-items: center; /* Alinea los elementos verticalmente al centro */
+  gap: 10px; /* Agrega un espacio entre el logo y el texto */
+  padding: 0 8px; /* Ajusta el padding para que no se vea pegado a los bordes */
+}
+
+.logo-sidebar {
+  height: 60px; /* Establece una altura para el logo. Ajusta según tus necesidades */
+  width: auto; /* Mantiene la proporción */
+}
+
+.menu-text {
+  font-size: 1.2em; /* Puedes ajustar el tamaño de la fuente del texto */
+}
+
+
 .content {
   padding: 16.5px;
 }

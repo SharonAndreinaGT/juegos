@@ -35,7 +35,9 @@ const url = `http://localhost:8055/items/users?filter[name][_eq]=${this.name.toL
         console.log('[LoginIDComponent] Respuesta de login:', respuesta);
         if (respuesta.data && respuesta.data.length > 0) {
           // Usuario encontrado
+
           const loggedInUser: User = respuesta.data[0]; // Obtén el objeto User completo
+          console.log('loggedInUser', loggedInUser);
           localStorage.setItem('gradeStudent', loggedInUser.grade!);
           // Usa el método de tu SharedDataService para guardar el ID del estudiante
           this.sharedDataService.setLoggedInStudentId(loggedInUser.id);

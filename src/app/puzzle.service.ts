@@ -36,7 +36,7 @@ export class PuzzleService {
   getPuzzleConfigByLevelStudent(level: string): Observable<any> {
     // Directus usa el filtro `_eq` para igualdad. Se solicita el ID también.
 
-    const grade = JSON.parse(localStorage.getItem('gradeFilter') || '').data[0].grade;
+    const grade = localStorage.getItem('gradeStudent') || '';
     console.log('haaaaaa',grade);
 
     return this.http.get<any>(`${this.apiUrl}?filter[level][_eq]=${level}&filter[grade][_eq]=${grade}&fields=*,id`);

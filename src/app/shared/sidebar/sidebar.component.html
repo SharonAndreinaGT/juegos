@@ -1,11 +1,8 @@
 <mat-sidenav-container class="container">
   <mat-sidenav mode="side" opened class="sidenav-bar">
     <mat-toolbar class="sidenav">
-        <div class="menu-header-content">
-          <img src="assets/img/Logo11.png" alt="Logo del software educativo" class="logo-sidebar">
-          <span class="menu-text">Menú</span>
-        </div>
-      </mat-toolbar>
+      <span>Administrador</span>
+    </mat-toolbar>
 
     <mat-nav-list>
       <button mat-button class="menu-button" routerLink="/main">
@@ -35,6 +32,13 @@
       <button mat-button class="menu-button" routerLink="/chart">
         <mat-icon>bar_chart</mat-icon>
         <span>Gráficas</span>
+      </button>
+
+      <mat-divider></mat-divider>
+
+      <button mat-button class="menu-button" (click)="exportData()">
+        <mat-icon>download</mat-icon>
+        <span>Exportar Data</span>
       </button>
 
       <mat-divider></mat-divider>

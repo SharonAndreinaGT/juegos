@@ -1,232 +1,183 @@
-<mat-sidenav-container class="container">
-  <mat-sidenav mode="side" opened class="sidenav-bar">
-    <mat-toolbar class="sidenav">
-      <div class="menu-header-content">
-        <img src="assets/img/Logo11.png" alt="Logo del software educativo" class="logo-sidebar">
-        <span class="menu-text">Menú</span>
-      </div>
-    </mat-toolbar>
-
-    <mat-nav-list>
-      <button mat-button class="menu-button" routerLink="/main">
-        <mat-icon>person</mat-icon>
-        <span>Inicio</span>
-      </button>
-      <button mat-button class="menu-button" routerLink="/firstGrade">
-        <mat-icon>person_add</mat-icon>
-        <span>Primer Grado</span>
-      </button>
-      <button mat-button class="menu-button" routerLink="/secondGrade">
-        <mat-icon>person_add</mat-icon>
-        <span>Segundo Grado</span>
-      </button>
-      <button mat-button class="menu-button" routerLink="/thirdGrade">
-        <mat-icon>person_add</mat-icon>
-        <span>Tercer Grado</span>
-      </button>
-      <button mat-button class="menu-button" routerLink="/settings">
-        <mat-icon>settings</mat-icon>
-        <span>Juegos</span>
-      </button>
-      <button mat-button class="menu-button" routerLink="/progress">
-        <mat-icon>timeline</mat-icon>
-        <span>Progreso</span>
-      </button>
-      <button mat-button class="menu-button" routerLink="/chart">
-        <mat-icon>bar_chart</mat-icon>
-        <span>Gráficas</span>
-      </button>
-
-      <mat-divider></mat-divider>
-
-      <button mat-button class="menu-button" (click)="logout()">
-        <mat-icon>logout</mat-icon>
-        <span>Salir</span>
-      </button>
-    </mat-nav-list>
-  </mat-sidenav>
-
-  <mat-sidenav-content class="content">
-    <mat-card class="welcome-container">
-      <mat-card-content class="">
-        <div class="welcome-content">
-          <div class="header-container">
-            <button mat-icon-button class="back-button" (click)="goBack()" matTooltip="Regresar">
-              <mat-icon>arrow_back</mat-icon>
-            </button>
-            <h1>{{ title }}</h1>
-          </div>
+<app-sidebar>
+  <mat-card class="welcome-container">
+    <mat-card-content class="">
+      <div class="welcome-content">
+        <div class="header-container">
+          <button mat-icon-button class="back-button" (click)="goBack()" matTooltip="Regresar">
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+          <h1>{{ title }}</h1>
         </div>
+      </div>
 
-        <mat-card class="settings-card">
-          <mat-card-content>
-            <mat-tab-group dynamicHeight>
-              <mat-tab label="Nivel 1">
-                <h2 class="h2">Fácil</h2>
-                <mat-slide-toggle [checked]="level1Config.isActive"
-                  (change)="onLevelActiveChange('level1', $event.checked)" class="level-toggle">
-                  Nivel Activo
-                </mat-slide-toggle>
+      <mat-card class="settings-card">
+        <mat-card-content>
+          <mat-tab-group dynamicHeight>
+            <mat-tab label="Nivel 1">
+              <h2 class="h2">Fácil</h2>
+              <mat-slide-toggle [checked]="level1Config.isActive"
+                (change)="onLevelActiveChange('level1', $event.checked)" class="level-toggle">
+                Nivel Activo
+              </mat-slide-toggle>
 
-                <div class="tab-content-form">
-                  <div class="form-column">
-                    <div class="form-group">
-                      <mat-form-field appearance="outline" class="full-width-input">
-                        <mat-label>Imagen para el Rompecabezas</mat-label>
-                        <input type="file" id="imageInput1" (change)="onImageSelected($event, 'level1')" accept="image/*"
-                          #fileInput1 hidden>
-                        <input matInput readonly
-                          [value]="level1ImageFile?.name || (level1Config.imageUrl ? 'Imagen cargada' : '')"
-                          placeholder="Seleccionar archivo...">
-                        <button mat-icon-button matSuffix (click)="fileInput1.click()">
-                          <mat-icon>folder_open</mat-icon>
-                        </button>
-                      </mat-form-field>
-                      <div *ngIf="level1ImagePreview" class="image-preview">
-                        <img [src]="level1ImagePreview" alt="Previsualización Nivel 1">
-                      </div>
+              <div class="tab-content-form">
+                <div class="form-column">
+                  <div class="form-group">
+                    <mat-form-field appearance="outline" class="full-width-input">
+                      <mat-label>Imagen para el Rompecabezas</mat-label>
+                      <input type="file" id="imageInput1" (change)="onImageSelected($event, 'level1')" accept="image/*"
+                        #fileInput1 hidden>
+                      <input matInput readonly
+                        [value]="level1ImageFile?.name || (level1Config.imageUrl ? 'Imagen cargada' : '')"
+                        placeholder="Seleccionar archivo...">
+                      <button mat-icon-button matSuffix (click)="fileInput1.click()">
+                        <mat-icon>folder_open</mat-icon>
+                      </button>
+                    </mat-form-field>
+                    <div *ngIf="level1ImagePreview" class="image-preview">
+                      <img [src]="level1ImagePreview" alt="Previsualización Nivel 1">
                     </div>
-                  </div>
-
-                  <div class="form-column">
-                    <div class="form-group">
-                      <mat-form-field appearance="outline" class="full-width-input">
-                        <mat-label>Cantidad de Piezas por lado (N)</mat-label>
-                        <input matInput type="number" placeholder="2 (para 4 piezas)" min="2" max="2"
-                          [(ngModel)]="level1Config.rows" name="level1Rows">
-                        <mat-hint>Este nivel es de 2x2 = 4 piezas.</mat-hint>
-                      </mat-form-field>
-                    </div>
-
-                    <div class="form-group">
-                      <mat-form-field appearance="outline" class="full-width-input">
-                        <mat-label>Tiempo Límite (segundos)</mat-label>
-                        <input matInput type="number" placeholder="0 para ilimitado" min="0"
-                          [(ngModel)]="level1Config.time_limit" name="level1TimeLimit">
-                        <mat-hint>Establece 0 para un juego sin límite de tiempo</mat-hint>
-                      </mat-form-field>
-                    </div>
-
-
-
-                    <button mat-raised-button color="primary" (click)="saveLevelConfig('level1')" class="colorbutton-btn">
-                      Guardar Configuración
-                    </button>
                   </div>
                 </div>
-              </mat-tab>
 
-              <mat-tab label="Nivel 2">
-                <h2 class="h2">Medio</h2>
-                <mat-slide-toggle [checked]="level2Config.isActive"
-                  (change)="onLevelActiveChange('level2', $event.checked)" class="level-toggle">
-                  Nivel Activo
-                </mat-slide-toggle>
-                <div class="tab-content-form">
-                  <div class="form-column">
-                    <div class="form-group">
-                      <mat-form-field appearance="outline" class="full-width-input">
-                        <mat-label>Imagen para el Rompecabezas</mat-label>
-                        <input type="file" id="imageInput2" (change)="onImageSelected($event, 'level2')" accept="image/*"
-                          #fileInput2 hidden>
-                        <input matInput readonly
-                          [value]="level2ImageFile?.name || (level2Config.imageUrl ? 'Imagen cargada' : '')"
-                          placeholder="Seleccionar archivo...">
-                        <button mat-icon-button matSuffix (click)="fileInput2.click()">
-                          <mat-icon>folder_open</mat-icon>
-                        </button>
-                      </mat-form-field>
-                      <div *ngIf="level2ImagePreview" class="image-preview">
-                        <img [src]="level2ImagePreview" alt="Previsualización Nivel 2">
-                      </div>
-                    </div>
+                <div class="form-column">
+                  <div class="form-group">
+                    <mat-form-field appearance="outline" class="full-width-input">
+                      <mat-label>Cantidad de Piezas por lado (N)</mat-label>
+                      <input matInput type="number" placeholder="2 (para 4 piezas)" min="2" max="2"
+                        [(ngModel)]="level1Config.rows" name="level1Rows">
+                      <mat-hint>Este nivel es de 2x2 = 4 piezas.</mat-hint>
+                    </mat-form-field>
                   </div>
 
-                  <div class="form-column">
-                    <div class="form-group">
-                      <mat-form-field appearance="outline" class="full-width-input">
-                        <mat-label>Cantidad de Piezas por lado (N)</mat-label>
-                        <input matInput type="number" placeholder="3 (para 9 piezas)" min="3" max="3"
-                          [(ngModel)]="level2Config.rows" name="level2Rows">
-                        <mat-hint>Este nivel es de 3x3 = 9 piezas.</mat-hint>
-                      </mat-form-field>
+                  <div class="form-group">
+                    <mat-form-field appearance="outline" class="full-width-input">
+                      <mat-label>Tiempo Límite (segundos)</mat-label>
+                      <input matInput type="number" placeholder="0 para ilimitado" min="0"
+                        [(ngModel)]="level1Config.time_limit" name="level1TimeLimit">
+                      <mat-hint>Establece 0 para un juego sin límite de tiempo</mat-hint>
+                    </mat-form-field>
+                  </div>
+
+
+
+                  <button mat-raised-button color="primary" (click)="saveLevelConfig('level1')" class="colorbutton-btn">
+                    Guardar Configuración
+                  </button>
+                </div>
+              </div>
+            </mat-tab>
+
+            <mat-tab label="Nivel 2">
+              <h2 class="h2">Medio</h2>
+              <mat-slide-toggle [checked]="level2Config.isActive"
+                (change)="onLevelActiveChange('level2', $event.checked)" class="level-toggle">
+                Nivel Activo
+              </mat-slide-toggle>
+              <div class="tab-content-form">
+                <div class="form-column">
+                  <div class="form-group">
+                    <mat-form-field appearance="outline" class="full-width-input">
+                      <mat-label>Imagen para el Rompecabezas</mat-label>
+                      <input type="file" id="imageInput2" (change)="onImageSelected($event, 'level2')" accept="image/*"
+                        #fileInput2 hidden>
+                      <input matInput readonly
+                        [value]="level2ImageFile?.name || (level2Config.imageUrl ? 'Imagen cargada' : '')"
+                        placeholder="Seleccionar archivo...">
+                      <button mat-icon-button matSuffix (click)="fileInput2.click()">
+                        <mat-icon>folder_open</mat-icon>
+                      </button>
+                    </mat-form-field>
+                    <div *ngIf="level2ImagePreview" class="image-preview">
+                      <img [src]="level2ImagePreview" alt="Previsualización Nivel 2">
                     </div>
-
-                    <div class="form-group">
-                      <mat-form-field appearance="outline" class="full-width-input">
-                        <mat-label>Tiempo Límite (segundos)</mat-label>
-                        <input matInput type="number" placeholder="0 para ilimitado" min="0"
-                          [(ngModel)]="level2Config.time_limit" name="level2TimeLimit">
-                        <mat-hint>Establece 0 para un juego sin límite de tiempo</mat-hint>
-                      </mat-form-field>
-                    </div>
-
-
-
-                    <button mat-raised-button color="primary" (click)="saveLevelConfig('level2')" class="colorbutton-btn">
-                      Guardar Configuración
-                    </button>
                   </div>
                 </div>
-              </mat-tab>
 
-              <mat-tab label="Nivel 3">
-                <h2 class="h2">Difícil</h2>
-                <mat-slide-toggle [checked]="level3Config.isActive"
-                  (change)="onLevelActiveChange('level3', $event.checked)" class="level-toggle">
-                  Nivel Activo
-                </mat-slide-toggle>
-                <div class="tab-content-form">
-                  <div class="form-column" >
-                    <div class="form-group">
-                      <mat-form-field appearance="outline" class="full-width-input">
-                        <mat-label>Imagen para el Rompecabezas</mat-label>
-                        <input type="file" id="imageInput3" (change)="onImageSelected($event, 'level3')" accept="image/*"
-                          #fileInput3 hidden>
-                        <input matInput readonly
-                          [value]="level3ImageFile?.name || (level3Config.imageUrl ? 'Imagen cargada' : '')"
-                          placeholder="Seleccionar archivo...">
-                        <button mat-icon-button matSuffix (click)="fileInput3.click()">
-                          <mat-icon>folder_open</mat-icon>
-                        </button>
-                      </mat-form-field>
-                      <div *ngIf="level3ImagePreview" class="image-preview">
-                        <img [src]="level3ImagePreview" alt="Previsualización Nivel 3">
-                      </div>
-                    </div>
+                <div class="form-column">
+                  <div class="form-group">
+                    <mat-form-field appearance="outline" class="full-width-input">
+                      <mat-label>Cantidad de Piezas por lado (N)</mat-label>
+                      <input matInput type="number" placeholder="3 (para 9 piezas)" min="3" max="3"
+                        [(ngModel)]="level2Config.rows" name="level2Rows">
+                      <mat-hint>Este nivel es de 3x3 = 9 piezas.</mat-hint>
+                    </mat-form-field>
                   </div>
 
-                  <div class="form-column">
-                    <div class="form-group">
-                      <mat-form-field appearance="outline" class="full-width-input">
-                        <mat-label>Cantidad de Piezas por lado (N)</mat-label>
-                        <input matInput type="number" placeholder="4 (para 16 piezas)" min="4" max="4"
-                          [(ngModel)]="level3Config.rows" name="level3Rows">
-                        <mat-hint>Este nivel es de 4x4 = 16 piezas.</mat-hint>
-                      </mat-form-field>
+                  <div class="form-group">
+                    <mat-form-field appearance="outline" class="full-width-input">
+                      <mat-label>Tiempo Límite (segundos)</mat-label>
+                      <input matInput type="number" placeholder="0 para ilimitado" min="0"
+                        [(ngModel)]="level2Config.time_limit" name="level2TimeLimit">
+                      <mat-hint>Establece 0 para un juego sin límite de tiempo</mat-hint>
+                    </mat-form-field>
+                  </div>
+
+
+
+                  <button mat-raised-button color="primary" (click)="saveLevelConfig('level2')" class="colorbutton-btn">
+                    Guardar Configuración
+                  </button>
+                </div>
+              </div>
+            </mat-tab>
+
+            <mat-tab label="Nivel 3">
+              <h2 class="h2">Difícil</h2>
+              <mat-slide-toggle [checked]="level3Config.isActive"
+                (change)="onLevelActiveChange('level3', $event.checked)" class="level-toggle">
+                Nivel Activo
+              </mat-slide-toggle>
+              <div class="tab-content-form">
+                <div class="form-column" >
+                  <div class="form-group">
+                    <mat-form-field appearance="outline" class="full-width-input">
+                      <mat-label>Imagen para el Rompecabezas</mat-label>
+                      <input type="file" id="imageInput3" (change)="onImageSelected($event, 'level3')" accept="image/*"
+                        #fileInput3 hidden>
+                      <input matInput readonly
+                        [value]="level3ImageFile?.name || (level3Config.imageUrl ? 'Imagen cargada' : '')"
+                        placeholder="Seleccionar archivo...">
+                      <button mat-icon-button matSuffix (click)="fileInput3.click()">
+                        <mat-icon>folder_open</mat-icon>
+                      </button>
+                    </mat-form-field>
+                    <div *ngIf="level3ImagePreview" class="image-preview">
+                      <img [src]="level3ImagePreview" alt="Previsualización Nivel 3">
                     </div>
-
-                    <div class="form-group">
-                      <mat-form-field appearance="outline" class="full-width-input">
-                        <mat-label>Tiempo Límite (segundos)</mat-label>
-                        <input matInput type="number" placeholder="0 para ilimitado" min="0"
-                          [(ngModel)]="level3Config.time_limit" name="level3TimeLimit">
-                        <mat-hint>Establece 0 para un juego sin límite de tiempo</mat-hint>
-                      </mat-form-field>
-                    </div>
-
-
-
-                    <button mat-raised-button color="primary" (click)="saveLevelConfig('level3')" class="colorbutton-btn">
-                      Guardar Configuración
-                    </button>
                   </div>
                 </div>
-              </mat-tab>
-            </mat-tab-group>
-          </mat-card-content>
-        </mat-card>
-      </mat-card-content>
-    </mat-card>
-  </mat-sidenav-content>
-</mat-sidenav-container>
+
+                <div class="form-column">
+                  <div class="form-group">
+                    <mat-form-field appearance="outline" class="full-width-input">
+                      <mat-label>Cantidad de Piezas por lado (N)</mat-label>
+                      <input matInput type="number" placeholder="4 (para 16 piezas)" min="4" max="4"
+                        [(ngModel)]="level3Config.rows" name="level3Rows">
+                      <mat-hint>Este nivel es de 4x4 = 16 piezas.</mat-hint>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="form-group">
+                    <mat-form-field appearance="outline" class="full-width-input">
+                      <mat-label>Tiempo Límite (segundos)</mat-label>
+                      <input matInput type="number" placeholder="0 para ilimitado" min="0"
+                        [(ngModel)]="level3Config.time_limit" name="level3TimeLimit">
+                      <mat-hint>Establece 0 para un juego sin límite de tiempo</mat-hint>
+                    </mat-form-field>
+                  </div>
+
+
+
+                  <button mat-raised-button color="primary" (click)="saveLevelConfig('level3')" class="colorbutton-btn">
+                    Guardar Configuración
+                  </button>
+                </div>
+              </div>
+            </mat-tab>
+          </mat-tab-group>
+        </mat-card-content>
+      </mat-card>
+    </mat-card-content>
+  </mat-card>
+</app-sidebar>

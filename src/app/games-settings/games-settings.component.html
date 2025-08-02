@@ -1,75 +1,25 @@
-<mat-sidenav-container class="container">
-    <mat-sidenav mode="side" opened class="sidenav-bar">
-      <mat-toolbar class="sidenav">
-        <div class="menu-header-content">
-          <img src="assets/img/Logo11.png" alt="Logo del software educativo" class="logo-sidebar">
-          <span class="menu-text">Menú</span>
+<app-sidebar>
+  <mat-card class="welcome-container">
+    <mat-card-content class="">
+      <div class="welcome-content">
+        <h1>{{ title }}</h1>
+      </div>
+ 
+      <div class="image-container">
+        <div class="image-item">
+          <span class="span">ROMPECABEZAS</span>
+          <img src="assets/img/puzzle.jpg" alt="" class="small-image" routerLink="/puzzleSettings">
         </div>
-      </mat-toolbar>
-
-    <mat-nav-list>
-      <button mat-button class="menu-button" routerLink="/main">
-        <mat-icon>person</mat-icon>
-        <span>Inicio</span>
-      </button>
-      <button mat-button class="menu-button" routerLink="/firstGrade">
-        <mat-icon>person_add</mat-icon>
-        <span>Primer Grado</span>
-      </button>
-      <button mat-button class="menu-button" routerLink="/secondGrade">
-        <mat-icon>person_add</mat-icon>
-        <span>Segundo Grado</span>
-      </button>
-      <button mat-button class="menu-button" routerLink="/thirdGrade">
-        <mat-icon>person_add</mat-icon>
-        <span>Tercer Grado</span>
-      </button>
-      <button mat-button class="menu-button" routerLink="/settings">
-        <mat-icon>settings</mat-icon>
-        <span>Juegos</span>
-      </button>
-      <button mat-button class="menu-button" routerLink="/progress">
-        <mat-icon>timeline</mat-icon>
-        <span>Progreso</span>
-      </button>
-       <button mat-button class="menu-button" routerLink="/chart">
-        <mat-icon>bar_chart</mat-icon>
-        <span>Gráficas</span>
-      </button>
-
-      <mat-divider></mat-divider>
-
-      <button mat-button class="menu-button" (click)="logout()">
-        <mat-icon>logout</mat-icon>
-        <span>Salir</span>
-      </button>
-    </mat-nav-list>
-    </mat-sidenav>
-
-    <mat-sidenav-content class="content">
-        <mat-card class="welcome-container">
-            <mat-card-content class="">
-                <div class="welcome-content">
-                    <h1>{{ title }}</h1>
-                </div>
-           
-                <div class="image-container">
-                    <div class="image-item">
-                      <span class="span">ROMPECABEZAS</span>
-                      <img src="assets/img/puzzle.jpg" alt="" class="small-image" routerLink="/puzzleSettings">
-                    </div>
-                    <div class="image-item">
-                      <span class="span">MEMORIA</span>
-                      <img src="assets/img/memory.png" alt="" class="small-image" routerLink="/memorySettings">
-                    </div>
-                    <div class="image-item">
-                      <span class="span">ADIVINA LA PALABRA OCULTA</span>
-                      <img src="assets/img/words.png" alt="" class="small-image" routerLink="/riddleSettings">
-                    </div>
-                </div>
-                
-            </mat-card-content>
-        </mat-card>
-    </mat-sidenav-content>
-
-</mat-sidenav-container>
+        <div class="image-item">
+          <span class="span">MEMORIA</span>
+          <img src="assets/img/memory.png" alt="" class="small-image" routerLink="/memorySettings">
+        </div>
+        <div class="image-item">
+          <span class="span">ADIVINA LA PALABRA OCULTA</span>
+          <img src="assets/img/words.png" alt="" class="small-image" routerLink="/riddleSettings">
+        </div>
+      </div>
+      
+    </mat-card-content>
+  </mat-card>
+</app-sidebar>

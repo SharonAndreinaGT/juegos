@@ -4,16 +4,25 @@
       <mat-form-field class="full-width">
         <mat-label>Nombre</mat-label>
         <input matInput formControlName="name" required>
+        <mat-error *ngIf="studentForm.get('name')?.hasError('required') && studentForm.get('name')?.touched">
+          El nombre es requerido.
+        </mat-error>
       </mat-form-field>
   
       <mat-form-field class="full-width">
         <mat-label>Apellido</mat-label>
         <input matInput formControlName="lastname" required>
+        <mat-error *ngIf="studentForm.get('lastname')?.hasError('required') && studentForm.get('lastname')?.touched">
+          El apellido es requerido.
+        </mat-error>
       </mat-form-field>
   
       <mat-form-field class="full-width">
         <mat-label>Sección</mat-label>
         <input matInput formControlName="section" required>
+        <mat-error *ngIf="studentForm.get('section')?.hasError('required') && studentForm.get('section')?.touched">
+          La sección es requerida.
+        </mat-error>
       </mat-form-field>
   
       <div class="button-group">

@@ -3,6 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { SharedDataService } from '../sharedData.service';
 import { User } from '../puzzle-config.model';
+import { UserService } from '../user.service';
+
 
 @Component({
   selector: 'app-login-id',
@@ -18,7 +20,9 @@ export class LoginIDComponent {
   constructor(
     private http: HttpClient,
     private router: Router,
-    private sharedDataService: SharedDataService // Inyecta el SharedDataService
+    private sharedDataService: SharedDataService, // Inyecta el SharedDataService
+    private userService: UserService,
+
   ) {}
 
   login() {
@@ -32,6 +36,7 @@ const url = `http://localhost:8055/items/users?filter[name][_eq]=${this.name.toL
         if (respuesta.data && respuesta.data.length > 0) {
           // Usuario encontrado
           const loggedInUser: User = respuesta.data[0]; // Obtén el objeto User completo
+          localStorage.setItem('gradeStudent', loggedInUser.grade!);
           // Usa el método de tu SharedDataService para guardar el ID del estudiante
           this.sharedDataService.setLoggedInStudentId(loggedInUser.id);
           this.router.navigate(['/options']); // Navega a la página de opciones

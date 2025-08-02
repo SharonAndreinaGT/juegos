@@ -33,6 +33,15 @@ export class PuzzleService {
     return this.http.get<any>(`${this.apiUrl}?filter[level][_eq]=${level}&filter[grade][_eq]=${this.grade}&fields=*,id`);
   }
 
+  getPuzzleConfigByLevelStudent(level: string): Observable<any> {
+    // Directus usa el filtro `_eq` para igualdad. Se solicita el ID también.
+
+    const grade = JSON.parse(localStorage.getItem('gradeFilter') || '').data[0].grade;
+    console.log('haaaaaa',grade);
+
+    return this.http.get<any>(`${this.apiUrl}?filter[level][_eq]=${level}&filter[grade][_eq]=${grade}&fields=*,id`);
+  }
+
   /**
    * Obtiene todas las configuraciones de rompecabezas.
    * Útil para la lógica de desactivación de otros niveles.

@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { SharedDataService } from '../sharedData.service';
 import { MemoryGameStateService } from '../memory-game-state.service';
 import { MemoryConfig } from '../memory-config-model';
+import { StudentProgressService } from '../student-progress.service';
 
 @Component({
   selector: 'app-games-options',
@@ -19,7 +20,8 @@ export class GamesOptionsComponent implements OnInit {
   constructor(
     private router: Router,
     private sharedDataService: SharedDataService,
-    private memoryGameStateService: MemoryGameStateService 
+    private memoryGameStateService: MemoryGameStateService,
+    private studentProgressService: StudentProgressService
   ) {}
 
 
@@ -52,7 +54,28 @@ export class GamesOptionsComponent implements OnInit {
 
  
   gamesRompecabezas(): void { 
-    this.router.navigate(['/puzzle', this.currentPuzzleLevel]);
+    // Obtener el ID del estudiante y su progreso actual
+    this.sharedDataService.loggedInStudentId$.subscribe(studentId => {
+      if (studentId) {
+        // Cargar o inicializar progreso del estudiante
+        let progress = this.studentProgressService.loadProgressFromLocalStorage(studentId, 'puzzle');
+        if (!progress) {
+          this.studentProgressService.initializeProgress(studentId, 'puzzle');
+          progress = this.studentProgressService.getCurrentProgress();
+        }
+        
+        if (progress) {
+          // Navegar al nivel actual del estudiante
+          this.router.navigate(['/puzzle', progress.currentLevel]);
+        } else {
+          // Fallback al primer nivel
+          this.router.navigate(['/puzzle', '183770b3-0e66-4932-8769-b0c1b4738d79']);
+        }
+      } else {
+        // Si no hay estudiante logueado, ir al primer nivel
+        this.router.navigate(['/puzzle', '183770b3-0e66-4932-8769-b0c1b4738d79']);
+      }
+    });
   }
 
   gamesMemory(): void {

@@ -6,6 +6,7 @@ import { PuzzleConfig, PuzzleResult, User } from '../puzzle-config.model';
 import { ActivatedRoute } from '@angular/router'; 
 import { Router } from '@angular/router';
 import { CanComponentDeactivate, NavigationGuardService } from '../navigation-guard.service';
+import { StudentProgressService } from '../student-progress.service';
 
 interface PuzzlePiece {
   index: number;
@@ -40,7 +41,7 @@ export class PuzzleComponent implements OnInit, OnDestroy, CanComponentDeactivat
   elapsedTime = '03:00';
   timerSubscription: Subscription | null = null;
 
-  currentLevelName: string = 'Nivel1';
+  currentGrade: string = 'Nivel1';
   currentStudentId: string | null = null;
 
   constructor(
@@ -50,18 +51,36 @@ export class PuzzleComponent implements OnInit, OnDestroy, CanComponentDeactivat
     private router: Router,
     private el: ElementRef,
     private renderer: Renderer2,
-    private navigationGuardService: NavigationGuardService
+    private navigationGuardService: NavigationGuardService,
+    private studentProgressService: StudentProgressService
   ) {}
 
   ngOnInit(): void {
     this.sharedDataService.loggedInStudentId$.subscribe((studentId: string | null) => {
       this.currentStudentId = studentId;
       console.log(`[PuzzleComponent] ID de estudiante obtenido del servicio compartido: ${this.currentStudentId}`);
+      
+      if (studentId) {
+        // Inicializar o cargar progreso del estudiante
+        let progress = this.studentProgressService.loadProgressFromLocalStorage(studentId, 'puzzle');
+        if (!progress) {
+          this.studentProgressService.initializeProgress(studentId, 'puzzle');
+          progress = this.studentProgressService.getCurrentProgress();
+        }
+        
+        if (progress) {
+          this.currentGrade = progress.currentLevel;
+          console.log(`[PuzzleComponent] Progreso cargado - Nivel actual: ${this.currentGrade}`);
+        }
+      }
     });
 
     this.route.paramMap.subscribe(params => {
-      this.currentLevelName = params.get('levelName') || 'Nivel1';
-      console.log(`[PuzzleComponent] Inicializando con nivel: ${this.currentLevelName}`);
+      const routeLevel = params.get('levelName');
+      if (routeLevel) {
+        this.currentGrade = routeLevel;
+      }
+      console.log(`[PuzzleComponent] Inicializando con nivel: ${this.currentGrade}`);
       this.loadPuzzleConfiguration();
     });
   }
@@ -71,11 +90,11 @@ export class PuzzleComponent implements OnInit, OnDestroy, CanComponentDeactivat
   }
 
   loadPuzzleConfiguration(): void {
-    console.log(`[PuzzleComponent] Cargando configuración para: ${this.currentLevelName}`);
-    this.puzzleService.getPuzzleConfigByLevel(this.currentLevelName).subscribe(
+    console.log(`[PuzzleComponent] Cargando configuración para: ${this.currentGrade}`);
+    this.puzzleService.getPuzzleConfigByLevelStudent(this.currentGrade).subscribe(
       (response: any) => {
         const configData: PuzzleConfig | undefined = response.data?.[0];
-        console.log(`[PuzzleComponent] Datos de configuración obtenidos para ${this.currentLevelName}:`, configData);
+        console.log(`[PuzzleComponent] Datos de configuración obtenidos para ${this.currentGrade}:`, configData);
 
         if (configData) {
           this.rows = configData.rows ?? 3;
@@ -86,14 +105,14 @@ export class PuzzleComponent implements OnInit, OnDestroy, CanComponentDeactivat
             console.log(`[PuzzleComponent] URL de imagen Directus construida: ${this.imageUrl}`);
           } else {
             this.imageUrl = 'assets/img/prueba.jpg';
-            console.warn(`[PuzzleComponent] URL de imagen no encontrada para ${this.currentLevelName}. Usando imagen por defecto.`);
+            console.warn(`[PuzzleComponent] URL de imagen no encontrada para ${this.currentGrade}. Usando imagen por defecto.`);
           }
 
           this.timeLimit = configData.time_limit ?? 180;
           this.timeLeft = this.timeLimit;
 
-          console.log(`[PuzzleComponent] Configuración de ${this.currentLevelName} cargada exitosamente:`, {
-            level_name: this.currentLevelName,
+          console.log(`[PuzzleComponent] Configuración de ${this.currentGrade} cargada exitosamente:`, {
+            level_name: this.currentGrade,
             rows: this.rows,
             cols: this.cols,
             imageUrl: this.imageUrl,
@@ -101,13 +120,13 @@ export class PuzzleComponent implements OnInit, OnDestroy, CanComponentDeactivat
           });
 
         } else {
-          console.warn(`[PuzzleComponent] No se encontró configuración para ${this.currentLevelName}. Usando valores por defecto.`);
+          console.warn(`[PuzzleComponent] No se encontró configuración para ${this.currentGrade}. Usando valores por defecto.`);
           this.resetToDefaultConfig();
         }
         this.initializeGame();
       },
       (error) => {
-        console.error(`[PuzzleComponent] Error al cargar la configuración del rompecabezas para ${this.currentLevelName}:`, error);
+        console.error(`[PuzzleComponent] Error al cargar la configuración del rompecabezas para ${this.currentGrade}:`, error);
         this.resetToDefaultConfig();
         this.initializeGame();
       }
@@ -183,6 +202,16 @@ export class PuzzleComponent implements OnInit, OnDestroy, CanComponentDeactivat
       this.playWinSound();
       this.calculateScoreAndStars();
       this.saveGameResult();
+      
+      // Desbloquear siguiente nivel si hay estudiante logueado
+      if (this.currentStudentId) {
+        const nextLevel = this.studentProgressService.completeLevel(this.currentGrade);
+        if (nextLevel) {
+          console.log(`[PuzzleComponent] ¡Nivel completado! Siguiente nivel desbloqueado: ${nextLevel}`);
+        } else {
+          console.log(`[PuzzleComponent] ¡Felicidades! Has completado todos los niveles del puzzle.`);
+        }
+      }
     }
   }
 
@@ -262,7 +291,7 @@ export class PuzzleComponent implements OnInit, OnDestroy, CanComponentDeactivat
     }
 
     const gameResult: PuzzleResult = {
-      level_name: this.currentLevelName,
+      level_name: this.currentGrade,
       score: this.score,
       moves: this.moves,
       stars: this.stars,
@@ -317,6 +346,38 @@ export class PuzzleComponent implements OnInit, OnDestroy, CanComponentDeactivat
   }
 
   resetGame(): void {
+    if (this.isComplete && this.currentStudentId) {
+      // Si completó el nivel, avanzar al siguiente
+      const progress = this.studentProgressService.getCurrentProgress();
+      if (progress) {
+        const nextLevel = this.studentProgressService.getNextLevel('puzzle', this.currentGrade);
+        if (nextLevel) {
+          this.currentGrade = nextLevel;
+          console.log(`[PuzzleComponent] Avanzando al siguiente nivel: ${this.currentGrade}`);
+          this.loadPuzzleConfiguration();
+          return;
+        } else {
+          console.log(`[PuzzleComponent] No hay más niveles disponibles. Reiniciando al primer nivel.`);
+          // Si no hay más niveles, volver al primero
+          this.studentProgressService.resetProgress(this.currentStudentId, 'puzzle');
+          const newProgress = this.studentProgressService.getCurrentProgress();
+          if (newProgress) {
+            this.currentGrade = newProgress.currentLevel;
+          }
+        }
+      }
+    }
+    
+    // Reiniciar el juego con la configuración actual
+    this.loadPuzzleConfiguration();
+  }
+
+  restartCurrentLevel(): void {
+    // Reiniciar el mismo nivel sin avanzar
+    this.isComplete = false;
+    this.moves = 0;
+    this.score = 0;
+    this.stars = 0;
     this.loadPuzzleConfiguration();
   }
 

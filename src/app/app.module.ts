@@ -24,6 +24,7 @@ import { GamesOptionsComponent } from './games-options/games-options.component';
 import { MemoryCardComponent } from './memory-card/memory-card.component';
 import { ChartComponent } from './chart/chart.component';
 import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
+import { SidebarComponent } from './shared/sidebar/sidebar.component';
 
 
 //importaciones de angular material
@@ -78,7 +79,8 @@ import { AuthInterceptor } from './auth.interceptor';
       GamesOptionsComponent,
       MemoryCardComponent,
       ChartComponent,
-      UnauthorizedComponent
+      UnauthorizedComponent,
+      SidebarComponent
     ],
     imports: [
       BrowserModule,

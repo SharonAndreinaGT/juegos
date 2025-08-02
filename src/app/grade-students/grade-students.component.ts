@@ -8,7 +8,6 @@ import { UserService } from '../user.service';
 import { DataExportService } from '../data-export.service';
 import { MatPaginator } from '@angular/material/paginator'; 
 import { MatTableDataSource } from '@angular/material/table';
-import { AuthService } from '../auth.service'; 
 
 @Component({
   selector: 'app-grade-students',
@@ -33,7 +32,6 @@ export class GradeStudentsComponent implements OnInit {
     private route: ActivatedRoute,
     private dialog: MatDialog,
     private userService: UserService,
-    private authService: AuthService,
     private snackBar: MatSnackBar,
     private exportService: DataExportService
   ) {}
@@ -133,10 +131,6 @@ export class GradeStudentsComponent implements OnInit {
         });
       }
     });
-  }
-
-  logout() {
-    this.authService.logout();
   }
 
   exportStudents() {

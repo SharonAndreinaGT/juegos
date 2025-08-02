@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-main',
@@ -10,15 +9,10 @@ import { AuthService } from '../auth.service';
 export class MainComponent  {
 
   constructor(
-    private router: Router,
-    private authService: AuthService
+    private router: Router
   ) {}
 
   navigateTo(view: string) {
     this.router.navigate([view]);
-  }
-
-  logout() {
-    this.authService.logout();
   }
 }

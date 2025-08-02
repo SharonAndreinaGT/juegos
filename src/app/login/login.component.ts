@@ -5,47 +5,55 @@ import { AuthService } from '../auth.service';
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
-  styleUrl: './login.component.css'
+  styleUrl: './login.component.css',
 })
 export class LoginComponent {
- 
-//Variables
-email = '';
-password = '';
-errorMessage: string = ''; 
-showPassword: boolean = false;
+  //Variables
+  email = '';
+  password = '';
+  errorMessage: string = '';
+  showPassword: boolean = false;
 
   //utilizando servicio de ruteo para poder navegar entre los componentes
   constructor(
-    private authService: AuthService, 
+    private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute
   ) {}
 
-
   //función de inicio de sesion
-  login(){
-    this.errorMessage = ''; 
+  login() {
+    this.errorMessage = '';
 
     this.authService.login(this.email, this.password).subscribe({
       next: (respuesta: any) => {
-        console.log(respuesta) 
+        console.log(respuesta);
         this.authService.setToken(respuesta.data.access_token);
-        
+
+        this.authService.getUserInfo(this.email).subscribe({
+          next: (userInfo: any) => {
+            localStorage.setItem('userInfo', JSON.stringify(userInfo.data));
+            console.log('Información del usuario:', userInfo.data);
+          },
+        });
+
         // Obtener la URL de retorno si existe
-        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/main';
+        const returnUrl =
+          this.route.snapshot.queryParams['returnUrl'] || '/main';
         this.router.navigate([returnUrl]);
       },
       error: (error) => {
         if (error.status === 401 || error.status === 403) {
-          this.errorMessage = 'Credenciales inválidas. Por favor, verifica tu email y contraseña.';
+          this.errorMessage =
+            'Credenciales inválidas. Por favor, verifica tu email y contraseña.';
         } else {
-          this.errorMessage = 'Error al conectarse con el servidor. Por favor, inténtalo más tarde.';
+          this.errorMessage =
+            'Error al conectarse con el servidor. Por favor, inténtalo más tarde.';
         }
-      }
+      },
     });
   }
-    //función para alternar la visibilidad de la contraseña
+  //función para alternar la visibilidad de la contraseña
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword;
   }
@@ -55,4 +63,3 @@ showPassword: boolean = false;
     this.router.navigate(['/welcome']);
   }
 }
-

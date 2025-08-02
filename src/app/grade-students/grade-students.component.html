@@ -47,7 +47,7 @@
               <tr *ngFor="let student of dataSource.connect() | async">
                 <td>{{ student.name }}</td>
                 <td>{{ student.lastname }}</td>
-                <td>{{ student.section }}</td>
+                <td>{{ student.section.section }}</td>
                 <td>
                   <button class="btn btn-sm btn-icon" (click)="editUser(student)">
                     <mat-icon>edit</mat-icon>

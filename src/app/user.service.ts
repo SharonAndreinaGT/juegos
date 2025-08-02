@@ -19,7 +19,8 @@ export class UserService {
 
   // Obtener usuarios por grado
   getUsersByGrade(grade: string) {
-    return this.http.get<any>(`${this.apiUrl}?filter[grade][_eq]=${grade}`);
+    const fields = '&fields=id,name,lastname,score,section.id,section.section';
+    return this.http.get<any>(`${this.apiUrl}?filter[grade][_eq]=${grade}${fields}`);
   }
 
   // Crear un nuevo usuario

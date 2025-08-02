@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
@@ -36,7 +36,7 @@ export class AuthService {
    */
   login(email: string, password: string): Observable<any> {
     const data = { email, password };
-    
+
     return this.http.post('http://localhost:8055/auth/login', data);
   }
 
@@ -65,12 +65,33 @@ export class AuthService {
   }
 
   /**
+   * Obtiene la información del usuario autenticado
+   */
+  getUserInfo(email: string): Observable<any> {
+    const token = this.getToken();
+    if (!token) {
+      return new Observable((observer) => {
+        observer.next(null);
+        observer.complete();
+      });
+    }
+
+    // Aquí puedes hacer una petición al servidor para obtener la información del usuario
+    return this.http.get(
+      `http://localhost:8055/users?filter[email][_eq]=${email}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+  }
+
+  /**
    * Verifica si el token es válido haciendo una petición al servidor
    */
   verifyToken(): Observable<boolean> {
     const token = this.getToken();
     if (!token) {
-      return new Observable(observer => {
+      return new Observable((observer) => {
         observer.next(false);
         observer.complete();
       });
@@ -78,9 +99,9 @@ export class AuthService {
 
     // Aquí puedes hacer una petición al servidor para verificar el token
     // Por ahora, solo verificamos que existe
-    return new Observable(observer => {
+    return new Observable((observer) => {
       observer.next(true);
       observer.complete();
     });
   }
-} 
+}

@@ -15,11 +15,12 @@ import { AuthService } from '../auth.service';
 })
 export class RiddleSettingsComponent implements OnInit {
   title = 'Adivinar la Palabra Oculta';
+  grade = JSON.parse(localStorage.getItem('gradeFilter') || '{}').data[0].id;
 
   // Cambiado a time_limit
-  level1Config: RiddleLevel = { id: null, level_number: 1, level_name: 'Fácil', max_intents: 5, words_level: 5, words: [], isActive: false, time_limit: 300 };
-  level2Config: RiddleLevel = { id: null, level_number: 2, level_name: 'Medio', max_intents: 4, words_level: 6, words: [], isActive: false, time_limit: 240 };
-  level3Config: RiddleLevel = { id: null, level_number: 3, level_name: 'Difícil', max_intents: 3, words_level: 7, words: [], isActive: false, time_limit: 180 };
+  level1Config: RiddleLevel = { id: null, level_number: 1, level_name: 'Fácil', max_intents: 5, words_level: 5, words: [], isActive: false, time_limit: 300, grade: this.grade, level: '183770b3-0e66-4932-8769-b0c1b4738d79'  };
+  level2Config: RiddleLevel = { id: null, level_number: 2, level_name: 'Medio', max_intents: 4, words_level: 6, words: [], isActive: false, time_limit: 240, grade: this.grade, level: '98fd8047-6897-4a86-85e2-f430e48956bd' };
+  level3Config: RiddleLevel = { id: null, level_number: 3, level_name: 'Difícil', max_intents: 3, words_level: 7, words: [], isActive: false, time_limit: 180, grade: this.grade, level: '3c16b66e-0fa4-4ecc-a9ae-41dd832f0bc1' };
 
   level1Form!: FormGroup;
   level2Form!: FormGroup;
@@ -43,9 +44,9 @@ export class RiddleSettingsComponent implements OnInit {
   ngOnInit(): void {
     this.riddleService.levels$.subscribe((levels: RiddleLevel[]) => {
       if (levels && levels.length > 0) {
-        this.level1Config = levels.find(lvl => lvl.level_number === 1) || this.level1Config;
-        this.level2Config = levels.find(lvl => lvl.level_number === 2) || this.level2Config;
-        this.level3Config = levels.find(lvl => lvl.level_number === 3) || this.level3Config;
+        this.level1Config = levels.find(lvl => lvl.level === '183770b3-0e66-4932-8769-b0c1b4738d79') || this.level1Config;
+        this.level2Config = levels.find(lvl => lvl.level === '98fd8047-6897-4a86-85e2-f430e48956bd') || this.level2Config;
+        this.level3Config = levels.find(lvl => lvl.level === '3c16b66e-0fa4-4ecc-a9ae-41dd832f0bc1') || this.level3Config;
       } else {
         console.warn('[RiddleSettingsComponent] La suscripción de niveles emitió un array vacío o nulo. Usando configuraciones predeterminadas.');
       }
@@ -76,19 +77,6 @@ export class RiddleSettingsComponent implements OnInit {
     });
   }
 
-  async toggleLevelActive(levelToActivate: RiddleLevel): Promise<void> {
-    const isActivating = !levelToActivate.isActive;
-
-    if (isActivating) {
-      await this.deactivateOtherLevels(levelToActivate.level_number);
-      levelToActivate.isActive = true;
-    } else {
-      levelToActivate.isActive = false;
-    }
-
-    await this.saveSingleLevelConfig(levelToActivate);
-    console.log(`[RiddleSettingsComponent] Nivel ${levelToActivate.level_number} isActive: ${levelToActivate.isActive}`);
-  }
 
   async addWord(levelConfig: RiddleLevel): Promise<void> {
     let value = this.newWordInput.trim().toUpperCase();
@@ -191,6 +179,7 @@ export class RiddleSettingsComponent implements OnInit {
 
   private async saveSingleLevelConfig(config: RiddleLevel): Promise<void> {
     try {
+      console.log(config);
       const savedConfig = await lastValueFrom(this.riddleService.saveRiddleLevel(config));
 
       if (savedConfig) {

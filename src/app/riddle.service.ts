@@ -11,6 +11,7 @@ import { catchError, map, tap } from 'rxjs/operators';
 export class RiddleService {
   private directusUrl = 'http://localhost:8055/items/riddle';
   private directusResultsUrl = 'http://localhost:8055/items/riddle_results'; //URL para los resultados
+  private grade = JSON.parse(localStorage.getItem('gradeFilter') || '{}').data[0].id;
 
   private levelsSubject = new BehaviorSubject<RiddleLevel[]>([]);
   levels$: Observable<RiddleLevel[]> = this.levelsSubject.asObservable();
@@ -20,7 +21,7 @@ export class RiddleService {
   }
 
   private loadLevelsFromDirectus(): void {
-    this.http.get<any>(this.directusUrl).pipe(
+    this.http.get<any>(`${this.directusUrl}?filter[grade][_eq]=${this.grade}&fields=*,id`).pipe(
       map(response => response.data as RiddleLevel[]),
       tap(levels => {
         if (levels && levels.length > 0) {
@@ -29,9 +30,9 @@ export class RiddleService {
         } else {
           console.log('[RiddleService] No se encontraron niveles en Directus. Creando configuración por defecto...');
           const defaultLevels: RiddleLevel[] = [
-            { id: null, level_number: 1, level_name: 'Fácil', max_intents: 5, words_level: 5, words: [{ word: 'ANGULAR' }, { word: 'PROGRAMACION' }, { word: 'DESARROLLO' }], isActive: true },
-            { id: null, level_number: 2, level_name: 'Medio', max_intents: 4, words_level: 6, words: [{ word: 'COMPONENTE' }, { word: 'SERVICIOS' }, { word: 'ROUTING' }], isActive: false },
-            { id: null, level_number: 3, level_name: 'Difícil', max_intents: 3, words_level: 7, words: [{ word: 'TYPESCRIPT' }, { word: 'JAVASCRIPT' }, { word: 'ALGORITMO' }], isActive: false }
+            { id: null, level_number: 1, level_name: 'Fácil', max_intents: 5, words_level: 5, words: [{ word: 'ANGULAR' }, { word: 'PROGRAMACION' }, { word: 'DESARROLLO' }], isActive: true, grade: this.grade, level: '183770b3-0e66-4932-8769-b0c1b4738d79' },
+            { id: null, level_number: 2, level_name: 'Medio', max_intents: 4, words_level: 6, words: [{ word: 'COMPONENTE' }, { word: 'SERVICIOS' }, { word: 'ROUTING' }], isActive: false, grade: this.grade, level: '98fd8047-6897-4a86-85e2-f430e48956bd' },
+            { id: null, level_number: 3, level_name: 'Difícil', max_intents: 3, words_level: 7, words: [{ word: 'TYPESCRIPT' }, { word: 'JAVASCRIPT' }, { word: 'ALGORITMO' }], isActive: false, grade: this.grade, level: '3c16b66e-0fa4-4ecc-a9ae-41dd832f0bc1' }
           ];
 
           lastValueFrom(
@@ -53,9 +54,9 @@ export class RiddleService {
       catchError(error => {
         console.error('[RiddleService] Error al cargar la configuración desde Directus (GET inicial):', error);
         const defaultLevelsOnError: RiddleLevel[] = [
-          { id: null, level_number: 1, level_name: 'Fácil', max_intents: 5, words_level: 5, words: [{ word: 'ANGULAR' }, { word: 'PROGRAMACION' }, { word: 'DESARROLLO' }], isActive: true },
-          { id: null, level_number: 2, level_name: 'Medio', max_intents: 4, words_level: 6, words: [{ word: 'COMPONENTE' }, { word: 'SERVICIOS' }, { word: 'ROUTING' }], isActive: false },
-          { id: null, level_number: 3, level_name: 'Difícil', max_intents: 3, words_level: 7, words: [{ word: 'TYPESCRIPT' }, { word: 'JAVASCRIPT' }, { word: 'ALGORITMO' }], isActive: false }
+          { id: null, level_number: 1, level_name: 'Fácil', max_intents: 5, words_level: 5, words: [{ word: 'ANGULAR' }, { word: 'PROGRAMACION' }, { word: 'DESARROLLO' }], isActive: true, grade: this.grade },
+          { id: null, level_number: 2, level_name: 'Medio', max_intents: 4, words_level: 6, words: [{ word: 'COMPONENTE' }, { word: 'SERVICIOS' }, { word: 'ROUTING' }], isActive: false, grade: this.grade },
+          { id: null, level_number: 3, level_name: 'Difícil', max_intents: 3, words_level: 7, words: [{ word: 'TYPESCRIPT' }, { word: 'JAVASCRIPT' }, { word: 'ALGORITMO' }], isActive: false, grade: this.grade }
         ];
         this.levelsSubject.next(defaultLevelsOnError);
         return of([]);
@@ -73,6 +74,7 @@ export class RiddleService {
     } else {
       operation = 'create';
       const { id, ...newLevelData } = level;
+      newLevelData.grade = this.grade;
       request = this.http.post<any>(this.directusUrl, newLevelData);
     }
 

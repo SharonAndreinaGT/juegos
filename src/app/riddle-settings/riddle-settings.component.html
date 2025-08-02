@@ -16,13 +16,6 @@
             <mat-tab label="Nivel 1">
               <div class="tab-content-form">
                 <h2 class="h2">Fácil</h2>
-                <mat-slide-toggle
-                    color="primary"
-                    [checked]="level1Config.isActive"
-                    (change)="toggleLevelActive(level1Config)"
-                    class="level-toggle">
-                    Activo
-                </mat-slide-toggle>
                 <form [formGroup]="level1Form">
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Máximo de Intentos</mat-label>
@@ -79,13 +72,6 @@
             <mat-tab label="Nivel 2">
               <div class="tab-content-form">
                 <h2 class="h2">Medio</h2>
-                <mat-slide-toggle
-                    color="primary"
-                    [checked]="level2Config.isActive"
-                    (change)="toggleLevelActive(level2Config)"
-                    class="level-toggle">
-                    Activo
-                </mat-slide-toggle>
                 <form [formGroup]="level2Form">
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Máximo de Intentos</mat-label>
@@ -142,13 +128,6 @@
             <mat-tab label="Nivel 3">
               <div class="tab-content-form">
                 <h2 class="h2">Difícil</h2>
-                <mat-slide-toggle
-                    color="primary"
-                    [checked]="level3Config.isActive"
-                    (change)="toggleLevelActive(level3Config)"
-                    class="level-toggle">
-                    Activo
-                </mat-slide-toggle>
                 <form [formGroup]="level3Form">
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Máximo de Intentos</mat-label>

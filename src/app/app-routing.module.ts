@@ -19,6 +19,7 @@ import { AuthGuard } from './auth.guard';
 import { StudentAuthGuard } from './student-auth.guard';
 import { NavigationGuardService } from './navigation-guard.service';
 import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
+import { AdminComponent } from './admin/admin.component';
 
 const getGradeFilter = () => {
   try {
@@ -31,7 +32,8 @@ const getGradeFilter = () => {
 
 const getGradeTitle = () => {
   try {
-    const grade = JSON.parse(localStorage.getItem('gradeFilter') || '{}').data[0];
+    const grade = JSON.parse(localStorage.getItem('gradeFilter') || '{}')
+      .data[0];
     return grade.grade;
   } catch {
     return '';
@@ -49,6 +51,7 @@ const routes: Routes = [
 
   // Rutas protegidas (requieren autenticación de administrador)
   { path: 'main', component: MainComponent, canActivate: [AuthGuard] },
+  { path: 'admin', component: AdminComponent, canActivate: [AuthGuard] },
 
   // Rutas de estudiantes (no requieren autenticación de administrador)
   {
@@ -80,7 +83,10 @@ const routes: Routes = [
     path: 'firstGrade',
     component: GradeStudentsComponent,
     canActivate: [AuthGuard],
-    data: { gradeTitle: `Grado: ${getGradeTitle()}`, gradeFilter: getGradeFilter() },
+    data: {
+      gradeTitle: `Grado: ${getGradeTitle()}`,
+      gradeFilter: getGradeFilter(),
+    },
   },
   {
     path: 'settings',

@@ -30,7 +30,6 @@ export class LoginComponent {
 
     this.authService.login(this.email, this.password).subscribe({
       next: async (respuesta: any) => {
-        console.log(respuesta);
         this.authService.setToken(respuesta.data.access_token);
 
         const userInfo = await this.userService.getUserInfo(this.email);
@@ -40,6 +39,12 @@ export class LoginComponent {
 
         const gradeFilter = await this.userService.getGradeFilter();
         localStorage.setItem('gradeFilter', JSON.stringify(gradeFilter));
+
+        console.log('User info:', userInfo.data);
+        const userRole = await firstValueFrom(
+          this.authService.getUserRole(userInfo.data[0].role)
+        );
+        localStorage.setItem('userRole', JSON.stringify(userRole));
 
         // Obtener la URL de retorno si existe
         const returnUrl =

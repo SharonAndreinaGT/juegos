@@ -16,6 +16,7 @@ import { RiddleSettingsComponent } from './riddle-settings/riddle-settings.compo
 import { ProgressComponent } from './progress/progress.component';
 import { ChartComponent } from './chart/chart.component';
 import { AuthGuard } from './auth.guard';
+import { AdminGuard } from './admin.guard';
 import { StudentAuthGuard } from './student-auth.guard';
 import { NavigationGuardService } from './navigation-guard.service';
 import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
@@ -31,13 +32,9 @@ const getGradeFilter = () => {
 };
 
 const getGradeTitle = () => {
-  try {
-    const grade = JSON.parse(localStorage.getItem('gradeFilter') || '{}')
-      .data[0];
-    return grade.grade;
-  } catch {
-    return '';
-  }
+  const grade = JSON.parse(localStorage.getItem('gradeFilter') || '{}').data[0];
+  console.log('Grade:', grade.grade);
+  return grade.grade;
 };
 
 //rutas de navegacion
@@ -51,7 +48,7 @@ const routes: Routes = [
 
   // Rutas protegidas (requieren autenticación de administrador)
   { path: 'main', component: MainComponent, canActivate: [AuthGuard] },
-  { path: 'admin', component: AdminComponent, canActivate: [AuthGuard] },
+  { path: 'admin', component: AdminComponent, canActivate: [AdminGuard] },
 
   // Rutas de estudiantes (no requieren autenticación de administrador)
   {
@@ -63,26 +60,25 @@ const routes: Routes = [
     path: 'puzzle/:levelName',
     component: PuzzleComponent,
     canActivate: [StudentAuthGuard],
-    canDeactivate: [NavigationGuardService],
+    canDeactivate: [NavigationGuardService, AuthGuard],
   },
   {
     path: 'memory',
     component: MemoryComponent,
     canActivate: [StudentAuthGuard],
-    canDeactivate: [NavigationGuardService],
+    canDeactivate: [NavigationGuardService, AuthGuard],
   },
   {
     path: 'riddle',
     component: RiddleComponent,
     canActivate: [StudentAuthGuard],
-    canDeactivate: [NavigationGuardService],
+    canDeactivate: [NavigationGuardService, AuthGuard],
   },
-  { path: 'progress', component: ProgressComponent, canActivate: [AuthGuard] },
-  { path: 'chart', component: ChartComponent, canActivate: [AuthGuard] },
+  { path: 'progress', component: ProgressComponent, canActivate: [] },
+  { path: 'chart', component: ChartComponent, canActivate: [] },
   {
     path: 'grade',
     component: GradeStudentsComponent,
-    canActivate: [AuthGuard],
     data: {
       gradeTitle: `Grado: ${getGradeTitle()}`,
       gradeFilter: getGradeFilter(),
@@ -91,25 +87,25 @@ const routes: Routes = [
   {
     path: 'settings',
     component: GamesSettingsComponent,
-    canActivate: [AuthGuard],
+    canActivate: [],
     data: { title: 'Configuración de Juegos' },
   },
   {
     path: 'puzzleSettings',
     component: PuzzleSettingsComponent,
-    canActivate: [AuthGuard],
+    canActivate: [],
     data: { title: 'Rompecabezas' },
   },
   {
     path: 'memorySettings',
     component: MemorySettingsComponent,
-    canActivate: [AuthGuard],
+    canActivate: [],
     data: { title: 'Memoria' },
   },
   {
     path: 'riddleSettings',
     component: RiddleSettingsComponent,
-    canActivate: [AuthGuard],
+    canActivate: [],
     data: { title: 'Adivina la Palabra Oculta' },
   },
 

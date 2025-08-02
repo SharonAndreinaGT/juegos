@@ -23,6 +23,11 @@ export class AuthService {
     return !!token;
   }
 
+  isAdmin(): boolean {
+    const userRole = JSON.parse(localStorage.getItem('userRole') || '{}').data;
+    return userRole ? userRole.name === 'user-admin' : false;
+  }
+
   /**
    * Verifica el estado de autenticación y actualiza el BehaviorSubject
    */
@@ -46,6 +51,24 @@ export class AuthService {
   setToken(token: string): void {
     localStorage.setItem('token', token);
     this.isAuthenticatedSubject.next(true);
+  }
+
+  /**
+   * Obtener rol del usuario que está autenticando
+   */
+  getUserRole(roleId: string): Observable<any> {
+    const token = this.getToken();
+    if (!token) {
+      return new Observable((observer) => {
+        observer.next({ name: 'guest' });
+        observer.complete();
+      });
+    }
+
+    // Aquí puedes hacer una petición al servidor para obtener el rol del usuario
+    return this.http.get<any>(`http://localhost:8055/roles/${roleId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
   }
 
   /**

@@ -18,6 +18,7 @@ export class GradeStudentsComponent implements OnInit {
   gradeTitle: string = '';
   gradeFilter = '';
   selectedSection: string = '';
+  searchTerm: string = '';
   availableSections: string[] = [];
   allStudents: any[] = []; 
 
@@ -52,7 +53,7 @@ export class GradeStudentsComponent implements OnInit {
         this.allStudents = response.data;
         this.dataSource.data = this.allStudents; 
         this.extractSections(); // Para llenar el filtro dinámico
-        this.applySectionFilter(); // Para inicializar lista filtrada
+        this.applyFilters(); // Para inicializar lista filtrada
       },
       error: (err) => {
         console.error('Error cargando estudiantes:', err);
@@ -66,11 +67,32 @@ export class GradeStudentsComponent implements OnInit {
   }
 
   applySectionFilter(): void {
+    this.applyFilters();
+  }
+
+  applySearchFilter(): void {
+    this.applyFilters();
+  }
+
+  applyFilters(): void {
+    let filteredStudents = [...this.allStudents];
+
+    // Aplicar filtro de sección
     if (this.selectedSection) {
-      this.dataSource.data = this.allStudents.filter(s => s.section === this.selectedSection);
-    } else {
-      this.dataSource.data = [...this.allStudents]; 
+      filteredStudents = filteredStudents.filter(s => s.section === this.selectedSection);
     }
+
+    // Aplicar filtro de búsqueda
+    if (this.searchTerm.trim()) {
+      const searchLower = this.searchTerm.toLowerCase().trim();
+      filteredStudents = filteredStudents.filter(s => 
+        s.name?.toLowerCase().includes(searchLower) || 
+        s.lastname?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    this.dataSource.data = filteredStudents;
+    
     if (this.dataSource.paginator) {
       this.dataSource.paginator.firstPage();
     }

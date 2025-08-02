@@ -56,6 +56,15 @@
             <option value="">Todas</option>
             <option *ngFor="let sec of availableSections" [value]="sec">{{ sec }}</option>
           </select>
+          
+          <label for="searchInput" style="margin-left: 20px;">Buscar por nombre:</label>
+          <input 
+            id="searchInput" 
+            type="text" 
+            [(ngModel)]="searchTerm" 
+            (input)="applySearchFilter()" 
+            placeholder="Buscar por nombre o apellido..."
+            class="search-input">
         </div>
 
         <div class="colorbutton-btn-container">

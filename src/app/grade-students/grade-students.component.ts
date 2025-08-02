@@ -32,8 +32,8 @@ export class GradeStudentsComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.route.params.subscribe(params => {
-      const grade = params['grade'];
+    this.route.data.subscribe(data => {
+      const grade = data['gradeFilter'];
       this.loadStudents(grade);
       this.setGradeTitle(grade);
     });
@@ -44,6 +44,7 @@ export class GradeStudentsComponent implements OnInit {
   }
 
   loadStudents(grade: string) {
+    console.log('Cargando estudiantes del grado:', grade);
     this.userService.getUsersByGrade(grade).subscribe(
       (data: any) => {
         this.allStudents = data.data || [];

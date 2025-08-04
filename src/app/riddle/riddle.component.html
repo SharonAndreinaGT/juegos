@@ -15,15 +15,15 @@
       <div class="header">
         <div class="title-with-icon">
           <h1 class="game-title">Adivinar la Palabra Oculta</h1>
-          <img src="assets/img/words.png" alt="Logo del juego" class="game-icon">
+          <img src="assets/img/signo.png" alt="Logo del juego" class="game-icon">
         </div>
         
         <div class="status">
           <p class="level-info">Nivel: <span>{{ activeLevelConfig.level_number }} - {{ activeLevelConfig.level_name }}</span></p>
-          <p class="intent-display">Intentos restantes: <span>{{ maxIncorrectGuesses - incorrectGuesses }}</span></p>
+          <p class="intent-display">Intentos: <span>{{ maxIncorrectGuesses - incorrectGuesses }}</span></p>
           <p class="word-progress">Palabra <span>{{ currentWordIndex + 1 }}</span> de <span>{{ activeLevelConfig.words_level }}</span></p>
           <p *ngIf="gameStatus === 'playing' || gameStatus === 'time-up'" class="game-timer">
-            Tiempo restante: <span> {{ formatTime(timeRemaining) }}</span> 
+            Tiempo: <span> {{ formatTime(timeRemaining) }}</span> 
           </p>
         </div>
       </div>

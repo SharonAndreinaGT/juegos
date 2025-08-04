@@ -13,10 +13,15 @@
 <mat-sidenav-container class="container">
   <div class="game-container">
       <div class="header" *ngIf="gameStarted">
-        <h2 class="game-title">Juego de Memoria</h2>
-        <div class="status" >
-          <div class="intent-display">Intentos: <span>{{ intent }}</span></div>
-          <div class="time-display">Tiempo: <span>{{ formatTime(elapsedTime) }}</span></div>
+        <div class="title-with-icon">
+          <h1 class="game-title">Juego de Memoria</h1>
+          <img src="assets/img/memory.png" alt="Logo del juego" class="game-icon">
+        </div>
+        
+        <div class="status">
+          <p class="level-info" *ngIf="activeLevel">Nivel: <span>{{ activeLevel.level_name }}</span></p>
+          <p class="intent-display">Intentos: <span>{{ intent }}</span></p>
+          <p class="time-display">Tiempo: <span>{{ formatTime(elapsedTime) }}</span></p>
         </div>
       </div>
 

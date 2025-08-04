@@ -34,18 +34,24 @@
   padding: 0 10px; 
 }
 
-.header-top {
+/* Estilo para el contenedor que agrupa el título y el ícono */
+.title-with-icon {
   display: flex;
-  justify-content: flex-end;
-  width: 100%;
-  margin-bottom: 20px;
+  justify-content: center; /* Centra el título y el ícono horizontalmente */
+  align-items: center; /* Centra el título y el ícono verticalmente */
+  gap: 15px; /* Espacio entre el título y la imagen */
 }
+
+/* Estilo para el ícono del juego */
+.game-icon {
+  width: 50px; /* Tamaño de la imagen, ajústalo según el tamaño de tu archivo */
+  height: auto;
+}
+
 .game-title {
-  margin: 0;
-  font-size: 2.5em; /* Tamaño del título del juego */
-  color: #3f51b5; /* Color primario de Angular Material */
-  font-weight: bold; /* Hacer el título más impactante */
-  margin-right: 20px; 
+  font-size: 2.2rem;
+  color: #006dbb;
+  margin: 0; 
 }
 
 /* Estilos para el display de estado (intentos restantes, palabra X de Y) */
@@ -59,6 +65,14 @@
   flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
 }
 
+.level-info,
+.intent-display,
+.word-progress,
+.game-timer {
+  font-size: 1.2em;
+  font-weight: 500;
+  margin: 0;
+}
 
 .status span {
   font-weight: bold;
@@ -208,9 +222,20 @@
     padding: 15px;
     width: 95%;
   }
-  .game-title {
-    font-size: 1.8em;
+  
+  .title-with-icon {
+    flex-direction: column;
+    text-align: center;
   }
+  
+  .game-icon {
+    width: 40px;
+  }
+  
+  .game-title {
+    font-size: 1.8rem;
+  }
+  
   .word-display {
     font-size: 3em;
     letter-spacing: 6px;
@@ -224,9 +249,14 @@
 }
 
 @media (max-width: 500px) {
-  .game-title {
-    font-size: 1.5em;
+  .game-icon {
+    width: 35px;
   }
+  
+  .game-title {
+    font-size: 1.5rem;
+  }
+  
   .status {
     gap: 10px;
     font-size: 1em;
@@ -245,10 +275,10 @@
     font-size: 1rem;
   }
   .stars-display {
-    font-size: 1.8em;
+    font-size: 2.2em;
   }
   .game-over-message button {
-    padding: 8px 15px;
     font-size: 0.9em;
+    padding: 8px 16px;
   }
 }

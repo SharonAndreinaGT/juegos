@@ -166,3 +166,26 @@
 .game-over-message button:active {
   transform: translateY(0);
 }
+
+/* Estilo para el contenedor que agrupa el título y el ícono */
+.title-with-icon {
+  display: flex;
+  justify-content: center; /* Centra el título y el ícono horizontalmente */
+  align-items: center; /* Centra el título y el ícono verticalmente */
+  gap: 15px; /* Espacio entre el título y la imagen */
+}
+
+/* Estilo para el ícono de la carita feliz */
+.happy-face-icon {
+  width: 50px; /* Tamaño de la imagen, ajústalo según el tamaño de tu archivo */
+  height: auto;
+}
+
+/* El resto de los estilos, incluyendo el del nivel */
+.level-info {
+  margin: 10px 0 20px;
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #3f51b5;
+  text-align: center;
+}

@@ -13,10 +13,19 @@
 <mat-sidenav-container class="container">
   <div class="welcome-container">
     <div class="header">
-      <h1 class="puzzle-title" *ngIf="!isComplete && timeLeft > 0">
-        ¡Que comience la diversión!
-      </h1>
+      
+      <div class="title-with-icon">
+        <h1 class="puzzle-title" *ngIf="!isComplete && timeLeft > 0">
+          ¡Que comience la diversión!
+        </h1>
+        <img *ngIf="!isComplete && timeLeft > 0" 
+             src="assets/img/carita1.png" 
+             alt="Carita feliz" 
+             class="happy-face-icon">
+      </div>
+
       <div class="status" *ngIf="!isComplete && timeLeft > 0">
+        <p class="moves">Nivel: <span>{{ currentLevelName }}</span></p>
         <p class="moves">Movimientos: <span>{{ moves }}</span></p>
         <p class="timer">Tiempo: <span>{{ elapsedTime }}</span></p>
       </div>

@@ -784,4 +784,9 @@ export class ChartComponent implements OnInit {
   logout() {
     this.authService.logout();
   }
+
+   //Con este metodo solo podrá acceder a distintas funcionalidades solo si es administrador
+  isAdmin() {
+    return this.authService.isAdmin();
+  }
 }

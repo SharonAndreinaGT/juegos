@@ -37,7 +37,7 @@
 
       <mat-divider></mat-divider>
 
-      <button mat-button class="menu-button" (click)="exportData()">
+      <button mat-button class="menu-button" (click)="exportData()" *ngIf="isAdmin()">
         <mat-icon>download</mat-icon>
         <span>Exportar Data</span>
       </button>

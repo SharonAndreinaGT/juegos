@@ -146,44 +146,52 @@ export class ProgressComponent implements OnInit, AfterViewInit {
   }
 
   // Método para obtener el grado actual del usuario autenticado
-  private getCurrentGrade(): void {
-    try {
-      const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')[0];
-      this.currentGrade = userInfo.grade || '';
-      
-      // Actualizar el título según el grado
-      this.updateGradeTitle();
-      
-      // Cargar datos del grado específico
-      this.loadAllStudentsProgress();
-      this.loadAllStudentsMemoryResults();
-      this.loadAllStudentsRiddleResults();
-    } catch (error) {
-      console.error('Error al obtener el grado del usuario:', error);
-      this.currentGrade = '';
-      this.loadAllStudentsProgress();
-      this.loadAllStudentsMemoryResults();
-      this.loadAllStudentsRiddleResults();
+private getCurrentGrade(): void {
+  try {
+    const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')[0];
+
+    // Si es admin, no se filtra por grado (muestra todos los estudiantes)
+    if (this.authService.isAdmin()) {
+      this.currentGrade = ''; // Esto hará que se usen getUsers() en lugar de getUsersByGrade()
+    } else {
+      this.currentGrade = userInfo?.grade || '';
     }
+
+    this.updateGradeTitle();
+    this.loadAllStudentsProgress();
+    this.loadAllStudentsMemoryResults();
+    this.loadAllStudentsRiddleResults();
+  } catch (error) {
+    console.error('Error al obtener el grado del usuario:', error);
+    this.currentGrade = '';
+    this.loadAllStudentsProgress();
+    this.loadAllStudentsMemoryResults();
+    this.loadAllStudentsRiddleResults();
   }
+}
 
   // Método para actualizar el título según el grado
-  private updateGradeTitle(): void {
-    switch (this.currentGrade) {
-      case 'first':
-        this.gradeTitle = 'Progreso - Primer Grado';
-        break;
-      case 'second':
-        this.gradeTitle = 'Progreso - Segundo Grado';
-        break;
-      case 'third':
-        this.gradeTitle = 'Progreso - Tercer Grado';
-        break;
-      default:
-        this.gradeTitle = 'Progreso General';
-        break;
-    }
+private updateGradeTitle(): void {
+  if (this.authService.isAdmin()) {
+    this.gradeTitle = 'Progreso General (Administrador)';
+    return;
   }
+
+  switch (this.currentGrade) {
+    case 'first':
+      this.gradeTitle = 'Progreso - Primer Grado';
+      break;
+    case 'second':
+      this.gradeTitle = 'Progreso - Segundo Grado';
+      break;
+    case 'third':
+      this.gradeTitle = 'Progreso - Tercer Grado';
+      break;
+    default:
+      this.gradeTitle = 'Progreso General';
+      break;
+  }
+}
 
   loadAllStudentsProgress(): void {
     this.loading = true;
@@ -718,5 +726,10 @@ export class ProgressComponent implements OnInit, AfterViewInit {
     if (!results || results.length === 0) return 0;
     const sum = results.reduce((acc: number, r: any) => acc + (r[field] || 0), 0);
     return sum / results.length;
+  }
+
+  //Con este metodo solo podrá acceder a distintas funcionalidades solo si es administrador
+  isAdmin() {
+    return this.authService.isAdmin();
   }
 }

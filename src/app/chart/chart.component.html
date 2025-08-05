@@ -3,7 +3,7 @@
     <div class="welcome-container">
       <div class="welcome-content">
         <h2>{{ gradeTitle }}</h2>
-        <button mat-raised-button color="primary" (click)="generateChartsPdf()" class="generate-pdf-button">
+        <button mat-raised-button color="primary" (click)="generateChartsPdf()" class="generate-pdf-button" *ngIf="isAdmin()">
           <mat-icon>picture_as_pdf</mat-icon>
           Generar Reporte de Gráficas
         </button>

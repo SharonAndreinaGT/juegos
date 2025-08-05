@@ -21,9 +21,9 @@ export class DataExportService {
     // Definir las colecciones a exportar
     const collections = [
       { name: 'users', fields: ['id', 'name', 'lastname', 'section', 'grade', 'score'] },
-      { name: 'puzzle', fields: ['id', 'level_name', 'imageUrl', 'rows', 'cols', 'time_limit', 'isActive'] },
-      { name: 'memory', fields: ['id', 'level_name', 'card_count', 'time_limit', 'intent', 'isActive', 'images'] },
-      { name: 'riddle', fields: ['id', 'level_number', 'level_name', 'max_intents', 'words_level', 'words', 'isActive', 'time_limit'] },
+      { name: 'puzzle', fields: ['id', 'level', 'imageUrl', 'rows', 'cols', 'time_limit', 'isActive'] },
+      { name: 'memory', fields: ['id', 'level', 'card_count', 'time_limit', 'intent', 'isActive', 'images'] },
+      { name: 'riddle', fields: ['id', 'level', 'level_name', 'max_intents', 'words_level', 'words', 'isActive', 'time_limit'] },
       { name: 'puzzle_results', fields: ['id', 'student_id', 'level_name', 'score', 'time',  'created_at'] },
       { name: 'memory_results', fields: ['id', 'level_id', 'score', 'elapsedTime', 'matchedPairs', 'totalPairs', 'intentRemaining', 'completed', 'student_id', 'created_at'] },
       { name: 'riddle_results', fields: ['id', 'level_name', 'score', 'attempts_made', 'words_guessed', 'time_taken', 'is_complete', 'student_id'] }

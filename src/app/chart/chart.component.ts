@@ -1,8 +1,8 @@
 // src/app/chart/chart.component.ts
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core'; // Importa ElementRef
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { Chart, ChartConfiguration, ChartData, ChartType } from 'chart.js';
-import { NgChartsModule } from 'ng2-charts'; // Asegúrate de que esto esté importado en tu AppModule
+import { NgChartsModule } from 'ng2-charts';
 import { UserService } from '../user.service';
 import { PuzzleService } from '../puzzle.service';
 import { MemoryService } from '../memory.service';
@@ -25,6 +25,9 @@ export class ChartComponent implements OnInit {
   @ViewChild('pieChartCanvas') pieChartCanvas!: ElementRef<HTMLCanvasElement>;
   @ViewChild('lineChartCanvas') lineChartCanvas!: ElementRef<HTMLCanvasElement>;
 
+  // Propiedades para el filtrado por grado
+  currentGrade: string = '';
+  gradeTitle: string = 'Gráficas del Progreso';
 
   totalEstudiantes: number | null = null;
   loadingEstudiantes = true;
@@ -55,120 +58,49 @@ export class ChartComponent implements OnInit {
     private authService: AuthService
   ) {}
 
-  actualizarDistribucionPorGrado(countFirst: number, countSecond: number, countThird: number) {
-    this.pieChartData = {
-      ...this.pieChartData,
-      datasets: [{
-        ...this.pieChartData.datasets[0],
-        data: [countFirst, countSecond, countThird]
-      }]
-    };
-  }
-
-  getDistribucionPorGrado() {
-    this.userService.getUsers().subscribe({
-      next: (response) => {
-        const users = response.data || [];
-        const countFirst = users.filter((u: any) => u.grade === 'first').length;
-        const countSecond = users.filter((u: any) => u.grade === 'second').length;
-        const countThird = users.filter((u: any) => u.grade === 'third').length;
-        this.actualizarDistribucionPorGrado(countFirst, countSecond, countThird);
-      },
-      error: () => {
-        this.actualizarDistribucionPorGrado(0, 0, 0);
-      }
-    });
-  }
-
-  getProgresoMensual() {
-    let allResults: { score: number, created_at: string }[] = [];
-    let completed = 0;
-    const onComplete = () => {
-      completed++;
-      if (completed === 3) {
-        // Agrupar por mes
-        const monthMap: { [month: string]: number[] } = {};
-        allResults.forEach(res => {
-          if (typeof res.score === 'number' && res.created_at) {
-            const date = new Date(res.created_at);
-            const year = date.getFullYear();
-            const month = (date.getMonth() + 1).toString().padStart(2, '0');
-            const key = `${year}-${month}`;
-            if (!monthMap[key]) monthMap[key] = [];
-            monthMap[key].push(res.score);
-          }
-        });
-        // Depuración: muestra el agrupamiento por mes
-        console.log('Agrupación por mes:', monthMap);
-
-        // Ordenar meses
-        const sortedMonths = Object.keys(monthMap).sort();
-        // Calcular promedios
-        let labels: string[] = [];
-        let data: number[] = [];
-        sortedMonths.forEach(month => {
-          labels.push(month);
-          const arr = monthMap[month];
-          const promedio = Math.round((arr.reduce((a, b) => a + b, 0) / arr.length) * 100) / 100;
-          data.push(promedio);
-          // Depuración: muestra el promedio de cada mes
-          console.log(`Mes ${month}: scores =`, arr, 'promedio =', promedio);
-        });
-        // Incluir el mes actual aunque no tenga datos
-        const now = new Date();
-        const currentMonth = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
-        if (!labels.includes(currentMonth)) {
-          labels.push(currentMonth);
-          data.push(0);
-        }
-        // Actualizar gráfico
-        this.lineChartData = {
-          ...this.lineChartData,
-          labels,
-          datasets: [{
-            ...this.lineChartData.datasets[0],
-            data
-          }]
-        };
-        // Depuración: muestra los datos finales del gráfico
-        console.log('Labels:', labels, 'Data:', data);
-      }
-    };
-    this.puzzleService.getAllPuzzleScoresWithDate().subscribe({
-      next: (arr) => {
-        allResults = allResults.concat(arr);
-        onComplete();
-      },
-      error: () => onComplete()
-    });
-    this.memoryService.getAllMemoryScoresWithDate().subscribe({
-      next: (arr) => {
-        allResults = allResults.concat(arr);
-        onComplete();
-      },
-      error: () => onComplete()
-    });
-    this.riddleService.getAllRiddleScoresWithDate().subscribe({
-      next: (arr) => {
-        allResults = allResults.concat(arr);
-        onComplete();
-      },
-      error: () => onComplete()
-    });
-  }
-
-  // Función auxiliar para obtener el número de semana ISO
-  getWeekNumber(date: Date): number {
-    const tempDate = new Date(date.getTime());
-    tempDate.setHours(0, 0, 0, 0);
-    // Jueves en la semana decide el año
-    tempDate.setDate(tempDate.getDate() + 3 - ((tempDate.getDay() + 6) % 7));
-    const week1 = new Date(tempDate.getFullYear(), 0, 4);
-    return 1 + Math.round(((tempDate.getTime() - week1.getTime()) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
-  }
-
   ngOnInit(): void {
-    Chart.register(); // Asegúrate de que los controladores de Chart.js estén registrados
+    Chart.register();
+    this.getCurrentGrade();
+  }
+
+  // Método para obtener el grado actual del usuario autenticado
+  private getCurrentGrade(): void {
+    try {
+      const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')[0];
+      this.currentGrade = userInfo.grade || '';
+      
+      // Actualizar el título según el grado
+      this.updateGradeTitle();
+      
+      // Cargar datos del grado específico
+      this.loadChartData();
+    } catch (error) {
+      console.error('Error al obtener el grado del usuario:', error);
+      this.currentGrade = '';
+      this.loadChartData();
+    }
+  }
+
+  // Método para actualizar el título según el grado
+  private updateGradeTitle(): void {
+    switch (this.currentGrade) {
+      case 'first':
+        this.gradeTitle = 'Gráficas del Progreso - Primer Grado';
+        break;
+      case 'second':
+        this.gradeTitle = 'Gráficas del Progreso - Segundo Grado';
+        break;
+      case 'third':
+        this.gradeTitle = 'Gráficas del Progreso - Tercer Grado';
+        break;
+      default:
+        this.gradeTitle = 'Gráficas del Progreso';
+        break;
+    }
+  }
+
+  // Método para cargar todos los datos de las gráficas
+  private loadChartData(): void {
     this.getTotalEstudiantes();
     this.getTotalPartidas();
     this.getPromedioScore();
@@ -178,10 +110,16 @@ export class ChartComponent implements OnInit {
     this.getProgresoMensual();
   }
 
+  // Métodos para obtener datos filtrados por grado
   getTotalEstudiantes() {
     this.loadingEstudiantes = true;
     this.errorEstudiantes = false;
-    this.userService.getUsers().subscribe({
+    
+    const usersObservable = this.currentGrade 
+      ? this.userService.getUsersByGrade(this.currentGrade)
+      : this.userService.getUsers();
+
+    usersObservable.subscribe({
       next: (response) => {
         if (response && response.data) {
           this.totalEstudiantes = response.data.length;
@@ -198,63 +136,62 @@ export class ChartComponent implements OnInit {
     });
   }
 
-  actualizarJuegosMasJugados(puzzleCount: number, memoryCount: number, riddleCount: number) {
-    this.barChartData2 = {
-      ...this.barChartData2,
-      datasets: [{
-        ...this.barChartData2.datasets[0],
-        data: [puzzleCount, memoryCount, riddleCount]
-      }]
-    };
-  }
-
   getTotalPartidas() {
     this.loadingPartidas = true;
     this.errorPartidas = false;
-    let total = 0;
-    let completed = 0;
-    let puzzleCount = 0;
-    let memoryCount = 0;
-    let riddleCount = 0;
-    const onComplete = () => {
-      completed++;
-      if (completed === 3) {
-        this.totalPartidas = puzzleCount + memoryCount + riddleCount;
+    
+    const usersObservable = this.currentGrade 
+      ? this.userService.getUsersByGrade(this.currentGrade)
+      : this.userService.getUsers();
+
+    usersObservable.subscribe({
+      next: (response) => {
+        const users = response.data || [];
+        let total = 0;
+        let completed = 0;
+        let puzzleCount = 0;
+        let memoryCount = 0;
+        let riddleCount = 0;
+
+        const onComplete = () => {
+          completed++;
+          if (completed === 3) {
+            this.totalPartidas = puzzleCount + memoryCount + riddleCount;
+            this.loadingPartidas = false;
+            this.actualizarJuegosMasJugados(puzzleCount, memoryCount, riddleCount);
+          }
+        };
+
+        // Contar partidas por estudiante del grado
+        users.forEach((user: any) => {
+          this.puzzleService.getStudentPuzzleResults(user.id).subscribe({
+            next: (results) => {
+              puzzleCount += results ? results.length : 0;
+              onComplete();
+            },
+            error: () => onComplete()
+          });
+
+          this.memoryService.getStudentMemoryResults(user.id).subscribe({
+            next: (results) => {
+              memoryCount += results ? results.length : 0;
+              onComplete();
+            },
+            error: () => onComplete()
+          });
+
+          this.riddleService.getStudentRiddleResults(user.id).subscribe({
+            next: (results) => {
+              riddleCount += results ? results.length : 0;
+              onComplete();
+            },
+            error: () => onComplete()
+          });
+        });
+      },
+      error: () => {
+        this.errorPartidas = true;
         this.loadingPartidas = false;
-        this.actualizarJuegosMasJugados(puzzleCount, memoryCount, riddleCount);
-      }
-    };
-    this.puzzleService.getTotalPuzzleResults().subscribe({
-      next: (count) => {
-        total += count;
-        puzzleCount = count;
-        onComplete();
-      },
-      error: () => {
-        this.errorPartidas = true;
-        onComplete();
-      }
-    });
-    this.memoryService.getTotalMemoryResults().subscribe({
-      next: (count) => {
-        total += count;
-        memoryCount = count;
-        onComplete();
-      },
-      error: () => {
-        this.errorPartidas = true;
-        onComplete();
-      }
-    });
-    this.riddleService.getTotalRiddleResults().subscribe({
-      next: (count) => {
-        total += count;
-        riddleCount = count;
-        onComplete();
-      },
-      error: () => {
-        this.errorPartidas = true;
-        onComplete();
       }
     });
   }
@@ -262,48 +199,66 @@ export class ChartComponent implements OnInit {
   getPromedioScore() {
     this.loadingScore = true;
     this.errorScore = false;
-    let scores: number[] = [];
-    let completed = 0;
-    const onComplete = () => {
-      completed++;
-      if (completed === 3) {
-        if (scores.length > 0) {
-          const sum = scores.reduce((a, b) => a + b, 0);
-          this.promedioScore = Math.round((sum / scores.length) * 100) / 100;
-        } else {
-          this.promedioScore = 0;
-        }
+    
+    const usersObservable = this.currentGrade 
+      ? this.userService.getUsersByGrade(this.currentGrade)
+      : this.userService.getUsers();
+
+    usersObservable.subscribe({
+      next: (response) => {
+        const users = response.data || [];
+        let scores: number[] = [];
+        let completed = 0;
+        const totalUsers = users.length * 3; // 3 juegos por usuario
+
+        const onComplete = () => {
+          completed++;
+          if (completed === totalUsers) {
+            if (scores.length > 0) {
+              const sum = scores.reduce((a, b) => a + b, 0);
+              this.promedioScore = Math.round((sum / scores.length) * 100) / 100;
+            } else {
+              this.promedioScore = 0;
+            }
+            this.loadingScore = false;
+          }
+        };
+
+        users.forEach((user: any) => {
+          this.puzzleService.getStudentPuzzleResults(user.id).subscribe({
+            next: (results) => {
+              if (results) {
+                scores = scores.concat(results.map((r: any) => r.score).filter((s: any) => typeof s === 'number'));
+              }
+              onComplete();
+            },
+            error: () => onComplete()
+          });
+
+          this.memoryService.getStudentMemoryResults(user.id).subscribe({
+            next: (results) => {
+              if (results) {
+                scores = scores.concat(results.map((r: any) => r.score).filter((s: any) => typeof s === 'number'));
+              }
+              onComplete();
+            },
+            error: () => onComplete()
+          });
+
+          this.riddleService.getStudentRiddleResults(user.id).subscribe({
+            next: (results) => {
+              if (results) {
+                scores = scores.concat(results.map((r: any) => r.score).filter((s: any) => typeof s === 'number'));
+              }
+              onComplete();
+            },
+            error: () => onComplete()
+          });
+        });
+      },
+      error: () => {
+        this.errorScore = true;
         this.loadingScore = false;
-      }
-    };
-    this.puzzleService.getAllPuzzleScores().subscribe({
-      next: (arr) => {
-        scores = scores.concat(arr.filter(s => typeof s === 'number'));
-        onComplete();
-      },
-      error: () => {
-        this.errorScore = true;
-        onComplete();
-      }
-    });
-    this.memoryService.getAllMemoryScores().subscribe({
-      next: (arr) => {
-        scores = scores.concat(arr.filter(s => typeof s === 'number'));
-        onComplete();
-      },
-      error: () => {
-        this.errorScore = true;
-        onComplete();
-      }
-    });
-    this.riddleService.getAllRiddleScores().subscribe({
-      next: (arr) => {
-        scores = scores.concat(arr.filter(s => typeof s === 'number'));
-        onComplete();
-      },
-      error: () => {
-        this.errorScore = true;
-        onComplete();
       }
     });
   }
@@ -311,52 +266,69 @@ export class ChartComponent implements OnInit {
   getTiempoPromedio() {
     this.loadingTiempo = true;
     this.errorTiempo = false;
-    let tiempos: number[] = [];
-    let completed = 0;
-    const onComplete = () => {
-      completed++;
-      if (completed === 3) {
-        if (tiempos.length > 0) {
-          const sum = tiempos.reduce((a, b) => a + b, 0);
-          const avg = sum / tiempos.length;
-          // Formatear a minutos y segundos
-          const min = Math.floor(avg / 60);
-          const sec = Math.round(avg % 60);
-          this.tiempoPromedio = `${min} min ${sec} s`;
-        } else {
-          this.tiempoPromedio = '0 min';
-        }
+    
+    const usersObservable = this.currentGrade 
+      ? this.userService.getUsersByGrade(this.currentGrade)
+      : this.userService.getUsers();
+
+    usersObservable.subscribe({
+      next: (response) => {
+        const users = response.data || [];
+        let tiempos: number[] = [];
+        let completed = 0;
+        const totalUsers = users.length * 3; // 3 juegos por usuario
+
+        const onComplete = () => {
+          completed++;
+          if (completed === totalUsers) {
+            if (tiempos.length > 0) {
+              const sum = tiempos.reduce((a, b) => a + b, 0);
+              const avg = sum / tiempos.length;
+              const min = Math.floor(avg / 60);
+              const sec = Math.round(avg % 60);
+              this.tiempoPromedio = `${min} min ${sec} s`;
+            } else {
+              this.tiempoPromedio = '0 min';
+            }
+            this.loadingTiempo = false;
+          }
+        };
+
+        users.forEach((user: any) => {
+          this.puzzleService.getStudentPuzzleResults(user.id).subscribe({
+            next: (results) => {
+              if (results) {
+                tiempos = tiempos.concat(results.map((r: any) => r.time).filter((t: any) => typeof t === 'number'));
+              }
+              onComplete();
+            },
+            error: () => onComplete()
+          });
+
+          this.memoryService.getStudentMemoryResults(user.id).subscribe({
+            next: (results) => {
+              if (results) {
+                tiempos = tiempos.concat(results.map((r: any) => r.elapsedTime).filter((t: any) => typeof t === 'number'));
+              }
+              onComplete();
+            },
+            error: () => onComplete()
+          });
+
+          this.riddleService.getStudentRiddleResults(user.id).subscribe({
+            next: (results) => {
+              if (results) {
+                tiempos = tiempos.concat(results.map((r: any) => r.time_taken).filter((t: any) => typeof t === 'number'));
+              }
+              onComplete();
+            },
+            error: () => onComplete()
+          });
+        });
+      },
+      error: () => {
+        this.errorTiempo = true;
         this.loadingTiempo = false;
-      }
-    };
-    this.puzzleService.getAllPuzzleTimes().subscribe({
-      next: (arr) => {
-        tiempos = tiempos.concat(arr.filter(s => typeof s === 'number'));
-        onComplete();
-      },
-      error: () => {
-        this.errorTiempo = true;
-        onComplete();
-      }
-    });
-    this.memoryService.getAllMemoryTimes().subscribe({
-      next: (arr) => {
-        tiempos = tiempos.concat(arr.filter(s => typeof s === 'number'));
-        onComplete();
-      },
-      error: () => {
-        this.errorTiempo = true;
-        onComplete();
-      }
-    });
-    this.riddleService.getAllRiddleTimes().subscribe({
-      next: (arr) => {
-        tiempos = tiempos.concat(arr.filter(s => typeof s === 'number'));
-        onComplete();
-      },
-      error: () => {
-        this.errorTiempo = true;
-        onComplete();
       }
     });
   }
@@ -364,87 +336,221 @@ export class ChartComponent implements OnInit {
   getRendimientoPorGrado() {
     this.loadingRendimiento = true;
     this.errorRendimiento = false;
-    let allResults: { student_id: any, score: number }[] = [];
-    let users: any[] = [];
-    let completed = 0;
-    const onComplete = () => {
-      completed++;
-      if (completed === 4) {
-        // Map student_id to grade
-        const gradeScores: { [grade: string]: number[] } = { first: [], second: [], third: [] };
-        allResults.forEach(res => {
-          const user = users.find(u => u.id === res.student_id);
-          if (user && gradeScores[user.grade]) {
-            gradeScores[user.grade].push(res.score);
+    
+    const usersObservable = this.currentGrade 
+      ? this.userService.getUsersByGrade(this.currentGrade)
+      : this.userService.getUsers();
+
+    usersObservable.subscribe({
+      next: (response) => {
+        const users = response.data || [];
+        let allResults: { student_id: any, score: number }[] = [];
+        let completed = 0;
+        const totalUsers = users.length * 3; // 3 juegos por usuario
+
+        const onComplete = () => {
+          completed++;
+          if (completed === totalUsers) {
+            // Calcular promedio del grado
+            if (allResults.length > 0) {
+              const sum = allResults.reduce((a, b) => a + b.score, 0);
+              const average = sum / allResults.length;
+              this.rendimientoPorGrado[this.currentGrade || 'general'] = Math.round(average * 100) / 100;
+            } else {
+              this.rendimientoPorGrado[this.currentGrade || 'general'] = 0;
+            }
+            
+            // Actualizar gráfico
+            if (this.barChartData && this.barChartData.datasets && this.barChartData.datasets[0]) {
+              this.barChartData = {
+                ...this.barChartData,
+                labels: [this.gradeTitle],
+                datasets: [{
+                  ...this.barChartData.datasets[0],
+                  data: [this.rendimientoPorGrado[this.currentGrade || 'general']],
+                  label: 'Puntaje Promedio del Grado'
+                }]
+              };
+            }
+            this.loadingRendimiento = false;
           }
-        });
-        // Calcular promedios
-        (['first', 'second', 'third'] as const).forEach(grade => {
-          const arr = gradeScores[grade];
-          this.rendimientoPorGrado[grade] = arr.length > 0 ? Math.round((arr.reduce((a, b) => a + b, 0) / arr.length) * 100) / 100 : 0;
-        });
-        // Actualizar gráfico
-        this.barChartData = {
-          ...this.barChartData,
-          datasets: [{
-            ...this.barChartData.datasets[0],
-            data: [
-              this.rendimientoPorGrado['first'],
-              this.rendimientoPorGrado['second'],
-              this.rendimientoPorGrado['third']
-            ]
-          }]
         };
+
+        users.forEach((user: any) => {
+          this.puzzleService.getStudentPuzzleResults(user.id).subscribe({
+            next: (results) => {
+              if (results) {
+                allResults = allResults.concat(results.map((r: any) => ({ student_id: user.id, score: r.score })));
+              }
+              onComplete();
+            },
+            error: () => onComplete()
+          });
+
+          this.memoryService.getStudentMemoryResults(user.id).subscribe({
+            next: (results) => {
+              if (results) {
+                allResults = allResults.concat(results.map((r: any) => ({ student_id: user.id, score: r.score })));
+              }
+              onComplete();
+            },
+            error: () => onComplete()
+          });
+
+          this.riddleService.getStudentRiddleResults(user.id).subscribe({
+            next: (results) => {
+              if (results) {
+                allResults = allResults.concat(results.map((r: any) => ({ student_id: user.id, score: r.score })));
+              }
+              onComplete();
+            },
+            error: () => onComplete()
+          });
+        });
+      },
+      error: () => {
+        this.errorRendimiento = true;
         this.loadingRendimiento = false;
       }
-    };
-    this.puzzleService.getAllPuzzleScores().subscribe({
-      next: (arr) => {
-        allResults = allResults.concat((arr as any[]).map((score, i) => ({ student_id: null, score })));
-        this.puzzleService.getAllPuzzleScoresWithStudent().subscribe({
-          next: (results) => {
-            allResults = allResults.concat(results);
-            onComplete();
-          },
-          error: () => {
-            this.errorRendimiento = true;
-            onComplete();
-          }
-        });
-      },
-      error: () => {
-        this.errorRendimiento = true;
-        onComplete();
-      }
     });
-    this.memoryService.getAllMemoryScoresWithStudent().subscribe({
-      next: (results) => {
-        allResults = allResults.concat(results);
-        onComplete();
-      },
-      error: () => {
-        this.errorRendimiento = true;
-        onComplete();
-      }
-    });
-    this.riddleService.getAllRiddleScoresWithStudent().subscribe({
-      next: (results) => {
-        allResults = allResults.concat(results);
-        onComplete();
-      },
-      error: () => {
-        this.errorRendimiento = true;
-        onComplete();
-      }
-    });
-    this.userService.getUsers().subscribe({
+  }
+
+  actualizarJuegosMasJugados(puzzleCount: number, memoryCount: number, riddleCount: number) {
+    if (this.barChartData2 && this.barChartData2.datasets && this.barChartData2.datasets[0]) {
+      this.barChartData2 = {
+        ...this.barChartData2,
+        datasets: [{
+          ...this.barChartData2.datasets[0],
+          data: [puzzleCount, memoryCount, riddleCount]
+        }]
+      };
+    }
+  }
+
+  actualizarDistribucionPorGrado(countFirst: number, countSecond: number, countThird: number) {
+    if (this.pieChartData && this.pieChartData.datasets && this.pieChartData.datasets[0]) {
+      this.pieChartData = {
+        ...this.pieChartData,
+        datasets: [{
+          ...this.pieChartData.datasets[0],
+          data: [countFirst, countSecond, countThird]
+        }]
+      };
+    }
+  }
+
+  getDistribucionPorGrado() {
+    const usersObservable = this.currentGrade 
+      ? this.userService.getUsersByGrade(this.currentGrade)
+      : this.userService.getUsers();
+
+    usersObservable.subscribe({
       next: (response) => {
-        users = response.data || [];
-        onComplete();
+        const users = response.data || [];
+        const countFirst = users.filter((u: any) => u.grade === 'first').length;
+        const countSecond = users.filter((u: any) => u.grade === 'second').length;
+        const countThird = users.filter((u: any) => u.grade === 'third').length;
+        this.actualizarDistribucionPorGrado(countFirst, countSecond, countThird);
       },
       error: () => {
-        this.errorRendimiento = true;
-        onComplete();
+        this.actualizarDistribucionPorGrado(0, 0, 0);
+      }
+    });
+  }
+
+  getProgresoMensual() {
+    const usersObservable = this.currentGrade 
+      ? this.userService.getUsersByGrade(this.currentGrade)
+      : this.userService.getUsers();
+
+    usersObservable.subscribe({
+      next: (response) => {
+        const users = response.data || [];
+        let allResults: { score: number, created_at: string }[] = [];
+        let completed = 0;
+        const totalUsers = users.length * 3; // 3 juegos por usuario
+
+        const onComplete = () => {
+          completed++;
+          if (completed === totalUsers) {
+            // Agrupar por mes
+            const monthMap: { [month: string]: number[] } = {};
+            allResults.forEach(res => {
+              if (typeof res.score === 'number' && res.created_at) {
+                const date = new Date(res.created_at);
+                const year = date.getFullYear();
+                const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                const key = `${year}-${month}`;
+                if (!monthMap[key]) monthMap[key] = [];
+                monthMap[key].push(res.score);
+              }
+            });
+
+            // Ordenar meses
+            const sortedMonths = Object.keys(monthMap).sort();
+            let labels: string[] = [];
+            let data: number[] = [];
+            sortedMonths.forEach(month => {
+              labels.push(month);
+              const arr = monthMap[month];
+              const promedio = Math.round((arr.reduce((a, b) => a + b, 0) / arr.length) * 100) / 100;
+              data.push(promedio);
+            });
+
+            // Incluir el mes actual aunque no tenga datos
+            const now = new Date();
+            const currentMonth = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
+            if (!labels.includes(currentMonth)) {
+              labels.push(currentMonth);
+              data.push(0);
+            }
+
+            // Actualizar gráfico
+            if (this.lineChartData && this.lineChartData.datasets && this.lineChartData.datasets[0]) {
+              this.lineChartData = {
+                ...this.lineChartData,
+                labels,
+                datasets: [{
+                  ...this.lineChartData.datasets[0],
+                  data,
+                  label: `Progreso Mensual - ${this.gradeTitle}`
+                }]
+              };
+            }
+          }
+        };
+
+        users.forEach((user: any) => {
+          this.puzzleService.getStudentPuzzleResults(user.id).subscribe({
+            next: (results) => {
+              if (results) {
+                allResults = allResults.concat(results.map((r: any) => ({ score: r.score, created_at: r.created_at })));
+              }
+              onComplete();
+            },
+            error: () => onComplete()
+          });
+
+          this.memoryService.getStudentMemoryResults(user.id).subscribe({
+            next: (results) => {
+              if (results) {
+                allResults = allResults.concat(results.map((r: any) => ({ score: r.score, created_at: r.created_at })));
+              }
+              onComplete();
+            },
+            error: () => onComplete()
+          });
+
+          this.riddleService.getStudentRiddleResults(user.id).subscribe({
+            next: (results) => {
+              if (results) {
+                allResults = allResults.concat(results.map((r: any) => ({ score: r.score, created_at: r.created_at })));
+              }
+              onComplete();
+            },
+            error: () => onComplete()
+          });
+        });
       }
     });
   }
@@ -458,20 +564,20 @@ export class ChartComponent implements OnInit {
       },
       title: {
         display: true,
-        text: 'Rendimiento Promedio por Grado'
+        text: 'Rendimiento Promedio del Grado'
       }
     }
   };
 
   public barChartType: ChartType = 'bar';
   public barChartData: ChartData<'bar'> = {
-    labels: ['Primer Grado', 'Segundo Grado', 'Tercer Grado'],
+    labels: ['Grado Actual'],
     datasets: [
       {
-        data: [85, 78, 92],
+        data: [0],
         label: 'Puntaje Promedio',
-        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
-        borderColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+        backgroundColor: ['#FF6384'],
+        borderColor: ['#FF6384'],
         borderWidth: 1
       }
     ]
@@ -496,7 +602,7 @@ export class ChartComponent implements OnInit {
     labels: ['Rompecabezas', 'Memoria', 'Adivinanzas'],
     datasets: [
       {
-        data: [45, 32, 23],
+        data: [0, 0, 0],
         label: 'Partidas Jugadas',
         backgroundColor: ['#4BC0C0', '#FF9F40', '#9966FF'],
         borderColor: ['#4BC0C0', '#FF9F40', '#9966FF'],
@@ -525,7 +631,7 @@ export class ChartComponent implements OnInit {
     labels: ['Primer Grado', 'Segundo Grado', 'Tercer Grado'],
     datasets: [
       {
-        data: [35, 28, 37],
+        data: [0, 0, 0],
         backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
         borderColor: ['#FF6384', '#36A2EB', '#FFCE56'],
         borderWidth: 2
@@ -555,10 +661,10 @@ export class ChartComponent implements OnInit {
 
   public lineChartType: ChartType = 'line';
   public lineChartData: ChartData<'line'> = {
-    labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4', 'Semana 5', 'Semana 6'],
+    labels: [],
     datasets: [
       {
-        data: [65, 72, 78, 81, 85, 88],
+        data: [],
         label: 'Puntaje Promedio',
         borderColor: '#4BC0C0',
         backgroundColor: 'rgba(75, 192, 192, 0.2)',
@@ -630,55 +736,49 @@ export class ChartComponent implements OnInit {
    * Genera un reporte PDF con las imágenes de los gráficos.
    */
   generateChartsPdf(): void {
-    const doc = new jsPDF('p', 'mm', 'a4'); // 'p' para portrait, 'mm' para milímetros, 'a4' tamaño de página
-    let yOffset = 10; // Margen superior inicial
+    const doc = new jsPDF('p', 'mm', 'a4');
+    let yOffset = 10;
 
     // Título del Reporte
     doc.setFontSize(20);
-    doc.text('Reporte de Gráficas de Progreso', 10, yOffset);
+    doc.text(`Reporte de ${this.gradeTitle}`, 10, yOffset);
     yOffset += 15;
     doc.setFontSize(12);
     doc.text(`Fecha de Emisión: ${new Date().toLocaleDateString()}`, 10, yOffset);
     yOffset += 20;
 
     const charts = [
-      { canvas: this.barChartCanvas, title: 'Rendimiento Promedio por Grado' },
+      { canvas: this.barChartCanvas, title: 'Rendimiento Promedio del Grado' },
       { canvas: this.barChart2Canvas, title: 'Juegos más Jugados' },
       { canvas: this.pieChartCanvas, title: 'Distribución de Estudiantes por Grado' },
-      { canvas: this.lineChartCanvas, title: 'Progreso Mensual - Puntaje Promedio' }
+      { canvas: this.lineChartCanvas, title: `Progreso Mensual - ${this.gradeTitle}` }
     ];
 
     charts.forEach((chart, index) => {
       const canvas = chart.canvas.nativeElement;
       if (canvas) {
         const imgData = canvas.toDataURL('image/png');
-        const imgWidth = 180; // Ancho de la imagen en el PDF (ajustar según necesidad)
+        const imgWidth = 180;
         const pageHeight = doc.internal.pageSize.height;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width; // Calcular altura proporcional
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-        // Añadir página si no es la primera o si el contenido no cabe
         if (index > 0) {
           doc.addPage();
-          yOffset = 10; // Reiniciar yOffset para la nueva página
+          yOffset = 10;
         }
 
-        // Añadir título del gráfico en el PDF
         doc.setFontSize(16);
         doc.text(chart.title, 10, yOffset);
         yOffset += 10;
 
-        // Calcular posición X para centrar la imagen
         const imgX = (doc.internal.pageSize.width - imgWidth) / 2;
-
-        // Añadir la imagen del gráfico
         doc.addImage(imgData, 'PNG', imgX, yOffset, imgWidth, imgHeight);
-
-        // Actualizar yOffset para el siguiente contenido (o el final del documento)
-        yOffset += imgHeight + 20; // Espacio después del gráfico
+        yOffset += imgHeight + 20;
       }
     });
 
-    doc.save('reporte_graficas.pdf');
+    const fileName = `reporte_graficas_${this.currentGrade}_grado.pdf`;
+    doc.save(fileName);
   }
 
   logout() {

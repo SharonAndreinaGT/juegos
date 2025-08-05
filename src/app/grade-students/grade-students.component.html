@@ -22,7 +22,7 @@
           class="search-input">
       </div>
 
-      <div class="colorbutton-btn-container">
+      <div class="colorbutton-btn-container" *ngIf="!isAdmin">
         <button mat-button class="colorbutton-btn" (click)="newStudent()">
           Registrar estudiante
         </button>
@@ -35,17 +35,19 @@
               <tr>
                 <th>Nombre</th>
                 <th>Apellido</th>
+                <th *ngIf="isAdmin">Grado</th>
                 <th>Sección</th>
-                <th>Editar</th>
+                <th *ngIf="!isAdmin">Editar</th>
               </tr>
             </thead>
             <tbody>
               <tr *ngFor="let student of dataSource.connect() | async">
                 <td>{{ student.name }}</td>
                 <td>{{ student.lastname }}</td>
+                <td *ngIf="isAdmin">{{ student.grade }}</td>
                 <td>{{ student.section.section }}</td>
                 <td>
-                  <button class="btn btn-sm btn-icon" (click)="editUser(student)">
+                  <button *ngIf="!isAdmin" class="btn btn-sm btn-icon" (click)="editUser(student)">
                     <mat-icon>edit</mat-icon>
                   </button>
                 </td>

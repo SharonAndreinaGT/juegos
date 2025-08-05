@@ -15,14 +15,14 @@
       <ng-container *ngIf="isAdmin()">
         <button mat-button class="menu-button" routerLink="/admin">
           <mat-icon>admin_panel_settings</mat-icon>
-          <span>Admin</span>
+          <span>Docentes</span>
         </button>
       </ng-container>
       <button mat-button class="menu-button" routerLink="/grade">
         <mat-icon>person_add</mat-icon>
         <span>Estudiantes</span>
       </button>
-      <button mat-button class="menu-button" routerLink="/settings">
+      <button *ngIf="!isAdmin()" mat-button class="menu-button" routerLink="/settings">
         <mat-icon>settings</mat-icon>
         <span>Juegos</span>
       </button>

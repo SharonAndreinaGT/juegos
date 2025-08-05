@@ -7,6 +7,7 @@ import { EditUserFormComponent } from '../edit-user-form/edit-user-form.componen
 import { UserService } from '../user.service';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-grade-students',
@@ -22,21 +23,27 @@ export class GradeStudentsComponent implements OnInit {
   gradeTitle: string = 'Grado: Desconocido';
   dataSource = new MatTableDataSource<any>([]);
 
+  isAdmin: boolean = false;
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   constructor(
     private route: ActivatedRoute,
     private dialog: MatDialog,
     private userService: UserService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
+    this.isAdmin = this.authService.isAdmin();
+
     this.route.data.subscribe((data) => {
-      const grade = data['gradeFilter'];
+      const isAdmin = this.authService.isAdmin();
+      const grade = isAdmin ? null : data['gradeFilter'];
       this.loadStudents(grade);
-      this.gradeTitle = data['gradeTitle'] || this.gradeTitle;
-    });
+      this.gradeTitle = isAdmin ? 'Todos los estudiantes' : (data['gradeTitle'] || this.gradeTitle);
+  });
   }
 
   ngAfterViewInit() {

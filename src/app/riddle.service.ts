@@ -11,7 +11,7 @@ import { catchError, map, tap } from 'rxjs/operators';
 export class RiddleService {
   private directusUrl = 'http://localhost:8055/items/riddle';
   private directusResultsUrl = 'http://localhost:8055/items/riddle_results'; //URL para los resultados
-  private grade = JSON.parse(localStorage.getItem('gradeFilter') || '{}').data[0].id;
+  private grade = JSON.parse(localStorage.getItem('gradeFilter') || '{}').data ? JSON.parse(localStorage.getItem('gradeFilter') || '{}').data[0].id : '';
 
   private levelsSubject = new BehaviorSubject<RiddleLevel[]>([]);
   levels$: Observable<RiddleLevel[]> = this.levelsSubject.asObservable();
@@ -21,7 +21,8 @@ export class RiddleService {
   }
 
   private loadLevelsFromDirectus(): void {
-    this.http.get<any>(`${this.directusUrl}?filter[grade][_eq]=${this.grade}&fields=*,id`).pipe(
+    const url = this.grade ? `${this.directusUrl}?filter[grade][_eq]=${this.grade}&fields=*,id` : `${this.directusUrl}?fields=*,id`;
+    this.http.get<any>(url).pipe(
       map(response => response.data as RiddleLevel[]),
       tap(levels => {
         if (levels && levels.length > 0) {

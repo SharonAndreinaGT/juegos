@@ -45,7 +45,7 @@ export class ChartComponent implements OnInit {
   loadingTiempo = true;
   errorTiempo = false;
 
-  rendimientoPorGrado: { [grade: string]: number } = { first: 0, second: 0, third: 0 };
+  rendimientoPorGrado: { [grade: string]: number } = { '87b4cb0a-81bb-4217-9f17-6a545fc39f73': 0, 'ef7220b7-7bc2-4b91-88d1-47892aa57576': 0, '0acec409-6850-4152-b640-662fe9217123': 0 };
   loadingRendimiento = true;
   errorRendimiento = false;
 
@@ -67,6 +67,7 @@ export class ChartComponent implements OnInit {
   private getCurrentGrade(): void {
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')[0];
+      console.log(userInfo)
       this.currentGrade = userInfo.grade || '';
       
       // Actualizar el título según el grado
@@ -115,6 +116,7 @@ export class ChartComponent implements OnInit {
     this.loadingEstudiantes = true;
     this.errorEstudiantes = false;
     
+    console.log('datos:', this.currentGrade)
     const usersObservable = this.currentGrade 
       ? this.userService.getUsersByGrade(this.currentGrade)
       : this.userService.getUsers();
@@ -140,6 +142,7 @@ export class ChartComponent implements OnInit {
     this.loadingPartidas = true;
     this.errorPartidas = false;
     
+    console.log('datos:', this.currentGrade)
     const usersObservable = this.currentGrade 
       ? this.userService.getUsersByGrade(this.currentGrade)
       : this.userService.getUsers();
@@ -207,6 +210,7 @@ export class ChartComponent implements OnInit {
     usersObservable.subscribe({
       next: (response) => {
         const users = response.data || [];
+        console.log(users)
         let scores: number[] = [];
         let completed = 0;
         const totalUsers = users.length * 3; // 3 juegos por usuario
@@ -353,21 +357,34 @@ export class ChartComponent implements OnInit {
           if (completed === totalUsers) {
             // Calcular promedio del grado
             if (allResults.length > 0) {
-              const sum = allResults.reduce((a, b) => a + b.score, 0);
-              const average = sum / allResults.length;
-              this.rendimientoPorGrado[this.currentGrade || 'general'] = Math.round(average * 100) / 100;
+              if (this.currentGrade) {
+                const sum = allResults.reduce((a, b) => a + b.score, 0);
+                const average = sum / allResults.length;
+                this.rendimientoPorGrado[this.currentGrade || 'general'] = Math.round(average * 100) / 100;
+              } else {
+                const gradeScores: { [grade: string]: number[] } = { '87b4cb0a-81bb-4217-9f17-6a545fc39f73': [], 'ef7220b7-7bc2-4b91-88d1-47892aa57576': [], '0acec409-6850-4152-b640-662fe9217123': [] };
+                (['87b4cb0a-81bb-4217-9f17-6a545fc39f73', 'ef7220b7-7bc2-4b91-88d1-47892aa57576', '0acec409-6850-4152-b640-662fe9217123'] as const).forEach(grade => {
+                  const arr = gradeScores[grade];
+                  this.rendimientoPorGrado[grade] = arr.length > 0 ? Math.round((arr.reduce((a, b) => a + b, 0) / arr.length) * 100) / 100 : 0;
+                });
+              }
             } else {
               this.rendimientoPorGrado[this.currentGrade || 'general'] = 0;
             }
             
             // Actualizar gráfico
             if (this.barChartData && this.barChartData.datasets && this.barChartData.datasets[0]) {
+              const array = [
+                this.rendimientoPorGrado['87b4cb0a-81bb-4217-9f17-6a545fc39f73'],
+                this.rendimientoPorGrado['ef7220b7-7bc2-4b91-88d1-47892aa57576'],
+                this.rendimientoPorGrado['0acec409-6850-4152-b640-662fe9217123']
+              ]
               this.barChartData = {
                 ...this.barChartData,
                 labels: [this.gradeTitle],
                 datasets: [{
                   ...this.barChartData.datasets[0],
-                  data: [this.rendimientoPorGrado[this.currentGrade || 'general']],
+                  data: this.currentGrade ? [this.rendimientoPorGrado[this.currentGrade || 'general']] : array,
                   label: 'Puntaje Promedio del Grado'
                 }]
               };
@@ -447,9 +464,9 @@ export class ChartComponent implements OnInit {
     usersObservable.subscribe({
       next: (response) => {
         const users = response.data || [];
-        const countFirst = users.filter((u: any) => u.grade === 'first').length;
-        const countSecond = users.filter((u: any) => u.grade === 'second').length;
-        const countThird = users.filter((u: any) => u.grade === 'third').length;
+        const countFirst = users.filter((u: any) => u.grade === '87b4cb0a-81bb-4217-9f17-6a545fc39f73').length;
+        const countSecond = users.filter((u: any) => u.grade === 'ef7220b7-7bc2-4b91-88d1-47892aa57576').length;
+        const countThird = users.filter((u: any) => u.grade === '0acec409-6850-4152-b640-662fe9217123').length;
         this.actualizarDistribucionPorGrado(countFirst, countSecond, countThird);
       },
       error: () => {

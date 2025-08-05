@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { PuzzleConfig, PuzzleResult } from './puzzle-config.model';
-
+import { AuthService } from './auth.service';
 @Injectable({
   providedIn: 'root'
 })
@@ -18,10 +18,11 @@ export class PuzzleService {
   // URL base de Directus (útil para construir otras URLs)
   private directusBaseUrl = 'http://localhost:8055';
 
-  private grade = JSON.parse(localStorage.getItem('gradeFilter') || '{}').data[0].id;
+  
+  private grade = JSON.parse(localStorage.getItem('gradeFilter') || '{}').data ? JSON.parse(localStorage.getItem('gradeFilter') || '{}').data[0].id : '';
 
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private authService: AuthService) {}
 
   /**
    * Obtiene la configuración del rompecabezas por el nombre del nivel.
@@ -179,5 +180,9 @@ export class PuzzleService {
     return this.http.get<any>(`${this.directusBaseUrl}/items/${this.puzzleResultsCollection}?fields=score,created_at&limit=-1`).pipe(
       map(response => (response.data || []).map((item: any) => ({ score: item.score, created_at: item.created_at })))
     );
+  }
+
+   isAdmin() {
+    return this.authService.isAdmin();
   }
 }

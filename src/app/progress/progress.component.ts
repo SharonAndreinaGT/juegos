@@ -198,6 +198,7 @@ private updateGradeTitle(): void {
     this.error = null;
 
     // Usar getUsersByGrade si hay un grado específico, sino usar getUsers
+    console.log('dato:', this.currentGrade)
     const usersObservable = this.currentGrade 
       ? this.userService.getUsersByGrade(this.currentGrade)
       : this.userService.getUsers();

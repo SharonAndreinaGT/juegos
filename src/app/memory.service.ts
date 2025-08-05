@@ -11,7 +11,7 @@ export class MemoryService {
   private apiUrl = 'http://localhost:8055/items/memory';    
   private directusFilesUrl = 'http://localhost:8055/files';
   private memoryResultsApiUrl = 'http://localhost:8055/items/memory_results';
-  private grade = JSON.parse(localStorage.getItem('gradeFilter') || '{}').data[0].id;
+  private grade = JSON.parse(localStorage.getItem('gradeFilter') || '{}').data ? JSON.parse(localStorage.getItem('gradeFilter') || '{}').data[0].id : '';
 
   constructor(private http: HttpClient) { }
 

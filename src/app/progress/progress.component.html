@@ -29,10 +29,7 @@
                   <th mat-header-cell *matHeaderCellDef> Grado </th>
                   <td mat-cell *matCellDef="let student">
                     {{
-                      student.grade === 'first' ? 'Primer grado' :
-                      student.grade === 'second' ? 'Segundo grado' :
-                      student.grade === 'third' ? 'Tercer grado' :
-                      student.grade || 'No definido'
+                      student.grade.grade
                     }}
                   </td>
                 </ng-container>
@@ -96,10 +93,7 @@
                   <th mat-header-cell *matHeaderCellDef> Grado </th>
                   <td mat-cell *matCellDef="let result">
                     {{
-                      result.grade === 'first' ? 'Primer grado' :
-                      result.grade === 'second' ? 'Segundo grado' :
-                      result.grade === 'third' ? 'Tercer grado' :
-                      result.grade || 'No definido'
+                      result.grade.grade
                     }}
                   </td>
                 </ng-container>
@@ -167,10 +161,7 @@
                   <th mat-header-cell *matHeaderCellDef> Grado </th>
                   <td mat-cell *matCellDef="let result">
                     {{
-                      result.grade === 'first' ? 'Primer grado' :
-                      result.grade === 'second' ? 'Segundo grado' :
-                      result.grade === 'third' ? 'Tercer grado' :
-                      result.grade || 'No definido'
+                      result.grade.grade
                     }}
                   </td>
                 </ng-container>

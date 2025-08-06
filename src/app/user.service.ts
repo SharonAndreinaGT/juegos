@@ -15,7 +15,9 @@ export class UserService {
 
   // Obtener todos los usuarios
   getUsers() {
-    return this.http.get<any>(this.apiUrl);
+    const fields = '?fields=id,name,lastname,grade,grade.grade,score,section.id,section.section';
+
+    return this.http.get<any>(this.apiUrl + fields);
   }
 
   // Obtener usuarios por grado

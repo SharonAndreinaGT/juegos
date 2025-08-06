@@ -135,6 +135,10 @@ export class RiddleService {
     return this.levelsSubject.value.find(level => level.level_number === levelNumber);
   }
 
+  getCurrentLevels(): RiddleLevel[] {
+    return this.levelsSubject.value;
+  }
+
   saveRiddleResult(result: RiddleResult): Observable<RiddleResult> {
     console.log('[RiddleService] Enviando resultado de Riddle a Directus:', result);
     return this.http.post<any>(this.directusResultsUrl, result).pipe(

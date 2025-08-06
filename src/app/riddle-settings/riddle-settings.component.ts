@@ -44,11 +44,28 @@ export class RiddleSettingsComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    // Obtener el grado actual
+    const grade = JSON.parse(localStorage.getItem('gradeFilter') || '{}').data?.[0]?.id || '';
+    console.log(`[RiddleSettingsComponent] Grado actual en ngOnInit: ${grade}`);
+    
     this.riddleService.levels$.subscribe((levels: RiddleLevel[]) => {
       if (levels && levels.length > 0) {
         this.level1Config = levels.find(lvl => lvl.level === '183770b3-0e66-4932-8769-b0c1b4738d79') || this.level1Config;
         this.level2Config = levels.find(lvl => lvl.level === '98fd8047-6897-4a86-85e2-f430e48956bd') || this.level2Config;
         this.level3Config = levels.find(lvl => lvl.level === '3c16b66e-0fa4-4ecc-a9ae-41dd832f0bc1') || this.level3Config;
+        
+        // Asegurar que todos los niveles tengan el grado asignado
+        if (grade) {
+          this.level1Config.grade = grade;
+          this.level2Config.grade = grade;
+          this.level3Config.grade = grade;
+        }
+        
+        console.log(`[RiddleSettingsComponent] Niveles cargados con grado ${grade}:`, {
+          level1: this.level1Config,
+          level2: this.level2Config,
+          level3: this.level3Config
+        });
       } else {
         console.warn('[RiddleSettingsComponent] La suscripción de niveles emitió un array vacío o nulo. Usando configuraciones predeterminadas.');
       }
@@ -92,6 +109,41 @@ export class RiddleSettingsComponent implements OnInit {
       case 3: return this.level3Config;
       default: return this.level1Config;
     }
+  }
+
+  onLevelActiveChange(level: 'level1' | 'level2' | 'level3', isActive: boolean): void {
+    console.log(`[RiddleSettingsComponent] Cambio de estado para ${level}: ${isActive}`);
+    
+    let configToUpdate: RiddleLevel;
+    switch (level) {
+      case 'level1':
+        configToUpdate = this.level1Config;
+        break;
+      case 'level2':
+        configToUpdate = this.level2Config;
+        break;
+      case 'level3':
+        configToUpdate = this.level3Config;
+        break;
+      default:
+        return;
+    }
+
+    // Desactivar todos los demás niveles si este se está activando
+    if (isActive) {
+      console.log(`[RiddleSettingsComponent] Activando ${level}, desactivando otros niveles...`);
+      if (level !== 'level1') this.level1Config.isActive = false;
+      if (level !== 'level2') this.level2Config.isActive = false;
+      if (level !== 'level3') this.level3Config.isActive = false;
+    }
+    
+    configToUpdate.isActive = isActive;
+
+    console.log(`[RiddleSettingsComponent] Estados finales de los niveles:`, {
+      level1: this.level1Config.isActive,
+      level2: this.level2Config.isActive,
+      level3: this.level3Config.isActive
+    });
   }
 
   onFileSelected(event: any): void {
@@ -188,6 +240,14 @@ export class RiddleSettingsComponent implements OnInit {
     levelToSave.words_level = formToValidate.value.wordsPerLevel;
     levelToSave.time_limit = formToValidate.value.timeLimit;
 
+    // Si este nivel se va a activar, desactivar todos los demás niveles del mismo grado primero
+    if (levelToSave.isActive) {
+      console.log(`[RiddleSettingsComponent] Nivel ${levelToSave.level_name} se está activando. Desactivando otros niveles del mismo grado...`);
+      await this.deactivateOtherLevelsByGrade(levelToSave);
+    } else {
+      console.log(`[RiddleSettingsComponent] Nivel ${levelToSave.level_name} se está desactivando. No se desactivarán otros niveles.`);
+    }
+
     await this.saveSingleLevelConfig(levelToSave);
     this.snackBar.open('Configuración guardada exitosamente.', 'Cerrar', { duration: 3000 });
   }
@@ -236,6 +296,99 @@ export class RiddleSettingsComponent implements OnInit {
           this.snackBar.open(`Error al desactivar el nivel ${level.level_name}.`, 'Cerrar', { duration: 3000 });
         }
       }
+    }
+  }
+
+  /**
+   * Desactiva todos los niveles de riddle del mismo grado excepto el especificado en la base de datos.
+   */
+  private async deactivateOtherLevelsByGrade(activeLevel: RiddleLevel): Promise<void> {
+    console.log(`[RiddleSettingsComponent] Iniciando desactivación de otros niveles del mismo grado. Nivel activo: ${activeLevel.level_name} (ID: ${activeLevel.level})`);
+    
+    // Obtener el grado actual del usuario
+    const grade = JSON.parse(localStorage.getItem('gradeFilter') || '{}').data?.[0]?.id || '';
+    console.log(`[RiddleSettingsComponent] Grado actual: ${grade}`);
+    
+    if (!grade) {
+      console.warn(`[RiddleSettingsComponent] No se pudo obtener el grado actual. No se desactivarán otros niveles.`);
+      return;
+    }
+
+    // Obtener todas las configuraciones del mismo grado directamente desde la base de datos
+    try {
+      // Obtener todos los niveles desde Directus con filtro por grado
+      const grade = JSON.parse(localStorage.getItem('gradeFilter') || '{}').data?.[0]?.id || '';
+      const isAdmin = this.authService.isAdmin();
+      const gradeFilter = isAdmin ? '' : `&filter[grade][_eq]=${grade}`;
+      const url = `http://localhost:8055/items/riddle?fields=*,id${gradeFilter}`;
+      
+      const response = await fetch(url);
+      const data = await response.json();
+      const allConfigs: RiddleLevel[] = data.data || [];
+      
+      console.log(`[RiddleSettingsComponent] Configuraciones obtenidas directamente de Directus:`, allConfigs);
+      console.log(`[RiddleSettingsComponent] Grado a filtrar: ${grade}`);
+      
+      // Verificar que todos los niveles tengan el grado asignado
+      allConfigs.forEach((config, index) => {
+        if (!config.grade) {
+          console.warn(`[RiddleSettingsComponent] Nivel ${index + 1} no tiene grado asignado:`, config);
+        }
+      });
+      
+      // Filtrar solo las configuraciones del mismo grado que están activas y no son el nivel actual
+      const configsToDeactivate = allConfigs.filter((config: RiddleLevel) => {
+        // Asegurar que el grado esté asignado correctamente
+        if (!config.grade) {
+          config.grade = grade;
+        }
+        
+        const isSameGrade = config.grade === grade;
+        const isActive = config.isActive;
+        const isNotCurrentLevel = config.level !== activeLevel.level;
+        
+        console.log(`[RiddleSettingsComponent] Evaluando configuración desde DB:`, {
+          level_name: config.level_name,
+          level_id: config.level,
+          grade: config.grade,
+          isActive: config.isActive,
+          isSameGrade,
+          isActiveState: isActive,
+          isNotCurrentLevel,
+          shouldDeactivate: isSameGrade && isActive && isNotCurrentLevel
+        });
+        
+        return isSameGrade && isActive && isNotCurrentLevel;
+      });
+      
+      console.log(`[RiddleSettingsComponent] Configuraciones a desactivar:`, configsToDeactivate);
+      console.log(`[RiddleSettingsComponent] Total de niveles activos en DB del grado ${grade}: ${allConfigs.filter(c => c.isActive).length}`);
+      
+      // Desactivar cada configuración encontrada
+      for (const configToDeactivate of configsToDeactivate) {
+        try {
+          console.log(`[RiddleSettingsComponent] Desactivando ${configToDeactivate.level_name} (ID: ${configToDeactivate.id})`);
+          
+          configToDeactivate.isActive = false;
+          await lastValueFrom(this.riddleService.saveRiddleLevel(configToDeactivate));
+          
+          console.log(`[RiddleSettingsComponent] ${configToDeactivate.level_name} desactivado en Directus.`);
+          
+          // También actualiza el estado local del componente para consistencia inmediata de la UI
+          switch (configToDeactivate.level_name) {
+            case 'Fácil': this.level1Config.isActive = false; break;
+            case 'Medio': this.level2Config.isActive = false; break;
+            case 'Difícil': this.level3Config.isActive = false; break;
+          }
+        } catch (error) {
+          console.error(`[RiddleSettingsComponent] Error al desactivar ${configToDeactivate.level_name} en Directus:`, error);
+        }
+      }
+      
+      console.log(`[RiddleSettingsComponent] Proceso de desactivación completado. ${configsToDeactivate.length} niveles desactivados.`);
+      
+    } catch (error) {
+      console.error(`[RiddleSettingsComponent] Error al obtener configuraciones del grado ${grade}:`, error);
     }
   }
 

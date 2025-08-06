@@ -42,6 +42,7 @@ export class PuzzleComponent implements OnInit, OnDestroy, CanComponentDeactivat
   timerSubscription: Subscription | null = null;
 
   currentGrade: string = 'Nivel1';
+  currentLevel: any = '';
   currentStudentId: string | null = null;
 
   constructor(
@@ -79,8 +80,9 @@ export class PuzzleComponent implements OnInit, OnDestroy, CanComponentDeactivat
       const routeLevel = params.get('levelName');
       if (routeLevel) {
         this.currentGrade = routeLevel;
+        console.log(`[PuzzleComponent] Nivel desde ruta: ${routeLevel}`);
       }
-      console.log(`[PuzzleComponent] Inicializando con nivel: ${this.currentGrade}`);
+      console.log(`[PuzzleComponent] Inicializando puzzle component`);
       this.loadPuzzleConfiguration();
     });
   }
@@ -90,13 +92,32 @@ export class PuzzleComponent implements OnInit, OnDestroy, CanComponentDeactivat
   }
 
   loadPuzzleConfiguration(): void {
-    console.log(`[PuzzleComponent] Cargando configuración para: ${this.currentGrade}`);
-    this.puzzleService.getPuzzleConfigByLevelStudent(this.currentGrade).subscribe(
+    console.log(`[PuzzleComponent] Cargando configuración del nivel activo del grado del estudiante`);
+    
+    // Obtener el grado del estudiante
+    const grade = localStorage.getItem('gradeStudent') || '';
+    console.log(`[PuzzleComponent] Grado del estudiante: ${grade}`);
+    
+    if (!grade) {
+      console.warn(`[PuzzleComponent] No se pudo obtener el grado del estudiante. Usando configuración por defecto.`);
+      this.resetToDefaultConfig();
+      this.initializeGame();
+      return;
+    }
+    
+    // Obtener el nivel activo del grado del estudiante
+    this.puzzleService.getActivePuzzleConfigByGrade(grade).subscribe(
       (response: any) => {
-        const configData: PuzzleConfig | undefined = response.data?.[0];
-        console.log(`[PuzzleComponent] Datos de configuración obtenidos para ${this.currentGrade}:`, configData);
-
+        const configData: PuzzleConfig | undefined = response?.data?.[0];
+        console.log(`[PuzzleComponent] Configuración activa obtenida:`, configData);
+        
         if (configData) {
+          console.log(`[PuzzleComponent] Usando configuración activa:`, configData);
+          
+          // Asignar el ID del nivel a currentLevel
+          this.currentLevel = configData.level?.level || '';
+          console.log(`[PuzzleComponent] Current level asignado: ${this.currentLevel}`);
+          
           this.rows = configData.rows ?? 3;
           this.cols = configData.cols ?? 3;
 
@@ -105,14 +126,14 @@ export class PuzzleComponent implements OnInit, OnDestroy, CanComponentDeactivat
             console.log(`[PuzzleComponent] URL de imagen Directus construida: ${this.imageUrl}`);
           } else {
             this.imageUrl = 'assets/img/prueba.jpg';
-            console.warn(`[PuzzleComponent] URL de imagen no encontrada para ${this.currentGrade}. Usando imagen por defecto.`);
+            console.warn(`[PuzzleComponent] URL de imagen no encontrada. Usando imagen por defecto.`);
           }
 
           this.timeLimit = configData.time_limit ?? 180;
           this.timeLeft = this.timeLimit;
 
-          console.log(`[PuzzleComponent] Configuración de ${this.currentGrade} cargada exitosamente:`, {
-            level_name: this.currentGrade,
+          console.log(`[PuzzleComponent] Configuración activa cargada exitosamente:`, {
+            level_name: configData.level_name,
             rows: this.rows,
             cols: this.cols,
             imageUrl: this.imageUrl,
@@ -120,13 +141,13 @@ export class PuzzleComponent implements OnInit, OnDestroy, CanComponentDeactivat
           });
 
         } else {
-          console.warn(`[PuzzleComponent] No se encontró configuración para ${this.currentGrade}. Usando valores por defecto.`);
+          console.warn(`[PuzzleComponent] No se encontró configuración activa para el grado ${grade}. Usando valores por defecto.`);
           this.resetToDefaultConfig();
         }
         this.initializeGame();
       },
       (error) => {
-        console.error(`[PuzzleComponent] Error al cargar la configuración del rompecabezas para ${this.currentGrade}:`, error);
+        console.error(`[PuzzleComponent] Error al cargar la configuración activa del rompecabezas:`, error);
         this.resetToDefaultConfig();
         this.initializeGame();
       }

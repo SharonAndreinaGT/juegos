@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { PuzzleConfig, PuzzleResult } from './puzzle-config.model';
 import { AuthService } from './auth.service';
 @Injectable({
@@ -55,6 +55,29 @@ export class PuzzleService {
     console.log('haaaaaa',grade);
 
     return this.http.get<any>(`${this.apiUrl}?filter[level][_eq]=${level}&filter[grade][_eq]=${grade}&fields=*,id`);
+  }
+
+  /**
+   * Obtiene la configuración activa del puzzle para un grado específico.
+   * @param grade El ID del grado del estudiante.
+   * @returns Un Observable que emite la configuración activa del puzzle.
+   */
+  getActivePuzzleConfigByGrade(grade: string): Observable<any> {
+    console.log(`[PuzzleService] Obteniendo puzzle activo para grado: ${grade}`);
+    
+    const url = `${this.apiUrl}?filter[grade][_eq]=${grade}&filter[isActive][_eq]=true&fields=id,level,rows,cols,time_limit,imageUrl,isActive,grade, level.level`;
+    console.log(`[PuzzleService] URL de consulta: ${url}`);
+    
+    return this.http.get<any>(url).pipe(
+      map(response => {
+        console.log(`[PuzzleService] Respuesta de puzzle activo:`, response);
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error(`[PuzzleService] Error al obtener puzzle activo para grado ${grade}:`, error);
+        return of(null);
+      })
+    );
   }
 
   /**

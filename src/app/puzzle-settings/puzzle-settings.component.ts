@@ -147,6 +147,8 @@ export class PuzzleSettingsComponent implements OnInit {
    * @param isActive El nuevo estado de 'isActive'.
    */
   onLevelActiveChange(level: 'level1' | 'level2' | 'level3', isActive: boolean): void {
+    console.log(`[PuzzleSettingsComponent] Cambio de estado para ${level}: ${isActive}`);
+    
     let configToUpdate: PuzzleConfig;
     switch (level) {
       case 'level1':
@@ -164,18 +166,27 @@ export class PuzzleSettingsComponent implements OnInit {
 
     // Desactivar todos los demás niveles si este se está activando
     if (isActive) {
+      console.log(`[PuzzleSettingsComponent] Activando ${level}, desactivando otros niveles...`);
       if (level !== 'level1') this.level1Config.isActive = false;
       if (level !== 'level2') this.level2Config.isActive = false;
       if (level !== 'level3') this.level3Config.isActive = false;
       // Actualiza el servicio compartido inmediatamente para que el juego sepa qué nivel está activo
       this.sharedDataService.setCurrentPuzzleLevel(configToUpdate.level_name!);
+      console.log(`[PuzzleSettingsComponent] Nivel activo establecido en sharedDataService: ${configToUpdate.level_name}`);
     } else {
       // Si se desactiva el nivel actual y era el que estaba activo, limpiar el nivel activo en sharedDataService
       if (this.sharedDataService.getCurrentPuzzleLevel() === configToUpdate.level_name) {
         this.sharedDataService.setCurrentPuzzleLevel(''); 
+        console.log(`[PuzzleSettingsComponent] Nivel activo limpiado en sharedDataService`);
       }
     }
     configToUpdate.isActive = isActive;
+
+    console.log(`[PuzzleSettingsComponent] Estados finales de los niveles:`, {
+      level1: this.level1Config.isActive,
+      level2: this.level2Config.isActive,
+      level3: this.level3Config.isActive
+    });
 
     // IMPORTANTE: Se ha eliminado la llamada a this.saveLevelConfig(level) aquí.
     // Los cambios de isActive se guardarán solo cuando el usuario haga clic en el botón "Guardar Configuración".
@@ -342,44 +353,74 @@ export class PuzzleSettingsComponent implements OnInit {
   }
 
   /**
-   * Desactiva todos los niveles de rompecabezas excepto el especificado en la base de datos.
+   * Desactiva todos los niveles de rompecabezas del mismo grado excepto el especificado en la base de datos.
    * Obtiene la configuración más reciente de cada nivel antes de actualizarla.
    */
   private async deactivateOtherLevels(activeLevelName: string): Promise<void> {
-    const allLevelNames = ['Nivel1', 'Nivel2', 'Nivel3'];
+    console.log(`[PuzzleSettingsComponent] Iniciando desactivación de otros niveles del mismo grado. Nivel activo: ${activeLevelName}`);
+    
+    // Obtener el grado actual del usuario
+    const grade = JSON.parse(localStorage.getItem('gradeFilter') || '{}').data?.[0]?.id || '';
+    console.log(`[PuzzleSettingsComponent] Grado actual: ${grade}`);
+    
+    if (!grade) {
+      console.warn(`[PuzzleSettingsComponent] No se pudo obtener el grado actual. No se desactivarán otros niveles.`);
+      return;
+    }
 
-    for (const levelName of allLevelNames) {
-      if (levelName === activeLevelName) {
-        continue; 
-      }
-
-      console.log(`[PuzzleSettingsComponent] Intentando desactivar ${levelName} en la base de datos...`);
-      try {
-        const response: any = await this.puzzleService.getPuzzleConfigByLevel(levelName).toPromise();
-        const configToDeactivate: PuzzleConfig | undefined = response.data?.[0];
-
-        // Solo intentar desactivar si el objeto de configuración existe, tiene un ID
-        // y actualmente está activo en la base de datos.
-        if (configToDeactivate && configToDeactivate.id && configToDeactivate.isActive) {
+    // Obtener todas las configuraciones del mismo grado
+    try {
+      const allConfigsResponse = await this.puzzleService.getAllPuzzleConfigs().toPromise();
+      const allConfigs: PuzzleConfig[] = allConfigsResponse || [];
+      
+      console.log(`[PuzzleSettingsComponent] Todas las configuraciones del grado ${grade}:`, allConfigs);
+      
+      // Filtrar solo las configuraciones del mismo grado que están activas y no son el nivel actual
+      const configsToDeactivate = allConfigs.filter((config: PuzzleConfig) => {
+        const isSameGrade = config.grade === grade;
+        const isActive = config.isActive;
+        const isNotCurrentLevel = config.level_name !== activeLevelName;
+        
+        console.log(`[PuzzleSettingsComponent] Evaluando configuración:`, {
+          level_name: config.level_name,
+          grade: config.grade,
+          isActive: config.isActive,
+          isSameGrade,
+          isActiveState: isActive,
+          isNotCurrentLevel,
+          shouldDeactivate: isSameGrade && isActive && isNotCurrentLevel
+        });
+        
+        return isSameGrade && isActive && isNotCurrentLevel;
+      });
+      
+      console.log(`[PuzzleSettingsComponent] Configuraciones a desactivar:`, configsToDeactivate);
+      
+      // Desactivar cada configuración encontrada
+      for (const configToDeactivate of configsToDeactivate) {
+        try {
+          console.log(`[PuzzleSettingsComponent] Desactivando ${configToDeactivate.level_name} (ID: ${configToDeactivate.id})`);
+          
           configToDeactivate.isActive = false;
-
           await this.puzzleService.savePuzzleConfig(configToDeactivate).toPromise();
-          console.log(`[PuzzleSettingsComponent] ${levelName} desactivado en Directus.`);
-
+          
+          console.log(`[PuzzleSettingsComponent] ${configToDeactivate.level_name} desactivado en Directus.`);
+          
           // También actualiza el estado local del componente para consistencia inmediata de la UI
-          // Esto es importante para que los toggles se desactiven visualmente.
-          switch (levelName) {
+          switch (configToDeactivate.level_name) {
             case 'Nivel1': this.level1Config.isActive = false; break;
             case 'Nivel2': this.level2Config.isActive = false; break;
             case 'Nivel3': this.level3Config.isActive = false; break;
           }
-        } else {
-          console.log(`[PuzzleSettingsComponent] ${levelName} no encontrado, no tiene ID, o ya estaba inactivo en la DB. No se necesita desactivación.`);
+        } catch (error) {
+          console.error(`[PuzzleSettingsComponent] Error al desactivar ${configToDeactivate.level_name} en Directus:`, error);
         }
-      } catch (error) {
-        console.error(`[PuzzleSettingsComponent] Error al desactivar ${levelName} en Directus:`, error);
-        // Considera mostrar un snackbar de error aquí si es crítico para el usuario saber
       }
+      
+      console.log(`[PuzzleSettingsComponent] Proceso de desactivación completado. ${configsToDeactivate.length} niveles desactivados.`);
+      
+    } catch (error) {
+      console.error(`[PuzzleSettingsComponent] Error al obtener configuraciones del grado ${grade}:`, error);
     }
   }
 

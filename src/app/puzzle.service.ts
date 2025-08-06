@@ -81,20 +81,35 @@ export class PuzzleService {
    * @returns Un Observable que emite el objeto PuzzleConfig guardado/actualizado.
    */
   savePuzzleConfig(config: PuzzleConfig): Observable<PuzzleConfig> {
-    if (config.id) {
+    // Crear una copia del objeto sin el campo level_name que no existe en la base de datos
+    const configToSend = { ...config };
+    delete configToSend.level_name;
+    
+    console.log('[PuzzleService] Configuración a enviar (sin level_name):', {
+      id: configToSend.id,
+      level: configToSend.level,
+      grade: configToSend.grade,
+      isActive: configToSend.isActive,
+      rows: configToSend.rows,
+      cols: configToSend.cols,
+      time_limit: configToSend.time_limit,
+      imageUrl: configToSend.imageUrl
+    });
+
+    if (configToSend.id) {
       // Actualizar configuración existente
-      console.log(`[PuzzleService] Actualizando configuración con ID: ${config.id}`, config);
-      return this.http.patch<any>(`${this.apiUrl}/${config.id}`, config).pipe(
+      console.log(`[PuzzleService] Actualizando configuración con ID: ${configToSend.id}`, configToSend);
+      return this.http.patch<any>(`${this.apiUrl}/${configToSend.id}`, configToSend).pipe(
         map(response => response.data)
       );
     } else {
       // Crear nueva configuración
       const isAdmin = this.isAdmin();
       if (!isAdmin) {
-        config.grade = this.getGrade();
+        configToSend.grade = this.getGrade();
       }
-      console.log('[PuzzleService] Creando nueva configuración:', config);
-      return this.http.post<any>(this.apiUrl, config).pipe(
+      console.log('[PuzzleService] Creando nueva configuración:', configToSend);
+      return this.http.post<any>(this.apiUrl, configToSend).pipe(
         map(response => response.data)
       );
     }

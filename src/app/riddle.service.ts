@@ -3,6 +3,7 @@ import { BehaviorSubject, Observable, of, lastValueFrom } from 'rxjs';
 import { RiddleLevel, RiddleWord, RiddleResult } from './riddle.model';
 import { HttpClient } from '@angular/common/http';
 import { catchError, map, tap } from 'rxjs/operators';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,18 +11,37 @@ import { catchError, map, tap } from 'rxjs/operators';
 export class RiddleService {
   private directusUrl = 'http://localhost:8055/items/riddle';
   private directusResultsUrl = 'http://localhost:8055/items/riddle_results'; //URL para los resultados
-  private grade = JSON.parse(localStorage.getItem('gradeFilter') || '{}').data ? JSON.parse(localStorage.getItem('gradeFilter') || '{}').data[0].id : '';
+  private getGrade(): string {
+    try {
+      const gradeFilter = localStorage.getItem('gradeFilter');
+      if (!gradeFilter) return '';
+      
+      const parsed = JSON.parse(gradeFilter);
+      return parsed?.data?.[0]?.id || '';
+    } catch (error) {
+      console.warn('[RiddleService] Error al obtener grade:', error);
+      return '';
+    }
+  }
+
   private directusFilesUrl = 'http://localhost:8055/files';
 
   private levelsSubject = new BehaviorSubject<RiddleLevel[]>([]);
   levels$: Observable<RiddleLevel[]> = this.levelsSubject.asObservable();
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private authService: AuthService) {
     this.loadLevelsFromDirectus();
   }
 
+  isAdmin() {
+    return this.authService.isAdmin();
+  }
+
   private loadLevelsFromDirectus(): void {
-    const url = this.grade ? `${this.directusUrl}?filter[grade][_eq]=${this.grade}&fields=*,id` : `${this.directusUrl}?fields=*,id`;
+    const grade = this.getGrade();
+    const isAdmin = this.isAdmin();
+    const gradeFilter = isAdmin ? '' : `&filter[grade][_eq]=${grade}`;
+    const url = `${this.directusUrl}?fields=*,id${gradeFilter}`;
     this.http.get<any>(url).pipe(
       map(response => response.data as RiddleLevel[]),
       tap(levels => {
@@ -31,9 +51,9 @@ export class RiddleService {
         } else {
           console.log('[RiddleService] No se encontraron niveles en Directus. Creando configuración por defecto...');
           const defaultLevels: RiddleLevel[] = [
-            { id: null, level_number: 1, level_name: 'Fácil', max_intents: 5, words_level: 5, words: [{ word: 'ANGULAR' }, { word: 'PROGRAMACION' }, { word: 'DESARROLLO' }], isActive: true, grade: this.grade, time_limit: 300, level: '183770b3-0e66-4932-8769-b0c1b4738d79' },
-            { id: null, level_number: 2, level_name: 'Medio', max_intents: 4, words_level: 6, words: [{ word: 'COMPONENTE' }, { word: 'SERVICIOS' }, { word: 'ROUTING' }], isActive: false, grade: this.grade, time_limit: 240, level: '98fd8047-6897-4a86-85e2-f430e48956bd' },
-            { id: null, level_number: 3, level_name: 'Difícil', max_intents: 3, words_level: 7, words: [{ word: 'TYPESCRIPT' }, { word: 'JAVASCRIPT' }, { word: 'ALGORITMO' }], isActive: false, grade: this.grade, time_limit: 180, level: '3c16b66e-0fa4-4ecc-a9ae-41dd832f0bc1' }
+            { id: null, level_number: 1, level_name: 'Fácil', max_intents: 5, words_level: 5, words: [{ word: 'ANGULAR' }, { word: 'PROGRAMACION' }, { word: 'DESARROLLO' }], isActive: true, grade: grade, time_limit: 300, level: '183770b3-0e66-4932-8769-b0c1b4738d79' },
+            { id: null, level_number: 2, level_name: 'Medio', max_intents: 4, words_level: 6, words: [{ word: 'COMPONENTE' }, { word: 'SERVICIOS' }, { word: 'ROUTING' }], isActive: false, grade: grade, time_limit: 240, level: '98fd8047-6897-4a86-85e2-f430e48956bd' },
+            { id: null, level_number: 3, level_name: 'Difícil', max_intents: 3, words_level: 7, words: [{ word: 'TYPESCRIPT' }, { word: 'JAVASCRIPT' }, { word: 'ALGORITMO' }], isActive: false, grade: grade, time_limit: 180, level: '3c16b66e-0fa4-4ecc-a9ae-41dd832f0bc1' }
           ];
         
           lastValueFrom(
@@ -55,9 +75,9 @@ export class RiddleService {
       catchError(error => {
         console.error('[RiddleService] Error al cargar la configuración desde Directus (GET inicial):', error);
         const defaultLevelsOnError: RiddleLevel[] = [
-          { id: null, level_number: 1, level_name: 'Fácil', max_intents: 5, words_level: 5, words: [{ word: 'ANGULAR' }, { word: 'PROGRAMACION' }, { word: 'DESARROLLO' }], isActive: true, grade: this.grade, time_limit: 300 },
-          { id: null, level_number: 2, level_name: 'Medio', max_intents: 4, words_level: 6, words: [{ word: 'COMPONENTE' }, { word: 'SERVICIOS' }, { word: 'ROUTING' }], isActive: false, grade: this.grade, time_limit: 240 },
-          { id: null, level_number: 3, level_name: 'Difícil', max_intents: 3, words_level: 7, words: [{ word: 'TYPESCRIPT' }, { word: 'JAVASCRIPT' }, { word: 'ALGORITMO' }], isActive: false, grade: this.grade, time_limit: 180 }
+          { id: null, level_number: 1, level_name: 'Fácil', max_intents: 5, words_level: 5, words: [{ word: 'ANGULAR' }, { word: 'PROGRAMACION' }, { word: 'DESARROLLO' }], isActive: true, grade: grade, time_limit: 300 },
+          { id: null, level_number: 2, level_name: 'Medio', max_intents: 4, words_level: 6, words: [{ word: 'COMPONENTE' }, { word: 'SERVICIOS' }, { word: 'ROUTING' }], isActive: false, grade: grade, time_limit: 240 },
+          { id: null, level_number: 3, level_name: 'Difícil', max_intents: 3, words_level: 7, words: [{ word: 'TYPESCRIPT' }, { word: 'JAVASCRIPT' }, { word: 'ALGORITMO' }], isActive: false, grade: grade, time_limit: 180 }
         ];
         this.levelsSubject.next(defaultLevelsOnError);
         return of([]);
@@ -75,7 +95,10 @@ export class RiddleService {
     } else {
       operation = 'create';
       const { id, ...newLevelData } = level;
-      newLevelData.grade = this.grade;
+      const isAdmin = this.isAdmin();
+      if (!isAdmin) {
+        newLevelData.grade = this.getGrade();
+      }
       request = this.http.post<any>(this.directusUrl, newLevelData);
     }
 

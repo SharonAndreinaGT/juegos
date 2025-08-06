@@ -34,6 +34,7 @@ export class LoginComponent {
 
         const userInfo = await this.userService.getUserInfo(this.email);
         localStorage.setItem('userInfo', JSON.stringify(userInfo.data));
+        console.log('userInfo', userInfo.data);
 
         this.authService.isAuthenticatedSubject.next(true);
 

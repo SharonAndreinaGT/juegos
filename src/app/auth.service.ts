@@ -25,6 +25,7 @@ export class AuthService {
 
   isAdmin(): boolean {
     const userRole = JSON.parse(localStorage.getItem('userRole') || '{}').data;
+    console.log('userRole', userRole);
     return userRole ? userRole.name === 'user-admin' : false;
   }
 
@@ -57,6 +58,8 @@ export class AuthService {
    * Obtener rol del usuario que está autenticando
    */
   getUserRole(roleId: string): Observable<any> {
+    console.log('roleId', roleId);
+    console.log('token', this.getToken());
     const token = this.getToken();
     if (!token) {
       return new Observable((observer) => {

@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, forkJoin, of } from 'rxjs'; 
 import { map, switchMap, catchError } from 'rxjs/operators'; 
 import { MemoryConfig, MemoryResult } from './memory-config-model';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,13 +12,31 @@ export class MemoryService {
   private apiUrl = 'http://localhost:8055/items/memory';    
   private directusFilesUrl = 'http://localhost:8055/files';
   private memoryResultsApiUrl = 'http://localhost:8055/items/memory_results';
-  private grade = JSON.parse(localStorage.getItem('gradeFilter') || '{}').data ? JSON.parse(localStorage.getItem('gradeFilter') || '{}').data[0].id : '';
+  private getGrade(): string {
+    try {
+      const gradeFilter = localStorage.getItem('gradeFilter');
+      if (!gradeFilter) return '';
+      
+      const parsed = JSON.parse(gradeFilter);
+      return parsed?.data?.[0]?.id || '';
+    } catch (error) {
+      console.warn('[MemoryService] Error al obtener grade:', error);
+      return '';
+    }
+  }
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private authService: AuthService) { }
+
+  isAdmin() {
+    return this.authService.isAdmin();
+  }
 
   // Obtiene la configuración del juego de memoria por el nombre del nivel
   getMemoryConfigByLevel(level: string): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}?filter[level][_eq]=${level}&filter[grade][_eq]=${this.grade}&fields=*,id`);
+    const grade = this.getGrade();
+    const isAdmin = this.isAdmin();
+    const gradeFilter = isAdmin ? '' : `&filter[grade][_eq]=${grade}`;
+    return this.http.get<any>(`${this.apiUrl}?filter[level][_eq]=${level}${gradeFilter}&fields=*,id`);
   }
 
   // Obtiene la configuración activa del juego de memoria (isActive: true)
@@ -27,7 +46,12 @@ export class MemoryService {
 
   // Obtiene todas las configuraciones del juego de memoria
   getAllMemoryConfigs(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}?fields=*,id`);
+    const isAdmin = this.isAdmin();
+    const grade = this.getGrade();
+    const gradeFilter = isAdmin ? '' : `?filter[grade][_eq]=${grade}&fields=*,id`;
+    const url = isAdmin ? `${this.apiUrl}?fields=*,id` : `${this.apiUrl}${gradeFilter}`;
+    
+    return this.http.get<any>(url);
   }
 
   //metodo para guardar la configuracion del juego 
@@ -35,13 +59,20 @@ export class MemoryService {
     if (config.id) {
       // Actualizar configuración existente
       console.log(`[MemoryService] Actualizando configuración de memoria con ID: ${config.id}`, config);
-      config.grade = this.grade;
+      const isAdmin = this.isAdmin();
+      if (!isAdmin) {
+        config.grade = this.getGrade();
+      }
       return this.http.patch<MemoryConfig>(`${this.apiUrl}/${config.id}`, config).pipe(
         map(response => response)
       );
     } else {
       // Crear nueva configuración
       console.log('[MemoryService] Creando nueva configuración de memoria:', config);
+      const isAdmin = this.isAdmin();
+      if (!isAdmin) {
+        config.grade = this.getGrade();
+      }
       return this.http.post<MemoryConfig>(this.apiUrl, config).pipe(
         map(response => response)
       );

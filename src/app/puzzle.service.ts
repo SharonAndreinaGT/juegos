@@ -19,7 +19,18 @@ export class PuzzleService {
   private directusBaseUrl = 'http://localhost:8055';
 
   
-  private grade = JSON.parse(localStorage.getItem('gradeFilter') || '{}').data ? JSON.parse(localStorage.getItem('gradeFilter') || '{}').data[0].id : '';
+  private getGrade(): string {
+    try {
+      const gradeFilter = localStorage.getItem('gradeFilter');
+      if (!gradeFilter) return '';
+      
+      const parsed = JSON.parse(gradeFilter);
+      return parsed?.data?.[0]?.id || '';
+    } catch (error) {
+      console.warn('[PuzzleService] Error al obtener grade:', error);
+      return '';
+    }
+  }
 
 
   constructor(private http: HttpClient, private authService: AuthService) {}
@@ -31,7 +42,10 @@ export class PuzzleService {
    */
   getPuzzleConfigByLevel(level: string): Observable<any> {
     // Directus usa el filtro `_eq` para igualdad. Se solicita el ID también.
-    return this.http.get<any>(`${this.apiUrl}?filter[level][_eq]=${level}&filter[grade][_eq]=${this.grade}&fields=*,id`);
+    const grade = this.getGrade();
+    const isAdmin = this.isAdmin();
+    const gradeFilter = isAdmin ? '' : `&filter[grade][_eq]=${grade}`;
+    return this.http.get<any>(`${this.apiUrl}?filter[level][_eq]=${level}${gradeFilter}&fields=*,id`);
   }
 
   getPuzzleConfigByLevelStudent(level: string): Observable<any> {
@@ -49,7 +63,12 @@ export class PuzzleService {
    * @returns Un Observable que emite un array de PuzzleConfig.
    */
   getAllPuzzleConfigs(): Observable<PuzzleConfig[]> {
-    return this.http.get<any>(`${this.apiUrl}?fields=*,id`).pipe(
+    const isAdmin = this.isAdmin();
+    const grade = this.getGrade();
+    const gradeFilter = isAdmin ? '' : `?filter[grade][_eq]=${grade}&fields=*,id`;
+    const url = isAdmin ? `${this.apiUrl}?fields=*,id` : `${this.apiUrl}${gradeFilter}`;
+    
+    return this.http.get<any>(url).pipe(
       map(response => response.data || [])
     );
   }
@@ -70,7 +89,10 @@ export class PuzzleService {
       );
     } else {
       // Crear nueva configuración
-      config.grade = this.grade;
+      const isAdmin = this.isAdmin();
+      if (!isAdmin) {
+        config.grade = this.getGrade();
+      }
       console.log('[PuzzleService] Creando nueva configuración:', config);
       return this.http.post<any>(this.apiUrl, config).pipe(
         map(response => response.data)

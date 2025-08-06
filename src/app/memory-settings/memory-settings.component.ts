@@ -294,42 +294,80 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
         console.log('Creando nueva configuración');
       }
 
-      // Si este nivel se va a activar, desactivar todos los demás niveles primero en la DB
+      // Si este nivel se va a activar, desactivar todos los demás niveles del mismo grado primero en la DB
       if (configToSave.isActive) {
-        // Obtener todas las configuraciones existentes de Directus
-        const allConfigsResponse = await this.memoryService.getAllMemoryConfigs().toPromise();
-        const allConfigs: MemoryConfig[] = allConfigsResponse?.data || [];
+        console.log(`[MemorySettingsComponent] Iniciando desactivación de otros niveles del mismo grado. Nivel activo: ${configToSave.level_name}`);
         
-        // Desactivar todos los niveles que están activos y no son el nivel actual
-        const deactivationPromises = allConfigs
-          .filter((config: MemoryConfig) => config.id !== configToSave.id && config.isActive)
-          .map(async (config: MemoryConfig) => {
-            console.log(`Desactivando nivel ${config.level_name} (ID: ${config.id}) en la DB.`);
-            // Obtener la configuración completa del nivel a desactivar antes de enviarla
-            const currentDbConfigResponse = await this.memoryService.getMemoryConfigByLevel(config.level!).toPromise();
-            const currentDbConfig = currentDbConfigResponse?.data?.[0];
+        // Obtener el grado actual del usuario
+        const grade = JSON.parse(localStorage.getItem('gradeFilter') || '{}').data?.[0]?.id || '';
+        console.log(`[MemorySettingsComponent] Grado actual: ${grade}`);
+        
+        if (!grade) {
+          console.warn(`[MemorySettingsComponent] No se pudo obtener el grado actual. No se desactivarán otros niveles.`);
+        } else {
+          // Obtener todas las configuraciones existentes de Directus
+          const allConfigsResponse = await this.memoryService.getAllMemoryConfigs().toPromise();
+          const allConfigs: MemoryConfig[] = allConfigsResponse?.data || [];
+          
+          console.log(`[MemorySettingsComponent] Todas las configuraciones del grado ${grade}:`, allConfigs);
+          
+          // Filtrar solo las configuraciones del mismo grado que están activas y no son el nivel actual
+          const configsToDeactivate = allConfigs.filter((config: MemoryConfig) => {
+            const isSameGrade = config.grade === grade;
+            const isActive = config.isActive;
+            const isNotCurrentLevel = config.level_name !== configToSave.level_name;
+            
+            console.log(`[MemorySettingsComponent] Evaluando configuración:`, {
+              level_name: config.level_name,
+              grade: config.grade,
+              isActive: config.isActive,
+              isSameGrade,
+              isActiveState: isActive,
+              isNotCurrentLevel,
+              shouldDeactivate: isSameGrade && isActive && isNotCurrentLevel
+            });
+            
+            return isSameGrade && isActive && isNotCurrentLevel;
+          });
+          
+          console.log(`[MemorySettingsComponent] Configuraciones a desactivar:`, configsToDeactivate);
+          
+          // Desactivar cada configuración encontrada
+          const deactivationPromises = configsToDeactivate.map(async (config: MemoryConfig) => {
+            try {
+              console.log(`[MemorySettingsComponent] Desactivando ${config.level_name} (ID: ${config.id})`);
+              
+              // Obtener la configuración completa del nivel a desactivar antes de enviarla
+              const currentDbConfigResponse = await this.memoryService.getMemoryConfigByLevel(config.level!).toPromise();
+              const currentDbConfig = currentDbConfigResponse?.data?.[0];
 
-            if (currentDbConfig && currentDbConfig.id) {
+              if (currentDbConfig && currentDbConfig.id) {
                 // Modificar la copia completa y enviarla
                 currentDbConfig.isActive = false;
-                return this.memoryService.saveMemoryConfig(currentDbConfig).toPromise();
+                await this.memoryService.saveMemoryConfig(currentDbConfig).toPromise();
+                console.log(`[MemorySettingsComponent] ${config.level_name} desactivado en Directus.`);
+              } else {
+                console.log(`[MemorySettingsComponent] No se pudo obtener configuración completa para ${config.level_name}`);
+              }
+            } catch (error) {
+              console.error(`[MemorySettingsComponent] Error al desactivar ${config.level_name} en Directus:`, error);
             }
-            return Promise.resolve(); // Si no se encuentra o no tiene ID, no hacer nada
           });
 
-        if (deactivationPromises.length > 0) {
-          await Promise.all(deactivationPromises);
-          console.log('Otros niveles desactivados exitosamente en la base de datos.');
-        }
-
-        // Después de desactivar en la DB, actualizar el estado local de los otros toggles
-        // para que la UI refleje el cambio inmediatamente al guardar.
-        ['level1', 'level2', 'level3'].forEach(key => {
-          const form = this.getLevelForm(key);
-          if (form.get('level_name')?.value !== configToSave.level_name) {
-            form.get('isActive')?.setValue(false, { emitEvent: false });
+          if (deactivationPromises.length > 0) {
+            await Promise.all(deactivationPromises);
+            console.log(`[MemorySettingsComponent] Proceso de desactivación completado. ${configsToDeactivate.length} niveles desactivados.`);
           }
-        });
+
+          // Después de desactivar en la DB, actualizar el estado local de los otros toggles
+          // para que la UI refleje el cambio inmediatamente al guardar.
+          ['level1', 'level2', 'level3'].forEach(key => {
+            const form = this.getLevelForm(key);
+            if (form.get('level_name')?.value !== configToSave.level_name) {
+              form.get('isActive')?.setValue(false, { emitEvent: false });
+            }
+          });
+        }
       }
       
       // Guardar la configuración (crear o actualizar) en Directus

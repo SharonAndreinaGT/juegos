@@ -140,4 +140,89 @@ export class GradeStudentsComponent implements OnInit {
       }
     });
   }
+
+  promoteStudents() {
+    if (this.isAdmin) {
+      this.snackBar.open('Los administradores no pueden promover estudiantes', 'Cerrar', {
+        duration: 3000,
+      });
+      return;
+    }
+
+    // Obtener el grado actual del usuario logueado
+    const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')[0];
+    const currentGradeId = userInfo.grade;
+
+    if (!currentGradeId) {
+      this.snackBar.open('No se pudo obtener el grado actual', 'Cerrar', {
+        duration: 3000,
+      });
+      return;
+    }
+
+    // Obtener información del grado actual para saber su level
+    this.userService.getGradeFilter().then((gradeResponse: any) => {
+      const currentGrade = gradeResponse.data?.[0];
+      if (!currentGrade || !currentGrade.level) {
+        this.snackBar.open('No se pudo obtener el nivel del grado actual', 'Cerrar', {
+          duration: 3000,
+        });
+        return;
+      }
+
+      const currentLevel = currentGrade.level;
+      const nextLevel = currentLevel + 1;
+
+      // Buscar el siguiente grado
+      this.userService.getNextGrade(currentLevel).subscribe({
+        next: (nextGradeResponse: any) => {
+          const nextGrade = nextGradeResponse.data?.[0];
+          if (!nextGrade) {
+            this.snackBar.open(`No existe un ${nextLevel}to grado`, 'Cerrar', {
+              duration: 3000,
+            });
+            return;
+          }
+
+          // Confirmar la promoción
+          const confirmMessage = `¿Está seguro de que desea promover todos los estudiantes del grado "${currentGrade.grade}" al grado "${nextGrade.grade}"? Esta acción no se puede deshacer.`;
+          
+          if (confirm(confirmMessage)) {
+            this.userService.promoteStudents(currentGradeId, nextGrade.id).subscribe({
+              next: (result: any) => {
+                if (result.success) {
+                  this.snackBar.open(result.message, 'Cerrar', {
+                    duration: 5000,
+                  });
+                  // Recargar la lista de estudiantes
+                  this.loadStudents(currentGradeId);
+                } else {
+                  this.snackBar.open(result.error || 'Error al promover estudiantes', 'Cerrar', {
+                    duration: 3000,
+                  });
+                }
+              },
+              error: (error) => {
+                console.error('Error al promover estudiantes:', error);
+                this.snackBar.open('Error al promover estudiantes', 'Cerrar', {
+                  duration: 3000,
+                });
+              }
+            });
+          }
+        },
+        error: (error) => {
+          console.error('Error al obtener el siguiente grado:', error);
+          this.snackBar.open('Error al obtener el siguiente grado', 'Cerrar', {
+            duration: 3000,
+          });
+        }
+      });
+    }).catch((error) => {
+      console.error('Error al obtener el grado actual:', error);
+      this.snackBar.open('Error al obtener el grado actual', 'Cerrar', {
+        duration: 3000,
+      });
+    });
+  }
 }

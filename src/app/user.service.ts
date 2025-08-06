@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { firstValueFrom, Observable, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { firstValueFrom, Observable, of, forkJoin } from 'rxjs';
+import { map, catchError, switchMap } from 'rxjs/operators';
 import { User } from './puzzle-config.model';
 import { AuthService } from './auth.service';
 
@@ -174,6 +174,63 @@ export class UserService {
           headers: { Authorization: `Bearer ${token}` },
         }
       )
+    );
+  }
+
+  /**
+   * Obtiene todos los grados ordenados por level
+   */
+  getAllGrades(): Observable<any> {
+    return this.http.get<any>('http://localhost:8055/items/grades?sort=level&fields=*,id');
+  }
+
+  /**
+   * Obtiene el siguiente grado basado en el level actual
+   */
+  getNextGrade(currentLevel: number): Observable<any> {
+    const nextLevel = currentLevel + 1;
+    return this.http.get<any>(`http://localhost:8055/items/grades?filter[level][_eq]=${nextLevel}&fields=*,id`);
+  }
+
+  /**
+   * Promueve todos los estudiantes de un grado al siguiente nivel
+   */
+  promoteStudents(currentGradeId: string, newGradeId: string): Observable<any> {
+    const token = this.authService.getToken();
+    if (!token) {
+      return of({ error: 'No hay token de autenticación' });
+    }
+
+    return this.getUsersByGrade(currentGradeId).pipe(
+      map((studentsResponse: any) => {
+        const students = studentsResponse.data || [];
+        if (students.length === 0) {
+          return { message: 'No hay estudiantes para promover' };
+        }
+        return students;
+      }),
+      switchMap((students: any[]) => {
+        const updatePromises = students.map((student: any) => {
+          const updateData = { grade: newGradeId };
+          return this.http.patch<any>(`${this.apiUrl}/${student.id}`, updateData, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+        });
+
+        return forkJoin(updatePromises);
+      }),
+      map((responses: any[]) => {
+        console.log('[UserService] Estudiantes promovidos exitosamente:', responses.length);
+        return { 
+          success: true, 
+          message: `${responses.length} estudiantes promovidos exitosamente`,
+          count: responses.length 
+        };
+      }),
+      catchError((error) => {
+        console.error('[UserService] Error al promover estudiantes:', error);
+        return of({ error: 'Error al promover estudiantes' });
+      })
     );
   }
 }

@@ -51,12 +51,17 @@
                   <mat-hint>Este nivel tiene {{ LEVEL_CARD_COUNTS.level1 }} tarjetas ({{ LEVEL_CARD_COUNTS.level1 / 2 }} pares).</mat-hint>
                 </mat-form-field>
 
-
+                <mat-slide-toggle 
+                  formControlName="isActive"
+                  (change)="onLevelActiveChange($event, 'level1')"
+                  color="primary"
+                  style="margin-top: 20px;">
+                  Activar Nivel
+                </mat-slide-toggle>
 
                 <div class="save-button-container" style="margin-top: 20px;">
                   <button mat-raised-button color="primary" class="colorbutton-btn"
-                          (click)="saveLevelConfig('level1')"
-                          [disabled]="level1Form.invalid">
+                          (click)="saveLevelConfig('level1')">
                     Guardar Configuración
                   </button>
                 </div>
@@ -119,7 +124,13 @@
                   <mat-hint>Este nivel tiene {{ LEVEL_CARD_COUNTS.level2 }} tarjetas ({{ LEVEL_CARD_COUNTS.level2 / 2 }} pares).</mat-hint>
                 </mat-form-field>
 
-
+                <mat-slide-toggle 
+                  formControlName="isActive"
+                  (change)="onLevelActiveChange($event, 'level2')"
+                  color="primary"
+                  style="margin-top: 20px;">
+                  Activar Nivel
+                </mat-slide-toggle>
 
                 <div class="save-button-container" style="margin-top: 20px;">
                   <button mat-raised-button color="primary" class="colorbutton-btn"
@@ -186,7 +197,13 @@
                   <mat-hint>Este nivel tiene {{ LEVEL_CARD_COUNTS.level3 }} tarjetas ({{ LEVEL_CARD_COUNTS.level3 / 2 }} pares).</mat-hint>
                 </mat-form-field>
 
-
+                <mat-slide-toggle 
+                  formControlName="isActive"
+                  (change)="onLevelActiveChange($event, 'level3')"
+                  color="primary"
+                  style="margin-top: 20px;">
+                  Activar Nivel
+                </mat-slide-toggle>
 
                 <div class="save-button-container" style="margin-top: 20px;">
                   <button mat-raised-button color="primary" class="colorbutton-btn"

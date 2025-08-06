@@ -55,16 +55,16 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
     private authService: AuthService
   ) {
     this.level1Form = this.fb.group({
-      level_name: ['Nivel1', Validators.required],
+      level_name: 'nivel1',
       card_count: [this.LEVEL_CARD_COUNTS.level1, [Validators.required, Validators.min(this.LEVEL_CARD_COUNTS.level1), Validators.pattern('^[0-9]*$')]],
       time_limit: [120, [Validators.required, Validators.min(1)]],
       intent: [0, [Validators.required, Validators.min(0)]],
-      isActive: [false],
+      isActive: false,
       level: ['183770b3-0e66-4932-8769-b0c1b4738d79']
     });
 
     this.level2Form = this.fb.group({
-      level_name: ['Nivel2', Validators.required],
+      level_name: 'nivel2',
       card_count: [this.LEVEL_CARD_COUNTS.level2, [Validators.required, Validators.min(this.LEVEL_CARD_COUNTS.level2), Validators.pattern('^[0-9]*$')]],
       time_limit: [180, [Validators.required, Validators.min(1)]],
       intent: [0, [Validators.required, Validators.min(0)]],
@@ -73,7 +73,7 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
     });
 
     this.level3Form = this.fb.group({
-      level_name: ['Nivel3', Validators.required],
+      level_name: 'nivel3',
       card_count: [this.LEVEL_CARD_COUNTS.level3, [Validators.required, Validators.min(this.LEVEL_CARD_COUNTS.level3), Validators.pattern('^[0-9]*$')]],
       time_limit: [240, [Validators.required, Validators.min(1)]],
       intent: [0, [Validators.required, Validators.min(0)]],
@@ -250,10 +250,19 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
       const levelName = levelForm.get('level_name')?.value;
       const level = levelForm.get('level')?.value;
       
+      console.log(`[MemorySettingsComponent] Valores obtenidos del formulario ${levelKey}:`, {
+        level_name: levelName,
+        level: level,
+        card_count: levelForm.get('card_count')?.value,
+        time_limit: levelForm.get('time_limit')?.value,
+        intent: levelForm.get('intent')?.value,
+        isActive: levelForm.get('isActive')?.value
+      });
+      
       // Obtener la configuración existente de Directus para este nivel
       const existingConfigResponse = await this.memoryService.getMemoryConfigByLevel(level).toPromise();
       const existingConfigData = existingConfigResponse?.data?.[0];
-      console.log(levelForm.get('level')?.value);
+      console.log(`[MemorySettingsComponent] Configuración existente para level ${level}:`, existingConfigData);
       const configToSave: MemoryConfig = {
         level_name: levelName,
         card_count: levelForm.get('card_count')?.value,
@@ -264,6 +273,18 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
         level: levelForm.get('level')?.value,
         grade: this.grade
       };
+
+      console.log(`[MemorySettingsComponent] Configuración a guardar para ${levelKey}:`, {
+        id: configToSave.id,
+        level_name: configToSave.level_name,
+        level: configToSave.level,
+        grade: configToSave.grade,
+        isActive: configToSave.isActive,
+        card_count: configToSave.card_count,
+        time_limit: configToSave.time_limit,
+        intent: configToSave.intent,
+        images_count: configToSave.images?.length
+      });
 
       // Si existe un registro, asignar el ID para que se actualice en lugar de crear
       if (existingConfigData && existingConfigData.id) {

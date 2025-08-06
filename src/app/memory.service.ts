@@ -56,6 +56,19 @@ export class MemoryService {
 
   //metodo para guardar la configuracion del juego 
   saveMemoryConfig(config: MemoryConfig): Observable<MemoryConfig> {
+    // Verificar que el campo level esté presente
+    console.log('[MemoryService] Configuración a guardar:', {
+      id: config.id,
+      level_name: config.level_name,
+      level: config.level,
+      grade: config.grade,
+      isActive: config.isActive,
+      card_count: config.card_count,
+      time_limit: config.time_limit,
+      intent: config.intent,
+      images: config.images
+    });
+
     if (config.id) {
       // Actualizar configuración existente
       console.log(`[MemoryService] Actualizando configuración de memoria con ID: ${config.id}`, config);

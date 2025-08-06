@@ -25,7 +25,6 @@ export class AuthService {
 
   isAdmin(): boolean {
     const userRole = JSON.parse(localStorage.getItem('userRole') || '{}').data;
-    console.log('userRole', userRole);
     return userRole ? userRole.name === 'user-admin' : false;
   }
 

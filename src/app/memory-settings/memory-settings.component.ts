@@ -296,7 +296,7 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
 
       // Si este nivel se va a activar, desactivar todos los demás niveles del mismo grado primero en la DB
       if (configToSave.isActive) {
-        console.log(`[MemorySettingsComponent] Iniciando desactivación de otros niveles del mismo grado. Nivel activo: ${configToSave.level_name}`);
+        console.log(`[MemorySettingsComponent] Iniciando desactivación de otros niveles del mismo grado. Nivel activo: ${configToSave.level_name} (ID: ${configToSave.level})`);
         
         // Obtener el grado actual del usuario
         const grade = JSON.parse(localStorage.getItem('gradeFilter') || '{}').data?.[0]?.id || '';
@@ -305,20 +305,27 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
         if (!grade) {
           console.warn(`[MemorySettingsComponent] No se pudo obtener el grado actual. No se desactivarán otros niveles.`);
         } else {
-          // Obtener todas las configuraciones existentes de Directus
-          const allConfigsResponse = await this.memoryService.getAllMemoryConfigs().toPromise();
-          const allConfigs: MemoryConfig[] = allConfigsResponse?.data || [];
+          // Obtener todas las configuraciones del mismo grado directamente desde la base de datos
+          const isAdmin = this.authService.isAdmin();
+          const gradeFilter = isAdmin ? '' : `&filter[grade][_eq]=${grade}`;
+          const url = `http://localhost:8055/items/memory?fields=*,id${gradeFilter}`;
           
-          console.log(`[MemorySettingsComponent] Todas las configuraciones del grado ${grade}:`, allConfigs);
+          const response = await fetch(url);
+          const data = await response.json();
+          const allConfigs: MemoryConfig[] = data.data || [];
+          
+          console.log(`[MemorySettingsComponent] Configuraciones obtenidas directamente de Directus:`, allConfigs);
+          console.log(`[MemorySettingsComponent] Grado a filtrar: ${grade}`);
           
           // Filtrar solo las configuraciones del mismo grado que están activas y no son el nivel actual
           const configsToDeactivate = allConfigs.filter((config: MemoryConfig) => {
             const isSameGrade = config.grade === grade;
             const isActive = config.isActive;
-            const isNotCurrentLevel = config.level_name !== configToSave.level_name;
+            const isNotCurrentLevel = config.level !== configToSave.level;
             
-            console.log(`[MemorySettingsComponent] Evaluando configuración:`, {
+            console.log(`[MemorySettingsComponent] Evaluando configuración desde DB:`, {
               level_name: config.level_name,
+              level_id: config.level,
               grade: config.grade,
               isActive: config.isActive,
               isSameGrade,
@@ -331,6 +338,7 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
           });
           
           console.log(`[MemorySettingsComponent] Configuraciones a desactivar:`, configsToDeactivate);
+          console.log(`[MemorySettingsComponent] Total de niveles activos en DB del grado ${grade}: ${allConfigs.filter(c => c.isActive).length}`);
           
           // Desactivar cada configuración encontrada
           const deactivationPromises = configsToDeactivate.map(async (config: MemoryConfig) => {

@@ -1,46 +1,72 @@
-import { Component, Inject, HostListener } from '@angular/core';
+import { Component, Inject, HostListener, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { FormBuilder, FormGroup, Validators, AbstractControl, ValidatorFn } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  AbstractControl,
+  ValidatorFn,
+} from '@angular/forms';
+import { TeacherService } from '../teacher.service';
+import { UserService } from '../user.service';
 
 @Component({
   selector: 'app-edit-user-form',
   templateUrl: './edit-user-form.component.html',
-  styleUrls: ['./edit-user-form.component.css']
+  styleUrls: ['./edit-user-form.component.css'],
 })
-export class EditUserFormComponent {
+export class EditUserFormComponent implements OnInit {
   studentForm: FormGroup;
+  sections: any[] = [];
 
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<EditUserFormComponent>,
+    private teacherService: TeacherService,
+    private userService: UserService,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
+    // Acceder a los datos del estudiante correctamente
+    // Soporta tanto data.student como data directo para mayor flexibilidad
+    const student = data.student || data;
+
     this.studentForm = this.fb.group({
-      id: [data.id],
-      name: [data.name || '', [Validators.required, this.lettersOnlyValidator()]],
-      lastname: [data.lastname || '', [Validators.required, this.lettersOnlyValidator()]],
-      score: [data.score ?? 0, [Validators.required, Validators.min(0), Validators.max(100)]],
-      section: [data.section || '', [Validators.required, this.sectionABValidator()]]
+      id: [student.id],
+      name: [
+        student.name || '',
+        [Validators.required, this.lettersOnlyValidator()],
+      ],
+      lastname: [
+        student.lastname || '',
+        [Validators.required, this.lettersOnlyValidator()],
+      ],
+      score: [
+        student.score ?? 0,
+        [Validators.required, Validators.min(0), Validators.max(100)],
+      ],
+      section: [student.section.id || '', [Validators.required]],
     });
   }
 
-  // Validador para permitir solo 'A' o 'B'
-  sectionABValidator(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any } | null => {
-      const value = control.value;
+  ngOnInit() {
+    this.loadSections();
+  }
 
-      if (value === null || value === undefined || value === '') {
-        return null;
-      }
-
-      const isValidChar = (value.toLowerCase() === 'a' || value.toLowerCase() === 'b');
-
-      if (isValidChar && value.length === 1) {
-        return null;
-      } else {
-        return { 'invalidSectionAB': { value: value } };
-      }
-    };
+  loadSections() {
+    this.teacherService.getSections().subscribe({
+      next: (response) => {
+        this.sections = response.data || [];
+        console.log('Secciones cargadas:', this.sections);
+      },
+      error: (error) => {
+        console.error('Error al cargar secciones:', error);
+        // Fallback con las secciones por defecto
+        this.sections = [
+          { id: 'A', name: 'A' },
+          { id: 'B', name: 'B' },
+        ];
+      },
+    });
   }
 
   // Validador para permitir solo letras y convertir a minúsculas
@@ -51,11 +77,11 @@ export class EditUserFormComponent {
         return null;
       }
       // permite solo letras y asegura que sean minúsculas
-      const onlyLowercaseLetters = /^[a-záéíóúñü]*$/;
+      const onlyLowercaseLetters = /^[A-Za-záéíóúñü]*$/;
       if (onlyLowercaseLetters.test(value)) {
         return null;
       } else {
-        return { 'lettersOnly': { value: value } };
+        return { lettersOnly: { value: value } };
       }
     };
   }
@@ -66,29 +92,16 @@ export class EditUserFormComponent {
     const target = event.target as HTMLInputElement;
     const formControlName = target.id; // Obtener el nombre del control del formulario
 
-    if (formControlName === 'section') {
-      let value = target.value;
-
-      if (value.length > 1) {
-        value = value.charAt(0);
-      }
-
-      if (value !== '' && value.toLowerCase() !== 'a' && value.toLowerCase() !== 'b') {
-        value = '';
-      }
-
-      if (this.studentForm.get('section')?.value !== value) {
-        this.studentForm.get('section')?.setValue(value, { emitEvent: false });
-        this.studentForm.get('section')?.updateValueAndValidity();
-      }
-    } else if (formControlName === 'name' || formControlName === 'lastname') {
+    if (formControlName === 'name' || formControlName === 'lastname') {
       let value = target.value;
 
       // Convertir a minúsculas y remover caracteres no permitidos
       const cleanedValue = value.toLowerCase().replace(/[^a-záéíóúñü]/g, '');
 
       if (this.studentForm.get(formControlName)?.value !== cleanedValue) {
-        this.studentForm.get(formControlName)?.setValue(cleanedValue, { emitEvent: false });
+        this.studentForm
+          .get(formControlName)
+          ?.setValue(cleanedValue, { emitEvent: false });
         this.studentForm.get(formControlName)?.updateValueAndValidity();
       }
     }
@@ -97,14 +110,16 @@ export class EditUserFormComponent {
   guardarCambios() {
     this.studentForm.markAllAsTouched();
     if (this.studentForm.valid) {
-      const formValue = this.studentForm.value;
-
-      // Estandarizar la sección a mayúsculas
-      if (formValue.section) {
-        formValue.section = formValue.section.toUpperCase();
-      }
-
-      this.dialogRef.close(formValue);
+      this.userService
+        .updateStudent(this.studentForm.value.id, this.studentForm.value)
+        .subscribe({
+          next: (response) => {
+            console.log('Estudiante actualizado:', response);
+            const formValue = this.studentForm.value;
+            window.location.reload(); // Recargar la página para reflejar los cambios
+            this.dialogRef.close(formValue);
+          },
+        });
     }
   }
 

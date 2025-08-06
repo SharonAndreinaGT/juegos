@@ -76,6 +76,9 @@
             Volver a intentar
           </button>
           <button *ngIf="isComplete" (click)="resetGame()">
+            Siguiente Nivel
+          </button>
+          <button *ngIf="isComplete" (click)="restartCurrentLevel()">
             Jugar de nuevo
           </button>
           <button *ngIf="isComplete" (click)="options()">

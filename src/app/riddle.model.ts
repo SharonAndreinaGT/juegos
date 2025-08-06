@@ -15,6 +15,8 @@ export interface RiddleLevel {
   words: RiddleWord[]; // Array de palabras disponibles para este nivel, incluyendo sus pistas.
   isActive: boolean;
   time_limit?: number;
+  grade?: string;
+  level?: string;
 }
 
 export interface RiddleResult {

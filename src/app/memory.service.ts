@@ -11,12 +11,13 @@ export class MemoryService {
   private apiUrl = 'http://localhost:8055/items/memory';    
   private directusFilesUrl = 'http://localhost:8055/files';
   private memoryResultsApiUrl = 'http://localhost:8055/items/memory_results';
+  private grade = JSON.parse(localStorage.getItem('gradeFilter') || '{}').data ? JSON.parse(localStorage.getItem('gradeFilter') || '{}').data[0].id : '';
 
   constructor(private http: HttpClient) { }
 
   // Obtiene la configuración del juego de memoria por el nombre del nivel
-  getMemoryConfigByLevel(levelName: string): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}?filter[level_name][_eq]=${levelName}&fields=*,id`);
+  getMemoryConfigByLevel(level: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}?filter[level][_eq]=${level}&filter[grade][_eq]=${this.grade}&fields=*,id`);
   }
 
   // Obtiene la configuración activa del juego de memoria (isActive: true)
@@ -34,6 +35,7 @@ export class MemoryService {
     if (config.id) {
       // Actualizar configuración existente
       console.log(`[MemoryService] Actualizando configuración de memoria con ID: ${config.id}`, config);
+      config.grade = this.grade;
       return this.http.patch<MemoryConfig>(`${this.apiUrl}/${config.id}`, config).pipe(
         map(response => response)
       );

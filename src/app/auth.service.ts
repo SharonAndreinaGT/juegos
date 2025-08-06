@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, map, Observable } from 'rxjs';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
-  private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
+  public isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
   constructor(private router: Router, private http: HttpClient) {
@@ -23,6 +23,11 @@ export class AuthService {
     return !!token;
   }
 
+  isAdmin(): boolean {
+    const userRole = JSON.parse(localStorage.getItem('userRole') || '{}').data;
+    return userRole ? userRole.name === 'user-admin' : false;
+  }
+
   /**
    * Verifica el estado de autenticación y actualiza el BehaviorSubject
    */
@@ -36,7 +41,7 @@ export class AuthService {
    */
   login(email: string, password: string): Observable<any> {
     const data = { email, password };
-    
+
     return this.http.post('http://localhost:8055/auth/login', data);
   }
 
@@ -46,6 +51,24 @@ export class AuthService {
   setToken(token: string): void {
     localStorage.setItem('token', token);
     this.isAuthenticatedSubject.next(true);
+  }
+
+  /**
+   * Obtener rol del usuario que está autenticando
+   */
+  getUserRole(roleId: string): Observable<any> {
+    const token = this.getToken();
+    if (!token) {
+      return new Observable((observer) => {
+        observer.next({ name: 'guest' });
+        observer.complete();
+      });
+    }
+
+    // Aquí puedes hacer una petición al servidor para obtener el rol del usuario
+    return this.http.get<any>(`http://localhost:8055/roles/${roleId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
   }
 
   /**
@@ -70,7 +93,7 @@ export class AuthService {
   verifyToken(): Observable<boolean> {
     const token = this.getToken();
     if (!token) {
-      return new Observable(observer => {
+      return new Observable((observer) => {
         observer.next(false);
         observer.complete();
       });
@@ -78,9 +101,9 @@ export class AuthService {
 
     // Aquí puedes hacer una petición al servidor para verificar el token
     // Por ahora, solo verificamos que existe
-    return new Observable(observer => {
+    return new Observable((observer) => {
       observer.next(true);
       observer.complete();
     });
   }
-} 
+}

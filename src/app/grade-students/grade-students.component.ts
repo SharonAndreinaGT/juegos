@@ -7,11 +7,12 @@ import { EditUserFormComponent } from '../edit-user-form/edit-user-form.componen
 import { UserService } from '../user.service';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-grade-students',
   templateUrl: './grade-students.component.html',
-  styleUrls: ['./grade-students.component.css']
+  styleUrls: ['./grade-students.component.css'],
 })
 export class GradeStudentsComponent implements OnInit {
   students: any[] = [];
@@ -19,8 +20,10 @@ export class GradeStudentsComponent implements OnInit {
   selectedSection: string = '';
   availableSections: string[] = [];
   searchTerm: string = '';
-  gradeTitle: string = '';
+  gradeTitle: string = 'Grado: Desconocido';
   dataSource = new MatTableDataSource<any>([]);
+
+  isAdmin: boolean = false;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -28,15 +31,19 @@ export class GradeStudentsComponent implements OnInit {
     private route: ActivatedRoute,
     private dialog: MatDialog,
     private userService: UserService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
-    this.route.data.subscribe(data => {
-      const grade = data['gradeFilter'];
+    this.isAdmin = this.authService.isAdmin();
+
+    this.route.data.subscribe((data) => {
+      const isAdmin = this.authService.isAdmin();
+      const grade = isAdmin ? null : data['gradeFilter'];
       this.loadStudents(grade);
-      this.setGradeTitle(grade);
-    });
+      this.gradeTitle = isAdmin ? 'Todos los estudiantes' : (data['gradeTitle'] || this.gradeTitle);
+  });
   }
 
   ngAfterViewInit() {
@@ -55,31 +62,15 @@ export class GradeStudentsComponent implements OnInit {
       (error: any) => {
         console.error('Error loading students:', error);
         this.snackBar.open('Error al cargar estudiantes', 'Cerrar', {
-          duration: 3000
+          duration: 3000,
         });
       }
     );
   }
 
-  setGradeTitle(grade: string) {
-    switch(grade) {
-      case 'first':
-        this.gradeTitle = 'Primer Grado';
-        break;
-      case 'second':
-        this.gradeTitle = 'Segundo Grado';
-        break;
-      case 'third':
-        this.gradeTitle = 'Tercer Grado';
-        break;
-      default:
-        this.gradeTitle = 'Grado';
-    }
-  }
-
   extractAvailableSections() {
     const sections = new Set<string>();
-    this.allStudents.forEach(student => {
+    this.allStudents.forEach((student) => {
       if (student.section) {
         sections.add(student.section);
       }
@@ -97,19 +88,21 @@ export class GradeStudentsComponent implements OnInit {
 
   applyFilters(): void {
     let filteredStudents = [...this.allStudents];
-    
     if (this.selectedSection) {
-      filteredStudents = filteredStudents.filter(s => s.section === this.selectedSection);
-    }
-    
-    if (this.searchTerm.trim()) {
-      const searchLower = this.searchTerm.toLowerCase().trim();
-      filteredStudents = filteredStudents.filter(s =>
-        s.name?.toLowerCase().includes(searchLower) ||
-        s.lastname?.toLowerCase().includes(searchLower)
+      filteredStudents = filteredStudents.filter(
+        (s) => s.section === this.selectedSection
       );
     }
-    
+
+    if (this.searchTerm.trim()) {
+      const searchLower = this.searchTerm.toLowerCase().trim();
+      filteredStudents = filteredStudents.filter(
+        (s) =>
+          s.name?.toLowerCase().includes(searchLower) ||
+          s.lastname?.toLowerCase().includes(searchLower)
+      );
+    }
+
     this.dataSource.data = filteredStudents;
     if (this.dataSource.paginator) {
       this.dataSource.paginator.firstPage();
@@ -119,14 +112,14 @@ export class GradeStudentsComponent implements OnInit {
   newStudent() {
     const dialogRef = this.dialog.open(CreateUserFormComponent, {
       width: '400px',
-      data: { grade: this.route.snapshot.params['grade'] }
+      data: { grade: this.route.snapshot.params['grade'] },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.loadStudents(this.route.snapshot.params['grade']);
         this.snackBar.open('Estudiante registrado exitosamente', 'Cerrar', {
-          duration: 3000
+          duration: 3000,
         });
       }
     });
@@ -135,14 +128,14 @@ export class GradeStudentsComponent implements OnInit {
   editUser(student: any) {
     const dialogRef = this.dialog.open(EditUserFormComponent, {
       width: '400px',
-      data: { student: student }
+      data: { student: student },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.loadStudents(this.route.snapshot.params['grade']);
         this.snackBar.open('Estudiante actualizado exitosamente', 'Cerrar', {
-          duration: 3000
+          duration: 3000,
         });
       }
     });

@@ -33,10 +33,10 @@ export class SharedDataService {
    * Establece el nivel de rompecabezas actual que está activo para los estudiantes.
    * @param levelName El nombre del nivel a establecer como activo.
    */
-  setCurrentPuzzleLevel(levelName: string): void {
-    this.currentPuzzleLevelSubject.next(levelName);
-    localStorage.setItem('currentPuzzleLevel', levelName);
-    console.log(`[SharedDataService] Nivel de rompecabezas activo establecido a: ${levelName}`);
+  setCurrentPuzzleLevel(level: string): void {
+    this.currentPuzzleLevelSubject.next(level);
+    localStorage.setItem('currentPuzzleLevel', level);
+    console.log(`[SharedDataService] Nivel de rompecabezas activo establecido a: ${level}`);
   }
 
   /**

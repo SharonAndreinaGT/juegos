@@ -2,8 +2,8 @@
   <mat-card class="welcome-container">
     <mat-card-content>
       <div class="welcome-content">
-        <h2>Progreso General</h2>
-        <button mat-raised-button color="primary" (click)="generateReportPdf()" class="generate-pdf-button">
+        <h2>{{ gradeTitle }}</h2>
+        <button mat-raised-button color="primary" (click)="generateReportPdf()" class="generate-pdf-button" *ngIf="isAdmin()">
           <mat-icon>picture_as_pdf</mat-icon>
           Generar Reporte
         </button>

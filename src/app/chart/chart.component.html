@@ -2,8 +2,8 @@
   <ng-container>
     <div class="welcome-container">
       <div class="welcome-content">
-        <h2>Gráficas del Progreso</h2>
-        <button mat-raised-button color="primary" (click)="generateChartsPdf()" class="generate-pdf-button">
+        <h2>{{ gradeTitle }}</h2>
+        <button mat-raised-button color="primary" (click)="generateChartsPdf()" class="generate-pdf-button" *ngIf="isAdmin()">
           <mat-icon>picture_as_pdf</mat-icon>
           Generar Reporte de Gráficas
         </button>
@@ -79,6 +79,7 @@
         </mat-card>
       </div>
 
+      <!-- Gráficas -->
       <div class="dashboard-grid">
         <mat-card class="chart-card">
           <mat-card-content>

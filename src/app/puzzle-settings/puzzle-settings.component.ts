@@ -16,9 +16,9 @@ export class PuzzleSettingsComponent implements OnInit {
 
   // Modelos para la configuración de cada nivel.
   // Inicializamos con valores por defecto y agregamos 'isActive'.
-  level1Config: PuzzleConfig = { level_name: 'Nivel1', rows: 2, cols: 2, time_limit: 180, isActive: false };
-  level2Config: PuzzleConfig = { level_name: 'Nivel2', rows: 3, cols: 3, time_limit: 120, isActive: false };
-  level3Config: PuzzleConfig = { level_name: 'Nivel3', rows: 4, cols: 4, time_limit: 90, isActive: false };
+  level1Config: PuzzleConfig = { level_name: 'Nivel1', rows: 2, cols: 2, time_limit: 180, isActive: false, level: '183770b3-0e66-4932-8769-b0c1b4738d79'   };
+  level2Config: PuzzleConfig = { level_name: 'Nivel2', rows: 3, cols: 3, time_limit: 120, isActive: false, level: '98fd8047-6897-4a86-85e2-f430e48956bd' };
+  level3Config: PuzzleConfig = { level_name: 'Nivel3', rows: 4, cols: 4, time_limit: 90, isActive: false, level: '3c16b66e-0fa4-4ecc-a9ae-41dd832f0bc1' };
 
   // Para previsualización de imágenes seleccionadas localmente
   level1ImagePreview: string | ArrayBuffer | null = null;
@@ -44,47 +44,47 @@ export class PuzzleSettingsComponent implements OnInit {
   }
 
   loadAllLevelConfigs(): void {
-    const levels = ['Nivel1', 'Nivel2', 'Nivel3'];
-    levels.forEach(levelName => this.loadLevelConfig(levelName));
+    const levelsIds = ['183770b3-0e66-4932-8769-b0c1b4738d79', '98fd8047-6897-4a86-85e2-f430e48956bd', '3c16b66e-0fa4-4ecc-a9ae-41dd832f0bc1'];
+    levelsIds.forEach((level, index) => this.loadLevelConfig(level));
   }
 
   /**
    * Carga la configuración de un nivel específico desde Directus.
-   * @param levelName El nombre del nivel a cargar.
+   * @param level El nombre del nivel a cargar.
    */
-  loadLevelConfig(levelName: string): void {
-    this.puzzleService.getPuzzleConfigByLevel(levelName).subscribe(
+  loadLevelConfig(level: string): void {
+    this.puzzleService.getPuzzleConfigByLevel(level).subscribe(
       (response: any) => {
         const configData: PuzzleConfig | undefined = response.data?.[0];
-        console.log(`[PuzzleSettingsComponent] Respuesta de Directus para ${levelName}:`, response);
-        console.log(`[PuzzleSettingsComponent] Datos de configuración procesados para ${levelName}:`, configData);
+        console.log(`[PuzzleSettingsComponent] Respuesta de Directus para ${level}:`, response);
+        console.log(`[PuzzleSettingsComponent] Datos de configuración procesados para ${level}:`, configData);
 
         if (configData) {
-          switch (levelName) {
-            case 'Nivel1':
+          switch (configData.level) {
+            case '183770b3-0e66-4932-8769-b0c1b4738d79':
               this.level1Config = { ...this.level1Config, ...configData };
               this.level1ImagePreview = configData.imageUrl ? this.puzzleService.getDirectusFileUrl(configData.imageUrl) : null;
               break;
-            case 'Nivel2':
+            case '98fd8047-6897-4a86-85e2-f430e48956bd':
               this.level2Config = { ...this.level2Config, ...configData };
               this.level2ImagePreview = configData.imageUrl ? this.puzzleService.getDirectusFileUrl(configData.imageUrl) : null;
               break;
-            case 'Nivel3':
+            case '3c16b66e-0fa4-4ecc-a9ae-41dd832f0bc1':
               this.level3Config = { ...this.level3Config, ...configData };
               this.level3ImagePreview = configData.imageUrl ? this.puzzleService.getDirectusFileUrl(configData.imageUrl) : null;
               break;
           }
-          console.log(`[PuzzleSettingsComponent] Configuración de ${levelName} cargada:`, configData);
+          console.log(`[PuzzleSettingsComponent] Configuración de ${level} cargada:`, configData);
 
           if (configData.isActive) {
-            this.sharedDataService.setCurrentPuzzleLevel(configData.level_name!);
+            this.sharedDataService.setCurrentPuzzleLevel(configData.level!);
           }
         } else {
-          console.log(`[PuzzleSettingsComponent] No se encontró configuración para ${levelName}. Se usarán valores por defecto.`);
+          console.log(`[PuzzleSettingsComponent] No se encontró configuración para ${level}. Se usarán valores por defecto.`);
         }
       },
       (error) => {
-        console.error(`[PuzzleSettingsComponent] Error al cargar la configuración de ${levelName}:`, error);
+        console.error(`[PuzzleSettingsComponent] Error al cargar la configuración de ${level}:`, error);
       }
     );
   }

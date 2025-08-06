@@ -15,10 +15,6 @@
           <mat-tab-group dynamicHeight>
             <mat-tab label="Nivel 1">
               <h2 class="h2">Fácil</h2>
-              <mat-slide-toggle [checked]="level1Config.isActive"
-                (change)="onLevelActiveChange('level1', $event.checked)" class="level-toggle">
-                Nivel Activo
-              </mat-slide-toggle>
 
               <div class="tab-content-form">
                 <div class="form-column">
@@ -70,10 +66,6 @@
 
             <mat-tab label="Nivel 2">
               <h2 class="h2">Medio</h2>
-              <mat-slide-toggle [checked]="level2Config.isActive"
-                (change)="onLevelActiveChange('level2', $event.checked)" class="level-toggle">
-                Nivel Activo
-              </mat-slide-toggle>
               <div class="tab-content-form">
                 <div class="form-column">
                   <div class="form-group">
@@ -124,10 +116,6 @@
 
             <mat-tab label="Nivel 3">
               <h2 class="h2">Difícil</h2>
-              <mat-slide-toggle [checked]="level3Config.isActive"
-                (change)="onLevelActiveChange('level3', $event.checked)" class="level-toggle">
-                Nivel Activo
-              </mat-slide-toggle>
               <div class="tab-content-form">
                 <div class="form-column" >
                   <div class="form-group">

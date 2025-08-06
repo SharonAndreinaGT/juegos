@@ -6,10 +6,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 @Component({
   selector: 'app-sidebar',
   templateUrl: './sidebar.component.html',
-  styleUrls: ['./sidebar.component.css']
+  styleUrls: ['./sidebar.component.css'],
 })
 export class SidebarComponent {
-
   constructor(
     private authService: AuthService,
     private exportService: DataExportService,
@@ -24,7 +23,11 @@ export class SidebarComponent {
     this.exportService.exportAllCollectionsAsZIP();
     this.snackBar.open('Exportando base de datos completa...', 'Cerrar', {
       duration: 4000,
-      panelClass: ['snackbar-success']
+      panelClass: ['snackbar-success'],
     });
   }
-} 
+
+  isAdmin() {
+    return this.authService.isAdmin();
+  }
+}

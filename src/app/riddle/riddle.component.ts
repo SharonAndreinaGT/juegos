@@ -49,7 +49,9 @@ export class RiddleComponent implements OnInit, OnDestroy, CanComponentDeactivat
     words_level: 0,
     words: [],
     isActive: false,
-    time_limit: 0
+    time_limit: 0,
+    grade: '',
+    level: ''
   };
 
   private levelsSubscription!: Subscription;

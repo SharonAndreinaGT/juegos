@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { PuzzleConfig, PuzzleResult } from './puzzle-config.model';
-
+import { AuthService } from './auth.service';
 @Injectable({
   providedIn: 'root'
 })
@@ -18,17 +18,29 @@ export class PuzzleService {
   // URL base de Directus (útil para construir otras URLs)
   private directusBaseUrl = 'http://localhost:8055';
 
+  
+  private grade = JSON.parse(localStorage.getItem('gradeFilter') || '{}').data ? JSON.parse(localStorage.getItem('gradeFilter') || '{}').data[0].id : '';
 
-  constructor(private http: HttpClient) {}
+
+  constructor(private http: HttpClient, private authService: AuthService) {}
 
   /**
    * Obtiene la configuración del rompecabezas por el nombre del nivel.
-   * @param levelName El nombre del nivel (ej. "Nivel1").
+   * @param level El nombre del nivel (ej. "Nivel1").
    * @returns Un Observable que emite la respuesta de Directus (que contiene un array de PuzzleConfig en `data`).
    */
-  getPuzzleConfigByLevel(levelName: string): Observable<any> {
+  getPuzzleConfigByLevel(level: string): Observable<any> {
     // Directus usa el filtro `_eq` para igualdad. Se solicita el ID también.
-    return this.http.get<any>(`${this.apiUrl}?filter[level_name][_eq]=${(levelName)}&fields=*,id`);
+    return this.http.get<any>(`${this.apiUrl}?filter[level][_eq]=${level}&filter[grade][_eq]=${this.grade}&fields=*,id`);
+  }
+
+  getPuzzleConfigByLevelStudent(level: string): Observable<any> {
+    // Directus usa el filtro `_eq` para igualdad. Se solicita el ID también.
+
+    const grade = localStorage.getItem('gradeStudent') || '';
+    console.log('haaaaaa',grade);
+
+    return this.http.get<any>(`${this.apiUrl}?filter[level][_eq]=${level}&filter[grade][_eq]=${grade}&fields=*,id`);
   }
 
   /**
@@ -58,6 +70,7 @@ export class PuzzleService {
       );
     } else {
       // Crear nueva configuración
+      config.grade = this.grade;
       console.log('[PuzzleService] Creando nueva configuración:', config);
       return this.http.post<any>(this.apiUrl, config).pipe(
         map(response => response.data)
@@ -167,5 +180,9 @@ export class PuzzleService {
     return this.http.get<any>(`${this.directusBaseUrl}/items/${this.puzzleResultsCollection}?fields=score,created_at&limit=-1`).pipe(
       map(response => (response.data || []).map((item: any) => ({ score: item.score, created_at: item.created_at })))
     );
+  }
+
+   isAdmin() {
+    return this.authService.isAdmin();
   }
 }

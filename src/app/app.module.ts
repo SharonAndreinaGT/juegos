@@ -25,6 +25,8 @@ import { MemoryCardComponent } from './memory-card/memory-card.component';
 import { ChartComponent } from './chart/chart.component';
 import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
 import { SidebarComponent } from './shared/sidebar/sidebar.component';
+import { AdminComponent } from './admin/admin.component';
+import { EditUserDialogComponent } from './admin/edit-user-dialog/edit-user-dialog.component';
 
 
 //importaciones de angular material
@@ -33,6 +35,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { MatCardModule } from '@angular/material/card';
@@ -54,6 +57,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { NgChartsModule } from 'ng2-charts';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSelectModule } from '@angular/material/select';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AuthInterceptor } from './auth.interceptor';
 
@@ -80,7 +84,9 @@ import { AuthInterceptor } from './auth.interceptor';
       MemoryCardComponent,
       ChartComponent,
       UnauthorizedComponent,
-      SidebarComponent
+      SidebarComponent,
+      AdminComponent,
+      EditUserDialogComponent
     ],
     imports: [
       BrowserModule,
@@ -90,6 +96,7 @@ import { AuthInterceptor } from './auth.interceptor';
       MatListModule,
       MatToolbarModule,
       MatIconModule,
+      MatTooltipModule,
       BrowserAnimationsModule,
       MatCardModule,
       MatDialogModule,
@@ -111,6 +118,7 @@ import { AuthInterceptor } from './auth.interceptor';
       NgChartsModule,
       MatProgressSpinnerModule,
       MatSnackBarModule,
+      MatSelectModule,
       HttpClientModule
     ],
     providers: [

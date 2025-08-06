@@ -96,6 +96,10 @@ export class ProgressComponent implements OnInit, AfterViewInit {
   errorMemoryResults: string | null = null;
   errorRiddleResults: string | null = null;
 
+  // Propiedades para el filtrado por grado
+  currentGrade: string = '';
+  gradeTitle: string = 'Progreso General';
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild('memoryPaginator') memoryPaginator!: MatPaginator;
   @ViewChild('riddlePaginator') riddlePaginator!: MatPaginator;
@@ -123,9 +127,7 @@ export class ProgressComponent implements OnInit, AfterViewInit {
   ) { }
 
   ngOnInit(): void {
-    this.loadAllStudentsProgress();
-    this.loadAllStudentsMemoryResults();
-    this.loadAllStudentsRiddleResults();
+    this.getCurrentGrade();
   }
 
   ngAfterViewInit(): void {
@@ -143,17 +145,72 @@ export class ProgressComponent implements OnInit, AfterViewInit {
     });
   }
 
+  // Método para obtener el grado actual del usuario autenticado
+private getCurrentGrade(): void {
+  try {
+    const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')[0];
+
+    // Si es admin, no se filtra por grado (muestra todos los estudiantes)
+    if (this.authService.isAdmin()) {
+      this.currentGrade = ''; // Esto hará que se usen getUsers() en lugar de getUsersByGrade()
+    } else {
+      this.currentGrade = userInfo?.grade || '';
+    }
+
+    this.updateGradeTitle();
+    this.loadAllStudentsProgress();
+    this.loadAllStudentsMemoryResults();
+    this.loadAllStudentsRiddleResults();
+  } catch (error) {
+    console.error('Error al obtener el grado del usuario:', error);
+    this.currentGrade = '';
+    this.loadAllStudentsProgress();
+    this.loadAllStudentsMemoryResults();
+    this.loadAllStudentsRiddleResults();
+  }
+}
+
+  // Método para actualizar el título según el grado
+private updateGradeTitle(): void {
+  if (this.authService.isAdmin()) {
+    this.gradeTitle = 'Progreso General (Administrador)';
+    return;
+  }
+
+  switch (this.currentGrade) {
+    case 'first':
+      this.gradeTitle = 'Progreso - Primer Grado';
+      break;
+    case 'second':
+      this.gradeTitle = 'Progreso - Segundo Grado';
+      break;
+    case 'third':
+      this.gradeTitle = 'Progreso - Tercer Grado';
+      break;
+    default:
+      this.gradeTitle = 'Progreso General';
+      break;
+  }
+}
 
   loadAllStudentsProgress(): void {
     this.loading = true;
     this.error = null;
 
-    this.userService.getUsers().pipe(
+    // Usar getUsersByGrade si hay un grado específico, sino usar getUsers
+    console.log('dato:', this.currentGrade)
+    const usersObservable = this.currentGrade 
+      ? this.userService.getUsersByGrade(this.currentGrade)
+      : this.userService.getUsers();
+
+    usersObservable.pipe(
       map(response => response.data as User[]),
       switchMap(users => {
         if (!users || users.length === 0) {
           this.loading = false;
-          this.error = 'No se encontraron estudiantes.';
+          this.error = this.currentGrade 
+            ? `No se encontraron estudiantes en ${this.gradeTitle}.`
+            : 'No se encontraron estudiantes.';
           return of([]);
         }
 
@@ -206,12 +263,19 @@ export class ProgressComponent implements OnInit, AfterViewInit {
     this.loadingMemoryResults = true;
     this.errorMemoryResults = null;
 
-    this.userService.getUsers().pipe(
+    // Usar getUsersByGrade si hay un grado específico, sino usar getUsers
+    const usersObservable = this.currentGrade 
+      ? this.userService.getUsersByGrade(this.currentGrade)
+      : this.userService.getUsers();
+
+    usersObservable.pipe(
       map(response => response.data as User[]),
       switchMap(users => {
         if (!users || users.length === 0) {
           this.loadingMemoryResults = false;
-          this.errorMemoryResults = 'No se encontraron estudiantes para los resultados de memoria.';
+          this.errorMemoryResults = this.currentGrade 
+            ? `No se encontraron estudiantes en ${this.gradeTitle} para los resultados de memoria.`
+            : 'No se encontraron estudiantes para los resultados de memoria.';
           return of([]);
         }
 
@@ -287,12 +351,19 @@ export class ProgressComponent implements OnInit, AfterViewInit {
     this.loadingRiddleResults = true;
     this.errorRiddleResults = null;
 
-    this.userService.getUsers().pipe(
+    // Usar getUsersByGrade si hay un grado específico, sino usar getUsers
+    const usersObservable = this.currentGrade 
+      ? this.userService.getUsersByGrade(this.currentGrade)
+      : this.userService.getUsers();
+
+    usersObservable.pipe(
       map(response => response.data as User[]),
       switchMap(users => {
         if (!users || users.length === 0) {
           this.loadingRiddleResults = false;
-          this.errorRiddleResults = 'No se encontraron estudiantes para los resultados de "Adivina la Palabra Oculta".';
+          this.errorRiddleResults = this.currentGrade 
+            ? `No se encontraron estudiantes en ${this.gradeTitle} para los resultados de "Adivina la Palabra Oculta".`
+            : 'No se encontraron estudiantes para los resultados de "Adivina la Palabra Oculta".';
           return of([]);
         }
 
@@ -378,7 +449,7 @@ export class ProgressComponent implements OnInit, AfterViewInit {
 
     // --- Título del Reporte (en la primera página) ---
     doc.setFontSize(18);
-    doc.text('Reporte de Progreso General de Estudiantes', 14, yOffset);
+    doc.text(`Reporte de ${this.gradeTitle}`, 14, yOffset);
     yOffset += 10;
     doc.setFontSize(12);
     doc.text(`Fecha de Emisión: ${new Date().toLocaleDateString()}`, 14, yOffset);
@@ -499,7 +570,10 @@ export class ProgressComponent implements OnInit, AfterViewInit {
     });
 
     // Guardar el PDF
-    doc.save('reporte_progreso_general.pdf');
+    const fileName = this.currentGrade 
+      ? `reporte_progreso_${this.currentGrade}_grado.pdf`
+      : 'reporte_progreso_general.pdf';
+    doc.save(fileName);
   }
 
   logout() {
@@ -653,5 +727,10 @@ export class ProgressComponent implements OnInit, AfterViewInit {
     if (!results || results.length === 0) return 0;
     const sum = results.reduce((acc: number, r: any) => acc + (r[field] || 0), 0);
     return sum / results.length;
+  }
+
+  //Con este metodo solo podrá acceder a distintas funcionalidades solo si es administrador
+  isAdmin() {
+    return this.authService.isAdmin();
   }
 }

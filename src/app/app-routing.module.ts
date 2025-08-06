@@ -16,9 +16,28 @@ import { RiddleSettingsComponent } from './riddle-settings/riddle-settings.compo
 import { ProgressComponent } from './progress/progress.component';
 import { ChartComponent } from './chart/chart.component';
 import { AuthGuard } from './auth.guard';
+import { AdminGuard } from './admin.guard';
 import { StudentAuthGuard } from './student-auth.guard';
 import { NavigationGuardService } from './navigation-guard.service';
 import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
+import { AdminComponent } from './admin/admin.component';
+
+const getGradeFilter = () => {
+  try {
+    const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')[0];
+    return userInfo.grade;
+  } catch {
+    return '';
+  }
+};
+
+const getGradeTitle = () => {
+  const gradeFilter = JSON.parse(localStorage.getItem('gradeFilter') || '{}');
+  const gradeData = Array.isArray(gradeFilter.data) ? gradeFilter.data[0] : undefined;
+  const grade = gradeData && gradeData.grade ? gradeData.grade : '';
+  console.log('Grade:', grade);
+  return grade;
+};
 
 //rutas de navegacion
 
@@ -28,30 +47,75 @@ const routes: Routes = [
   { path: 'loginID', component: LoginIDComponent },
   { path: 'login', component: LoginComponent },
   { path: 'unauthorized', component: UnauthorizedComponent },
-  
+
   // Rutas protegidas (requieren autenticación de administrador)
   { path: 'main', component: MainComponent, canActivate: [AuthGuard] },
-  
+  { path: 'admin', component: AdminComponent, canActivate: [AdminGuard] },
+
   // Rutas de estudiantes (no requieren autenticación de administrador)
-  { path: 'options', component: GamesOptionsComponent, canActivate: [StudentAuthGuard] },
-  { path: 'puzzle/:levelName', component: PuzzleComponent, canActivate: [StudentAuthGuard], canDeactivate: [NavigationGuardService] },
-  { path: 'memory', component: MemoryComponent, canActivate: [StudentAuthGuard], canDeactivate: [NavigationGuardService] },
-  { path: 'riddle', component: RiddleComponent, canActivate: [StudentAuthGuard], canDeactivate: [NavigationGuardService] },
-  { path: 'progress', component: ProgressComponent, canActivate: [AuthGuard] },
-  { path: 'chart', component: ChartComponent, canActivate: [AuthGuard] },
-  { path: 'firstGrade', component: GradeStudentsComponent, canActivate: [AuthGuard], data: { gradeTitle: 'Primer Grado', gradeFilter: 'first' }},
-  { path: 'secondGrade', component: GradeStudentsComponent, canActivate: [AuthGuard], data: { gradeTitle: 'Segundo Grado', gradeFilter: 'second' }},
-  { path: 'thirdGrade', component: GradeStudentsComponent, canActivate: [AuthGuard], data: { gradeTitle: 'Tercer Grado', gradeFilter: 'third' }},
-  { path: 'settings', component: GamesSettingsComponent, canActivate: [AuthGuard], data: { title: 'Configuración de Juegos'}},
-  { path: 'puzzleSettings', component: PuzzleSettingsComponent, canActivate: [AuthGuard], data: { title: 'Rompecabezas'}},
-  { path: 'memorySettings', component: MemorySettingsComponent, canActivate: [AuthGuard], data: { title: 'Memoria'}},
-  { path: 'riddleSettings', component: RiddleSettingsComponent, canActivate: [AuthGuard], data: { title: 'Adivina la Palabra Oculta'}},
+  {
+    path: 'options',
+    component: GamesOptionsComponent,
+    canActivate: [StudentAuthGuard],
+  },
+  {
+    path: 'puzzle/:levelName',
+    component: PuzzleComponent,
+    canActivate: [StudentAuthGuard],
+    canDeactivate: [NavigationGuardService, AuthGuard],
+  },
+  {
+    path: 'memory',
+    component: MemoryComponent,
+    canActivate: [StudentAuthGuard],
+    canDeactivate: [NavigationGuardService, AuthGuard],
+  },
+  {
+    path: 'riddle',
+    component: RiddleComponent,
+    canActivate: [StudentAuthGuard],
+    canDeactivate: [NavigationGuardService, AuthGuard],
+  },
+  { path: 'progress', component: ProgressComponent, canActivate: [] },
+  { path: 'chart', component: ChartComponent, canActivate: [] },
+  {
+    path: 'grade',
+    component: GradeStudentsComponent,
+    data: {
+      gradeTitle: `Grado: ${getGradeTitle()}`,
+      gradeFilter: getGradeFilter(),
+    },
+  },
+  {
+    path: 'settings',
+    component: GamesSettingsComponent,
+    canActivate: [],
+    data: { title: 'Configuración de Juegos' },
+  },
+  {
+    path: 'puzzleSettings',
+    component: PuzzleSettingsComponent,
+    canActivate: [],
+    data: { title: 'Rompecabezas' },
+  },
+  {
+    path: 'memorySettings',
+    component: MemorySettingsComponent,
+    canActivate: [],
+    data: { title: 'Memoria' },
+  },
+  {
+    path: 'riddleSettings',
+    component: RiddleSettingsComponent,
+    canActivate: [],
+    data: { title: 'Adivina la Palabra Oculta' },
+  },
 
   { path: '', redirectTo: 'welcome', pathMatch: 'full' },
 ];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}

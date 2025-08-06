@@ -44,7 +44,7 @@
               <tr *ngFor="let student of dataSource.connect() | async">
                 <td>{{ student.name }}</td>
                 <td>{{ student.lastname }}</td>
-                <td *ngIf="isAdmin">{{ student.grade }}</td>
+                <td *ngIf="isAdmin">{{ student.grade.grade }}</td>
                 <td>{{ student.section.section }}</td>
                 <td>
                   <button *ngIf="!isAdmin" class="btn btn-sm btn-icon" (click)="editUser(student)">

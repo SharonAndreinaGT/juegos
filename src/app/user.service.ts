@@ -20,7 +20,7 @@ export class UserService {
 
   // Obtener usuarios por grado
   getUsersByGrade(grade: string | null) {
-    const fields = '&fields=id,name,lastname,grade,score,section.id,section.section';
+    const fields = '&fields=id,name,lastname,grade,grade.grade,score,section.id,section.section';
     
     const url = grade
     ? `${this.apiUrl}?filter[grade][_eq]=${grade}${fields}`

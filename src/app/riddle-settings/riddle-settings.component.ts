@@ -48,6 +48,9 @@ export class RiddleSettingsComponent implements OnInit {
     const grade = JSON.parse(localStorage.getItem('gradeFilter') || '{}').data?.[0]?.id || '';
     console.log(`[RiddleSettingsComponent] Grado actual en ngOnInit: ${grade}`);
     
+    // Cargar niveles cuando se ejecuta el componente de configuración
+    this.riddleService.loadLevelsFromDirectus();
+    
     this.riddleService.levels$.subscribe((levels: RiddleLevel[]) => {
       if (levels && levels.length > 0) {
         this.level1Config = levels.find(lvl => lvl.level === '183770b3-0e66-4932-8769-b0c1b4738d79') || this.level1Config;

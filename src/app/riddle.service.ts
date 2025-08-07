@@ -29,15 +29,14 @@ export class RiddleService {
   private levelsSubject = new BehaviorSubject<RiddleLevel[]>([]);
   levels$: Observable<RiddleLevel[]> = this.levelsSubject.asObservable();
 
-  constructor(private http: HttpClient, private authService: AuthService) {
-    this.loadLevelsFromDirectus();
-  }
+  constructor(private http: HttpClient, private authService: AuthService) {}
 
   isAdmin() {
     return this.authService.isAdmin();
   }
 
-  private loadLevelsFromDirectus(): void {
+  loadLevelsFromDirectus(): void {
+    console.log('CARGANDOO AQUI', this.getGrade());
     const grade = this.getGrade();
     const isAdmin = this.isAdmin();
     const gradeFilter = isAdmin ? '' : `&filter[grade][_eq]=${grade}`;
@@ -137,6 +136,23 @@ export class RiddleService {
 
   getCurrentLevels(): RiddleLevel[] {
     return this.levelsSubject.value;
+  }
+
+  // Obtiene la configuración activa del juego de riddle para un grado específico
+  getActiveRiddleConfigByGrade(grade: string): Observable<any> {
+    console.log(`[RiddleService] Obteniendo riddle activo para grado: ${grade}`);
+    const url = `${this.directusUrl}?filter[grade][_eq]=${grade}&filter[isActive][_eq]=true&fields=id,max_intents,words_level,level.level,level.id,words,isActive,time_limit,grade,level,level.level`;
+    console.log(`[RiddleService] URL de consulta: ${url}`);
+    return this.http.get<any>(url).pipe(
+      map(response => {
+        console.log(`[RiddleService] Respuesta de riddle activo:`, response);
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error(`[RiddleService] Error al obtener riddle activo para grado ${grade}:`, error);
+        return of(null);
+      })
+    );
   }
 
   saveRiddleResult(result: RiddleResult): Observable<RiddleResult> {

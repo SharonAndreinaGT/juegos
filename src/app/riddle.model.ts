@@ -16,7 +16,7 @@ export interface RiddleLevel {
   isActive: boolean;
   time_limit?: number;
   grade?: string;
-  level?: string;
+  level?: any;
 }
 
 export interface RiddleResult {

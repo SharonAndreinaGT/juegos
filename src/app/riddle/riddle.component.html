@@ -19,9 +19,9 @@
         </div>
         
         <div class="status">
-          <p class="level-info">Nivel: <span>{{ activeLevelConfig.level_number }} - {{ activeLevelConfig.level_name }}</span></p>
+          <p class="level-info"><span>{{ currentLevel }}</span></p>
           <p class="intent-display">Intentos: <span>{{ maxIncorrectGuesses - incorrectGuesses }}</span></p>
-          <p class="word-progress">Palabra <span>{{ currentWordIndex + 1 }}</span> de <span>{{ activeLevelConfig.words_level }}</span></p>
+          <p class="word-progress">Palabra <span>{{ currentWordIndex + 1 }}</span> de <span>{{ words.length }}</span></p>
           <p *ngIf="gameStatus === 'playing' || gameStatus === 'time-up'" class="game-timer">
             Tiempo: <span> {{ formatTime(timeRemaining) }}</span> 
           </p>
@@ -29,11 +29,11 @@
       </div>
 
       <div class="riddle-wrapper">
-        <div *ngIf="activeLevelConfig.level_number === 3 && currentHintImage" class="hint-image-container">
+        <div *ngIf="activeLevelConfig.level.id === '3c16b66e-0fa4-4ecc-a9ae-41dd832f0bc1' && currentHintImage" class="hint-image-container">
           <img [src]="currentHintImage" alt="Pista de la palabra" class="word-hint-image">
         </div>
         
-        <p *ngIf="activeLevelConfig.level_number === 3 && currentHint" class="word-hint">
+        <p *ngIf="activeLevelConfig.level.id === '3c16b66e-0fa4-4ecc-a9ae-41dd832f0bc1' && currentHint" class="word-hint">
           Pista: {{ currentHint }}
         </p>
 

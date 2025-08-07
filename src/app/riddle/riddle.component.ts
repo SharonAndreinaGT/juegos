@@ -3,6 +3,7 @@ import { Component, OnInit, HostListener, OnDestroy, ViewChild, ElementRef } fro
 import { RiddleLevel, RiddleWord, RiddleResult } from '../riddle.model';
 import { RiddleService } from '../riddle.service';
 import { SharedDataService } from '../sharedData.service';
+import { StudentProgressService } from '../student-progress.service';
 import { Subscription, interval, Observable } from 'rxjs';
 import { Router } from '@angular/router';
 import { CanComponentDeactivate, NavigationGuardService } from '../navigation-guard.service';
@@ -53,6 +54,7 @@ export class RiddleComponent implements OnInit, OnDestroy, CanComponentDeactivat
     grade: '',
     level: ''
   };
+  currentLevel: any = ''; // Variable para el ID del nivel actual
 
   private levelsSubscription!: Subscription;
   private studentIdSubscription!: Subscription;
@@ -62,62 +64,104 @@ export class RiddleComponent implements OnInit, OnDestroy, CanComponentDeactivat
     private router: Router,
     private riddleService: RiddleService,
     private sharedDataService: SharedDataService,
-    private navigationGuardService: NavigationGuardService
+    private navigationGuardService: NavigationGuardService,
+    private studentProgressService: StudentProgressService
   ) { }
 
   ngOnInit(): void {
     this.studentIdSubscription = this.sharedDataService.loggedInStudentId$.subscribe((studentId: string | null) => {
       this.currentStudentId = studentId;
       console.log(`[RiddleComponent] ID de estudiante obtenido del servicio compartido: ${this.currentStudentId}`);
+      
+      if (studentId) {
+        // Cargar o inicializar progreso del estudiante
+        let progress = this.studentProgressService.loadProgressFromLocalStorage(studentId, 'riddle');
+        if (!progress) {
+          this.studentProgressService.initializeProgress(studentId, 'riddle');
+          progress = this.studentProgressService.getCurrentProgress();
+        }
+        
+        if (progress) {
+          console.log(`[RiddleComponent] Progreso del estudiante cargado:`, progress);
+        }
+      }
     });
 
-    this.levelsSubscription = this.riddleService.levels$.subscribe((levels: RiddleLevel[]) => {
-      const activeLevel = levels.find(lvl => lvl.isActive);
+    this.loadActiveRiddleConfig();
+  }
 
-      if (activeLevel) {
-        this.activeLevelConfig = activeLevel;
-        if (typeof this.activeLevelConfig.time_limit !== 'number' || this.activeLevelConfig.time_limit <= 0) {
-          console.warn(`[RiddleComponent] Nivel ${this.activeLevelConfig.level_name} tiene un time_limit inválido (${this.activeLevelConfig.time_limit}). Estableciendo por defecto a 300 segundos.`);
-          this.activeLevelConfig.time_limit = 300;
-        }
-        this.timeRemaining = this.activeLevelConfig.time_limit;
+  loadActiveRiddleConfig(): void {
+    // Obtener el grado del estudiante desde localStorage
+    const grade = localStorage.getItem('gradeStudent') || '';
+    console.log(`[RiddleComponent] Grado obtenido de localStorage: "${grade}"`);
+    
+    if (!grade) {
+      console.error('[RiddleComponent] No se encontró el grado del estudiante');
+      this.message = 'Error: No se encontró el grado del estudiante.';
+      return;
+    }
 
-        if (this.activeLevelConfig.words && this.activeLevelConfig.words.length > 0 && this.activeLevelConfig.words_level > 0) {
-          const shuffledWords = this.shuffleArray([...this.activeLevelConfig.words]);
-          this.words = shuffledWords.slice(0, this.activeLevelConfig.words_level);
-          console.log(`[RiddleComponent] Palabras para el nivel ${this.activeLevelConfig.level_name}:`, this.words.map(w => w.word));
-          this.resetGame();
+    console.log(`[RiddleComponent] Cargando configuración del nivel activo del grado del estudiante: ${grade}`);
+    
+    // Obtener la configuración activa específica del grado del estudiante
+    console.log(`[RiddleComponent] Llamando a getActiveRiddleConfigByGrade con grado: ${grade}`);
+    this.riddleService.getActiveRiddleConfigByGrade(grade).subscribe(
+      (response: any) => {
+        console.log('[RiddleComponent] Respuesta completa del servidor:', response);
+        const configData: RiddleLevel | undefined = response?.data?.[0];
+        console.log('[RiddleComponent] Configuración activa encontrada:', configData);
+
+        if (configData) {
+          // Asignar el ID del nivel a currentLevel
+          this.currentLevel = configData.level!.level || '';
+          console.log(`[RiddleComponent] Current level asignado: ${this.currentLevel}`);
+          
+          this.activeLevelConfig = configData;
+          console.log(`[RiddleComponent] activeLevelConfig.level: ${this.activeLevelConfig.level}`);
+          console.log(`[RiddleComponent] activeLevelConfig.words:`, this.activeLevelConfig.words);
+          
+          if (typeof this.activeLevelConfig.time_limit !== 'number' || this.activeLevelConfig.time_limit <= 0) {
+            console.warn(`[RiddleComponent] Nivel ${this.activeLevelConfig.level_name} tiene un time_limit inválido (${this.activeLevelConfig.time_limit}). Estableciendo por defecto a 300 segundos.`);
+            this.activeLevelConfig.time_limit = 300;
+          }
+          this.timeRemaining = this.activeLevelConfig.time_limit;
+
+          if (this.activeLevelConfig.words && this.activeLevelConfig.words.length > 0 && this.activeLevelConfig.words_level > 0) {
+            const shuffledWords = this.shuffleArray([...this.activeLevelConfig.words]);
+            this.words = shuffledWords.slice(0, this.activeLevelConfig.words_level);
+            console.log(`[RiddleComponent] Palabras para el nivel ${this.activeLevelConfig.level_name}:`, this.words.map(w => w.word));
+            console.log(`[RiddleComponent] Hints disponibles:`, this.words.map(w => ({ word: w.word, hint: w.hint, hint_image: w.hint_image })));
+            this.resetGame();
+          } else {
+            this.gameStatus = 'lost';
+            this.message = 'El nivel activo no tiene palabras o la cantidad de palabras por nivel es cero. Por favor, configura el nivel.';
+            this.words = [];
+            this.secretWord = '';
+            this.displayWord = '';
+            console.warn('El nivel activo no tiene palabras o words_level es 0.');
+            this.stopGameTimer();
+          }
         } else {
           this.gameStatus = 'lost';
-          this.message = 'El nivel activo no tiene palabras o la cantidad de palabras por nivel es cero. Por favor, configura el nivel.';
+          this.message = 'No se encontró un nivel activo para tu grado. Por favor, contacta al administrador.';
           this.words = [];
           this.secretWord = '';
           this.displayWord = '';
-          console.warn('El nivel activo no tiene palabras o words_level es 0.');
+          console.warn('[RiddleComponent] No se encontró configuración activa para el grado del estudiante');
           this.stopGameTimer();
         }
-      } else {
+        this.startGameTimer();
+      },
+      (error) => {
+        console.error('[RiddleComponent] Error al cargar la configuración:', error);
+        this.message = 'Error al cargar la configuración del nivel activo. Por favor, comprueba la conexión con Directus.';
         this.gameStatus = 'lost';
-        this.message = 'No hay ningún nivel activo. Por favor, activa un nivel en la configuración del docente.';
         this.words = [];
         this.secretWord = '';
         this.displayWord = '';
-        console.warn('Ningún nivel está activo.');
         this.stopGameTimer();
-
-        this.activeLevelConfig = {
-          id: null,
-          level_number: 0,
-          level_name: 'Ningún Nivel Activo',
-          max_intents: 7,
-          words_level: 0,
-          words: [],
-          isActive: false,
-          time_limit: 0
-        };
       }
-      this.startGameTimer();
-    });
+    );
   }
 
   ngOnDestroy(): void {
@@ -326,15 +370,19 @@ export class RiddleComponent implements OnInit, OnDestroy, CanComponentDeactivat
   }
 
   get currentHint(): string | undefined {
-    if (this.activeLevelConfig && this.activeLevelConfig.level_number === 3 && this.currentWordIndex < this.words.length) {
-      return this.words[this.currentWordIndex].hint;
+    console.log(`[RiddleComponent] currentHint EJECUTÁNDOSE - level: ${this.activeLevelConfig?.level}, currentWordIndex: ${this.currentWordIndex}, words.length: ${this.words.length}`);
+    if (this.activeLevelConfig && this.activeLevelConfig.level.id  === '3c16b66e-0fa4-4ecc-a9ae-41dd832f0bc1' && this.currentWordIndex < this.words.length) {
+      const hint = this.words[this.currentWordIndex].hint;
+      console.log(`[RiddleComponent] Hint encontrada: ${hint}`);
+      return hint;
     }
+    console.log(`[RiddleComponent] No se muestra hint - condiciones no cumplidas`);
     return undefined;
   }
 
   // AGREGADO: Nueva propiedad computada para la URL de la imagen de la pista
   get currentHintImage(): string | undefined {
-    if (this.activeLevelConfig && this.activeLevelConfig.level_number === 3 && this.currentWordIndex < this.words.length) {
+    if (this.activeLevelConfig && this.activeLevelConfig.level.id === '3c16b66e-0fa4-4ecc-a9ae-41dd832f0bc1' && this.currentWordIndex < this.words.length) {
       return this.words[this.currentWordIndex].hint_image;
     }
     return undefined;
@@ -382,6 +430,12 @@ export class RiddleComponent implements OnInit, OnDestroy, CanComponentDeactivat
       console.warn('No se pudo guardar el resultado del juego: No hay ID de estudiante disponible. Asegúrate de que el estudiante haya iniciado sesión.');
       alert('Tu resultado no pudo ser guardado. Por favor, asegúrate de haber iniciado sesión.');
       return;
+    }
+
+    // Si el juego se completó exitosamente, actualizar el progreso del estudiante
+    if (isGameCompleted && this.currentStudentId) {
+      this.studentProgressService.completeLevel(this.currentLevel);
+      console.log(`[RiddleComponent] Nivel completado: ${this.currentLevel}`);
     }
 
     const gameResult: RiddleResult = {

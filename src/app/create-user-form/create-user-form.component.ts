@@ -1,8 +1,9 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidatorFn } from '@angular/forms';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UserService } from '../user.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-create-user-form',
@@ -11,13 +12,17 @@ import { UserService } from '../user.service';
 })
 export class CreateUserFormComponent {
   studentForm: FormGroup;
+  private gradeId: string;
 
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<CreateUserFormComponent>,
     private snackBar: MatSnackBar,
-    private userService: UserService 
+    private userService: UserService,
+    // ✅ Se inyecta MAT_DIALOG_DATA para obtener el ID del grado
+    @Inject(MAT_DIALOG_DATA) public data: { grade: string }
   ) {
+    this.gradeId = data.grade; // ✅ Se asigna el ID del grado
     this.studentForm = this.fb.group({
       name: ['', [Validators.required, this.lettersOnlyValidator()]],
       lastname: ['', [Validators.required, this.lettersOnlyValidator()]],
@@ -30,19 +35,14 @@ export class CreateUserFormComponent {
   sectionABValidator(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } | null => {
       const value = control.value;
-
       if (value === null || value === undefined || value === '') {
         return null;
       }
-
-      // Validar si es 'A', 'a', 'B' o 'b'
       const isValidChar = (value.toLowerCase() === 'a' || value.toLowerCase() === 'b');
-
-      // Validar que sea solo una letra
       if (isValidChar && value.length === 1) {
-        return null; // El valor es válido
+        return null; 
       } else {
-        return { 'invalidSectionAB': { value: value } }; // El valor es inválido
+        return { 'invalidSectionAB': { value: value } }; 
       }
     };
   }
@@ -54,7 +54,6 @@ export class CreateUserFormComponent {
       if (value === null || value.length === 0) {
         return null;
       }
-      // Expresión regular que permite solo letras (incluyendo acentos y ñ/Ñ)
       const onlyLetters = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ]*$/;
       if (onlyLetters.test(value)) {
         return null;
@@ -68,20 +67,14 @@ export class CreateUserFormComponent {
   @HostListener('input', ['$event'])
   onInput(event: Event): void {
     const target = event.target as HTMLInputElement;
-
     if (target.id === 'section') {
       let value = target.value;
-
-      // Limitar la entrada a una sola letra
       if (value.length > 1) {
         value = value.charAt(0);
       }
-
-      // Si la letra ingresada no es 'A', 'a', 'B', 'b' y no está vacía, la resetea a vacío
       if (value !== '' && value.toLowerCase() !== 'a' && value.toLowerCase() !== 'b') {
         value = '';
       }
-
       if (this.studentForm.get('section')?.value !== value) {
         this.studentForm.get('section')?.setValue(value, { emitEvent: false });
         this.studentForm.get('section')?.updateValueAndValidity();
@@ -94,13 +87,9 @@ export class CreateUserFormComponent {
     if (this.studentForm.valid) {
       const formValue = this.studentForm.value;
 
-      // Estandarizar la sección a mayúsculas
       if (formValue.section) {
         formValue.section = formValue.section.toUpperCase();
       }
-
-      // Estandarizar nombre y apellido a minúsculas antes de guardar
-      // Esto es importante para la consistencia en la base de datos y la validación de duplicados
       if (formValue.name) {
         formValue.name = formValue.name.toLowerCase();
       }
@@ -108,31 +97,53 @@ export class CreateUserFormComponent {
         formValue.lastname = formValue.lastname.toLowerCase();
       }
 
-      // Validación para evitar registros duplicados usando el UserService
       try {
-        const isDuplicate = await this.userService.checkIfStudentExists(
-          formValue.name,
-          formValue.lastname,
-          formValue.section
-        ).toPromise(); // Convertir el Observable a Promise
+        // Se obtiene el ID de la sección antes de la validación
+        const sectionId = await firstValueFrom(this.userService.getSectionIdByName(formValue.section));
+
+        // Se valida con el ID de la sección y del grado
+        const isDuplicate = await firstValueFrom(this.userService.checkIfStudentExists(
+            formValue.name,
+            formValue.lastname,
+            sectionId,
+            this.gradeId
+        ));
 
         if (isDuplicate) {
-          this.snackBar.open('Error: Ya existe un estudiante con el mismo nombre, apellido y sección.', 'Cerrar', {
+          this.snackBar.open('Error: Ya existe un estudiante con el mismo nombre, apellido y sección en este grado.', 'Cerrar', {
             duration: 5000,
-            panelClass: ['snackbar-error'] // Clase CSS opcional para estilos de error
+            panelClass: ['snackbar-error']
           });
-          return; // Detener el proceso si es un duplicado
+          return;
         }
 
-        // Si no es un duplicado, procede con el registro
-        this.snackBar.open('Estudiante registrado con éxito.', 'Cerrar', {
-          duration: 3000, // Duración en milisegundos
-          panelClass: ['snackbar-success'] // Clase CSS opcional para estilos de éxito
-        });
-
-        this.dialogRef.close(formValue);
+        // ✅ Se crea el objeto de datos con los IDs de las relaciones
+        const studentData = {
+          name: formValue.name,
+          lastname: formValue.lastname,
+          score: formValue.score,
+          grade: this.gradeId, // ✅ Se envía el ID del grado
+          section: sectionId // ✅ Se envía el ID de la sección
+        };
+        
+        // ✅ Ahora sí, se llama al servicio para crear el estudiante
+        this.userService.createUser(studentData).subscribe(
+            (response) => {
+                this.snackBar.open('Estudiante registrado exitosamente', 'Cerrar', {
+                    duration: 3000
+                });
+                this.dialogRef.close(true); // Cierra y notifica el éxito
+            },
+            (error) => {
+                console.error('Error al registrar estudiante:', error);
+                this.snackBar.open('Error al registrar el estudiante', 'Cerrar', {
+                    duration: 3000
+                });
+                this.dialogRef.close(false); // Cierra y notifica el error
+            }
+        );
       } catch (error) {
-        console.error('Error al verificar duplicados o registrar estudiante:', error);
+        console.error('Error en el proceso de registro:', error);
         this.snackBar.open('Ocurrió un error al intentar registrar el estudiante. Por favor, inténtalo de nuevo.', 'Cerrar', {
           duration: 5000,
           panelClass: ['snackbar-error']

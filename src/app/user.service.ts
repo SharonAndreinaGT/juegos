@@ -10,6 +10,7 @@ import { AuthService } from './auth.service';
 })
 export class UserService {
   private apiUrl = 'http://localhost:8055/items/users';
+  private sectionsUrl = 'http://localhost:8055/items/sections';
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
@@ -29,6 +30,31 @@ export class UserService {
     : `${this.apiUrl}?limit=-1${fields}`; // limit=-1 para obtener todos
 
     return this.http.get<any>(url);
+  }
+
+// ✅ Añadir el nuevo método para obtener el ID de la sección
+  /**
+   * Obtiene el ID de la sección por su nombre (ej. 'A', 'B').
+   * @param sectionName El nombre de la sección a buscar.
+   * @returns Observable<string> que emite el ID de la sección.
+   */
+  getSectionIdByName(sectionName: string): Observable<string> {
+    const queryUrl = `${this.sectionsUrl}?filter[section][_eq]=${sectionName}`;
+    return this.http.get<any>(queryUrl).pipe(
+      map(response => {
+        if (response.data && response.data.length > 0) {
+          return response.data[0].id;
+        } else {
+          // Si no se encuentra la sección, se lanza un error.
+          throw new Error('Sección no encontrada');
+        }
+      }),
+      catchError(error => {
+        console.error('Error al obtener el ID de la sección:', error);
+        // Devolver un Observable de error
+        return of('');
+      })
+    );
   }
 
   // Crear un nuevo usuario
@@ -99,42 +125,34 @@ export class UserService {
       );
   }
 
-  /**
-   * Verifica si un estudiante ya existe en la base de datos por nombre, apellido y sección.
+ /**
+   * Verifica si un estudiante ya existe en la base de datos por nombre, apellido, sección y grado.
    * @param name Nombre del estudiante.
    * @param lastname Apellido del estudiante.
-   * @param section Sección del estudiante.
+   * @param sectionId ID de la sección del estudiante.
+   * @param gradeId ID del grado del estudiante.
    * @returns Observable<boolean> que emite true si el estudiante existe, false en caso contrario.
    */
   checkIfStudentExists(
     name: string,
     lastname: string,
-    section: string
+    sectionId: string,
+    gradeId: string
   ): Observable<boolean> {
-    // Normaliza los valores para la búsqueda (Directus es sensible a mayúsculas/minúsculas en filtros exactos)
     const normalizedName = name.toLowerCase();
     const normalizedLastname = lastname.toLowerCase();
-    const normalizedSection = section.toUpperCase(); // La sección ya se normaliza a mayúsculas en el formulario
-
-    const queryUrl = `${this.apiUrl}?filter[name][_eq]=${normalizedName}&filter[lastname][_eq]=${normalizedLastname}&filter[section][_eq]=${normalizedSection}`;
-    console.log(
-      `[UserService] Verificando existencia de estudiante con URL: ${queryUrl}`
-    );
+    
+    const queryUrl = `${this.apiUrl}?filter[name][_eq]=${normalizedName}&filter[lastname][_eq]=${normalizedLastname}&filter[section][_eq]=${sectionId}&filter[grade][_eq]=${gradeId}`;
+    console.log(`[UserService] Verificando existencia de estudiante con URL: ${queryUrl}`);
 
     return this.http.get<any>(queryUrl).pipe(
       map((response) => {
-        // Si response.data tiene elementos, significa que se encontró un usuario con esos criterios
         const exists = response.data && response.data.length > 0;
         console.log(`[UserService] Estudiante existe: ${exists}`);
         return exists;
       }),
       catchError((error) => {
-        console.error(
-          '[UserService] Error al verificar si el estudiante existe:',
-          error
-        );
-        // En caso de error de la API, asumimos que no existe para no bloquear el registro
-        // o puedes decidir manejarlo de otra forma (ej. lanzar el error)
+        console.error('[UserService] Error al verificar si el estudiante existe:', error);
         return of(false);
       })
     );

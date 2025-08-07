@@ -43,7 +43,18 @@ export class GradeStudentsComponent implements OnInit {
       const grade = isAdmin ? null : data['gradeFilter'];
       this.loadStudents(grade);
       this.gradeTitle = isAdmin ? 'Todos los estudiantes' : (data['gradeTitle'] || this.gradeTitle);
-  });
+    });
+
+    // ✅ Escuchar cambios en el localStorage para gradeFilter
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'gradeFilter') {
+        console.log('gradeFilter cambió, recargando datos...');
+        this.reloadDataFromLocalStorage();
+      }
+    });
+
+    // ✅ También verificar al entrar si hay gradeFilter en localStorage
+    this.reloadDataFromLocalStorage();
   }
 
   ngAfterViewInit() {
@@ -66,6 +77,22 @@ export class GradeStudentsComponent implements OnInit {
         });
       }
     );
+  }
+
+  // ✅ Método para recargar datos desde localStorage
+  reloadDataFromLocalStorage() {
+    const gradeFilterData = localStorage.getItem('gradeFilter');
+    if (gradeFilterData) {
+      try {
+        const parsedData = JSON.parse(gradeFilterData);
+        const gradeId = parsedData.data[0].id;
+        console.log('Recargando datos con gradeId:', gradeId);
+        this.loadStudents(gradeId);
+        this.gradeTitle = `Grado: ${parsedData.data[0].grade}`;
+      } catch (error) {
+        console.error('Error parsing gradeFilter:', error);
+      }
+    }
   }
 
   extractAvailableSections() {

@@ -85,6 +85,10 @@ export class AuthService {
    */
   logout(): void {
     localStorage.removeItem('token');
+    localStorage.removeItem('gradeFilter'); // ✅ Limpiar gradeFilter
+    localStorage.removeItem('userRole'); // ✅ Limpiar userRole
+    localStorage.removeItem('userInfo'); // ✅ Limpiar userInfo
+    localStorage.removeItem('gradeStudent'); // ✅ Limpiar gradeStudent
     this.isAuthenticatedSubject.next(false);
     this.router.navigate(['/welcome']);
   }

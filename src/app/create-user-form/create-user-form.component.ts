@@ -22,7 +22,21 @@ export class CreateUserFormComponent {
     // ✅ Se inyecta MAT_DIALOG_DATA para obtener el ID del grado
     @Inject(MAT_DIALOG_DATA) public data: { grade: string }
   ) {
-    this.gradeId = data.grade; // ✅ Se asigna el ID del grado
+    
+    // ✅ Obtener el gradeId del localStorage
+    const gradeFilterData = localStorage.getItem('gradeFilter');
+    if (gradeFilterData) {
+      try {
+        const parsedData = JSON.parse(gradeFilterData);
+        this.gradeId = parsedData.data[0].id || data.grade;
+      } catch (error) {
+        console.error('Error parsing gradeFilter:', error);
+        this.gradeId = data.grade;
+      }
+    } else {
+      this.gradeId = data.grade;
+    }
+    console.log('gradeId del localStorage:', this.gradeId);
     this.studentForm = this.fb.group({
       name: ['', [Validators.required, this.lettersOnlyValidator()]],
       lastname: ['', [Validators.required, this.lettersOnlyValidator()]],
@@ -125,6 +139,7 @@ export class CreateUserFormComponent {
           grade: this.gradeId, // ✅ Se envía el ID del grado
           section: sectionId // ✅ Se envía el ID de la sección
         };
+        console.log(studentData);
         
         // ✅ Ahora sí, se llama al servicio para crear el estudiante
         this.userService.createUser(studentData).subscribe(

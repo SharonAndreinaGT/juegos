@@ -117,7 +117,20 @@ export class GradeStudentsComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.loadStudents(this.route.snapshot.params['grade']);
+        // ✅ Usar gradeFilter del localStorage en lugar del parámetro de la ruta
+        const gradeFilterData = localStorage.getItem('gradeFilter');
+        let gradeId = this.route.snapshot.params['grade']; // fallback
+        
+        if (gradeFilterData) {
+          try {
+            const parsedData = JSON.parse(gradeFilterData);
+            gradeId = parsedData.data[0].id;
+          } catch (error) {
+            console.error('Error parsing gradeFilter:', error);
+          }
+        }
+        
+        this.loadStudents(gradeId);
         this.snackBar.open('Estudiante registrado exitosamente', 'Cerrar', {
           duration: 3000,
         });

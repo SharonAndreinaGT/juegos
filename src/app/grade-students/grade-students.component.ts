@@ -18,7 +18,7 @@ export class GradeStudentsComponent implements OnInit {
   students: any[] = [];
   allStudents: any[] = [];
   selectedSection: string = '';
-  availableSections: string[] = [];
+  availableSections: { label: string; value: string }[] = [];
   searchTerm: string = '';
   gradeTitle: string = 'Grado: Desconocido';
   dataSource = new MatTableDataSource<any>([]);
@@ -96,13 +96,11 @@ export class GradeStudentsComponent implements OnInit {
   }
 
   extractAvailableSections() {
-    const sections = new Set<string>();
-    this.allStudents.forEach((student) => {
-      if (student.section) {
-        sections.add(student.section);
-      }
-    });
-    this.availableSections = Array.from(sections).sort();
+    // ✅ Usar objetos con label y value para las secciones A y B
+    this.availableSections = [
+      { label: 'A', value: '7f45c3d4-2d12-4fdc-a9df-af1d8198275f' },
+      { label: 'B', value: '7fe05ed9-edd0-4e1b-b2d4-7da83ae455f5' }
+    ];
   }
 
   applySectionFilter() {
@@ -116,8 +114,15 @@ export class GradeStudentsComponent implements OnInit {
   applyFilters(): void {
     let filteredStudents = [...this.allStudents];
     if (this.selectedSection) {
+      console.log('Filtrando por sección:', this.selectedSection);
+      console.log('Ejemplo de estudiante:', filteredStudents[0]);
       filteredStudents = filteredStudents.filter(
-        (s) => s.section === this.selectedSection
+        (s) => {
+          // ✅ Comparar con el ID de la sección
+          const sectionId = s.section?.id || s.section;
+          console.log(`Estudiante ${s.name}: sectionId = ${sectionId}, selectedSection = ${this.selectedSection}`);
+          return sectionId === this.selectedSection;
+        }
       );
     }
 

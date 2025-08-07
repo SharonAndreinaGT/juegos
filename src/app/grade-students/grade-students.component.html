@@ -9,7 +9,7 @@
         <label for="sectionFilter">Filtrar por sección:</label>
         <select id="sectionFilter" [(ngModel)]="selectedSection" (change)="applySectionFilter()" class="section-filter-select">
           <option value="">Todas</option>
-          <option *ngFor="let sec of availableSections" [value]="sec">{{ sec }}</option>
+          <option *ngFor="let sec of availableSections" [value]="sec.value">{{ sec.label }}</option>
         </select>
         
         <label for="searchInput" style="margin-left: 20px;">Buscar por nombre:</label>

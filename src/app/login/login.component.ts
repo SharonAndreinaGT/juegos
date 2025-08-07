@@ -53,7 +53,17 @@ export class LoginComponent {
         this.router.navigate([returnUrl]);
       },
       error: (error) => {
-        if (error.status === 401 || error.status === 403) {
+        console.log('Error en login:', error);
+        console.log('Error status:', error.status);
+        console.log('Error message:', error.message);
+        
+        // Verificar diferentes tipos de errores de autenticación
+        if (error.status === 401 || error.status === 403 || 
+            (error.error && error.error.message && 
+             (error.error.message.includes('Invalid credentials') || 
+              error.error.message.includes('Invalid email or password') ||
+              error.error.message.includes('Invalid email') ||
+              error.error.message.includes('Invalid password')))) {
           this.errorMessage =
             'Credenciales inválidas. Por favor, verifica tu email y contraseña.';
         } else {

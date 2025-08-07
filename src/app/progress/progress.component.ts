@@ -12,7 +12,7 @@ import { PuzzleResult } from '../puzzle-config.model';
 import { MemoryResult } from '../memory-config-model';
 import { RiddleResult } from '../riddle.model';
 
-import { forkJoin, of } from 'rxjs';
+import { forkJoin, of, Observable } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
@@ -43,6 +43,7 @@ interface MemoryStudentDisplay {
   score: number;
   elapsedTime: number;
   totalPairs: number;
+  level: any;
 }
 
 interface RiddleStudentDisplay {
@@ -99,6 +100,9 @@ export class ProgressComponent implements OnInit, AfterViewInit {
   // Propiedades para el filtrado por grado
   currentGrade: string = '';
   gradeTitle: string = 'Progreso General';
+  // ✅ Variable para almacenar usuarios y evitar múltiples consultas
+  private cachedUsers: User[] = [];
+  private usersLoaded = false;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild('memoryPaginator') memoryPaginator!: MatPaginator;
@@ -127,6 +131,7 @@ export class ProgressComponent implements OnInit, AfterViewInit {
   ) { }
 
   ngOnInit(): void {
+    // ✅ Solo ejecutar getCurrentGrade() una vez al inicializar
     this.getCurrentGrade();
 
     // ✅ Escuchar cambios en el localStorage para gradeFilter
@@ -136,9 +141,6 @@ export class ProgressComponent implements OnInit, AfterViewInit {
         this.reloadDataFromLocalStorage();
       }
     });
-
-    // ✅ También verificar al entrar si hay gradeFilter en localStorage
-    this.checkAndReloadFromLocalStorage();
   }
 
   ngAfterViewInit(): void {
@@ -159,44 +161,54 @@ export class ProgressComponent implements OnInit, AfterViewInit {
   // Método para obtener el grado actual del usuario autenticado
 private getCurrentGrade(): void {
   try {
-    const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')[0];
-
-    // Si es admin, no se filtra por grado (muestra todos los estudiantes)
-    if (this.authService.isAdmin()) {
-      this.currentGrade = ''; // Esto hará que se usen getUsers() en lugar de getUsersByGrade()
+    // ✅ Verificar primero si hay gradeFilter en localStorage
+    const gradeFilterData = localStorage.getItem('gradeFilter');
+    if (gradeFilterData) {
+      try {
+        const parsedData = JSON.parse(gradeFilterData);
+        this.currentGrade = parsedData.data[0].id;
+        console.log('Usando gradeFilter del localStorage:', this.currentGrade);
+      } catch (error) {
+        console.error('Error parsing gradeFilter:', error);
+        this.setDefaultGrade();
+      }
     } else {
-      this.currentGrade = userInfo?.grade || '';
+      // ✅ Usar el grado del usuario si no hay gradeFilter
+      const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')[0];
+
+      // Si es admin, no se filtra por grado (muestra todos los estudiantes)
+      if (this.authService.isAdmin()) {
+        this.currentGrade = ''; // Esto hará que se usen getUsers() en lugar de getUsersByGrade()
+      } else {
+        this.currentGrade = userInfo?.grade || '';
+      }
     }
 
     this.updateGradeTitle();
+    // ✅ Limpiar cache de usuarios para el nuevo grado
+    this.clearUsersCache();
     this.loadAllStudentsProgress();
     this.loadAllStudentsMemoryResults();
     this.loadAllStudentsRiddleResults();
   } catch (error) {
     console.error('Error al obtener el grado del usuario:', error);
-    this.currentGrade = '';
-    this.loadAllStudentsProgress();
-    this.loadAllStudentsMemoryResults();
-    this.loadAllStudentsRiddleResults();
+    this.setDefaultGrade();
   }
 }
 
-// ✅ Método para verificar y recargar datos desde localStorage
-private checkAndReloadFromLocalStorage(): void {
-  const gradeFilterData = localStorage.getItem('gradeFilter');
-  if (gradeFilterData) {
-    try {
-      const parsedData = JSON.parse(gradeFilterData);
-      console.log('Recargando progress con gradeFilter:', parsedData);
-      // Recargar todas las configuraciones para el nuevo grado
-      this.reloadDataFromLocalStorage();
-    } catch (error) {
-      console.error('Error parsing gradeFilter en progress:', error);
-    }
-  }
+// ✅ Método para establecer el grado por defecto
+private setDefaultGrade(): void {
+  this.currentGrade = '';
+  this.updateGradeTitle();
+  this.clearUsersCache();
+  this.loadAllStudentsProgress();
+  this.loadAllStudentsMemoryResults();
+  this.loadAllStudentsRiddleResults();
 }
 
-// ✅ Método para recargar datos desde localStorage
+
+
+  // ✅ Método para recargar datos desde localStorage
 private reloadDataFromLocalStorage(): void {
   const gradeFilterData = localStorage.getItem('gradeFilter');
   if (gradeFilterData) {
@@ -209,6 +221,9 @@ private reloadDataFromLocalStorage(): void {
       this.currentGrade = gradeId;
       this.updateGradeTitle();
       
+      // ✅ Limpiar cache de usuarios para el nuevo grado
+      this.clearUsersCache();
+      
       // Recargar todos los datos
       this.loadAllStudentsProgress();
       this.loadAllStudentsMemoryResults();
@@ -219,90 +234,124 @@ private reloadDataFromLocalStorage(): void {
   }
 }
 
-  // Método para actualizar el título según el grado
-private updateGradeTitle(): void {
-  if (this.authService.isAdmin()) {
-    this.gradeTitle = 'Progreso General (Administrador)';
-    return;
+// ✅ Método para limpiar el cache de usuarios
+private clearUsersCache(): void {
+  this.cachedUsers = [];
+  this.usersLoaded = false;
+  console.log('Cache de usuarios limpiado');
+}
+
+  // ✅ Método general para obtener usuarios con cache
+  private getUsersObservable(): Observable<User[]> {
+    // Si ya tenemos usuarios cargados, devolverlos del cache
+    if (this.usersLoaded && this.cachedUsers.length > 0) {
+      console.log('Usando usuarios del cache:', this.cachedUsers.length);
+      return of(this.cachedUsers);
+    }
+
+    console.log('Obteniendo usuarios para grado:', this.currentGrade);
+    const usersObservable = this.currentGrade 
+      ? this.userService.getUsersByGrade(this.currentGrade)
+      : this.userService.getUsers();
+
+    return usersObservable.pipe(
+      map(response => {
+        this.cachedUsers = response.data as User[];
+        this.usersLoaded = true;
+        console.log('Usuarios cargados y guardados en cache:', this.cachedUsers.length);
+        return this.cachedUsers;
+      }),
+      catchError(error => {
+        console.error('Error al obtener usuarios:', error);
+        this.error = 'Error al cargar los estudiantes.';
+        return of([]);
+      })
+    );
   }
 
-  switch (this.currentGrade) {
-    case 'first':
-      this.gradeTitle = 'Progreso - Primer Grado';
-      break;
-    case 'second':
-      this.gradeTitle = 'Progreso - Segundo Grado';
-      break;
-    case 'third':
-      this.gradeTitle = 'Progreso - Tercer Grado';
-      break;
-    default:
-      this.gradeTitle = 'Progreso General';
-      break;
+  // Método para actualizar el título según el grado
+  private updateGradeTitle(): void {
+    if (this.authService.isAdmin()) {
+      this.gradeTitle = 'Progreso General (Administrador)';
+      return;
+    }
+
+    switch (this.currentGrade) {
+      case 'first':
+        this.gradeTitle = 'Progreso - Primer Grado';
+        break;
+      case 'second':
+        this.gradeTitle = 'Progreso - Segundo Grado';
+        break;
+      case 'third':
+        this.gradeTitle = 'Progreso - Tercer Grado';
+        break;
+      default:
+        this.gradeTitle = 'Progreso General';
+        break;
+    }
   }
-}
 
   loadAllStudentsProgress(): void {
     this.loading = true;
     this.error = null;
 
-    // Usar getUsersByGrade si hay un grado específico, sino usar getUsers
-    console.log('dato:', this.currentGrade)
-    const usersObservable = this.currentGrade 
-      ? this.userService.getUsersByGrade(this.currentGrade)
-      : this.userService.getUsers();
+    // ✅ Cargar usuarios si no están en cache
+    if (!this.usersLoaded || this.cachedUsers.length === 0) {
+      this.getUsersObservable().subscribe(users => {
+        this.processProgressData(users);
+      });
+    } else {
+      // ✅ Usar usuarios del cache directamente
+      console.log('Procesando progreso con usuarios del cache:', this.cachedUsers.length);
+      this.processProgressData(this.cachedUsers);
+    }
+  }
 
-    usersObservable.pipe(
-      map(response => response.data as User[]),
-      switchMap(users => {
-        if (!users || users.length === 0) {
-          this.loading = false;
-          this.error = this.currentGrade 
-            ? `No se encontraron estudiantes en ${this.gradeTitle}.`
-            : 'No se encontraron estudiantes.';
-          return of([]);
-        }
+  // ✅ Método para procesar datos de progreso
+  private processProgressData(users: User[]): void {
+    if (!users || users.length === 0) {
+      this.loading = false;
+      this.error = this.currentGrade 
+        ? `No se encontraron estudiantes en ${this.gradeTitle}.`
+        : 'No se encontraron estudiantes.';
+      return;
+    }
 
-        const progressObservables = users.map(user => {
-          return this.puzzleService.getStudentPuzzleResults(user.id).pipe(
-            map(results => {
-              const latestResult = results && results.length > 0 ? results[0] : null;
-              return {
-                id: user.id,
-                name: user.name,
-                lastname: user.lastname,
-                grade: user.grade,
-                latestPuzzleResult: latestResult,
-              } as StudentProgress;
-            }),
-            catchError(err => {
-              console.error(`Error al obtener resultados de rompecabezas para el estudiante ${user.name} (ID: ${user.id}):`, err);
-              return of({
-                id: user.id,
-                name: user.name,
-                lastname: user.lastname,
-                grade: user.grade,
-                latestPuzzleResult: null,
-              } as StudentProgress);
-            })
-          );
-        });
+    const progressObservables = users.map(user => {
+      return this.puzzleService.getStudentPuzzleResults(user.id).pipe(
+        map(results => {
+          const latestResult = results && results.length > 0 ? results[0] : null;
+          return {
+            id: user.id,
+            name: user.name,
+            lastname: user.lastname,
+            grade: user.grade,
+            latestPuzzleResult: latestResult,
+          } as StudentProgress;
+        }),
+        catchError(err => {
+          console.error(`Error al obtener resultados de rompecabezas para el estudiante ${user.name} (ID: ${user.id}):`, err);
+          return of({
+            id: user.id,
+            name: user.name,
+            lastname: user.lastname,
+            grade: user.grade,
+            latestPuzzleResult: null,
+          } as StudentProgress);
+        })
+      );
+    });
 
-        return forkJoin(progressObservables);
-      }),
-      catchError(err => {
-        console.error('Error al cargar el progreso de todos los estudiantes (rompecabezas):', err);
-        this.error = 'Error al cargar el progreso general de los estudiantes (rompecabezas). Por favor, inténtalo de nuevo.';
-        this.loading = false;
-        return of([]);
-      })
-    ).subscribe(
+    forkJoin(progressObservables).subscribe(
       (progressData: StudentProgress[]) => {
         this.studentProgressData.data = progressData;
         this.loading = false;
         console.log('[ProgressComponent] Progreso de estudiantes (rompecabezas) cargado:', this.studentProgressData.data);
       },
-      () => {
+      (error) => {
+        console.error('Error al cargar el progreso de todos los estudiantes:', error);
+        this.error = 'Error al cargar el progreso de los estudiantes. Por favor, inténtalo de nuevo.';
         this.loading = false;
       }
     );
@@ -312,85 +361,87 @@ private updateGradeTitle(): void {
     this.loadingMemoryResults = true;
     this.errorMemoryResults = null;
 
-    // Usar getUsersByGrade si hay un grado específico, sino usar getUsers
-    const usersObservable = this.currentGrade 
-      ? this.userService.getUsersByGrade(this.currentGrade)
-      : this.userService.getUsers();
+    // ✅ Cargar usuarios si no están en cache
+    if (!this.usersLoaded || this.cachedUsers.length === 0) {
+      this.getUsersObservable().subscribe(users => {
+        this.processMemoryData(users);
+      });
+    } else {
+      // ✅ Usar usuarios del cache directamente
+      console.log('Procesando memoria con usuarios del cache:', this.cachedUsers.length);
+      this.processMemoryData(this.cachedUsers);
+    }
+  }
 
-    usersObservable.pipe(
-      map(response => response.data as User[]),
-      switchMap(users => {
-        if (!users || users.length === 0) {
-          this.loadingMemoryResults = false;
-          this.errorMemoryResults = this.currentGrade 
-            ? `No se encontraron estudiantes en ${this.gradeTitle} para los resultados de memoria.`
-            : 'No se encontraron estudiantes para los resultados de memoria.';
-          return of([]);
-        }
+  // ✅ Método para procesar datos de memoria
+  private processMemoryData(users: User[]): void {
+    if (!users || users.length === 0) {
+      this.loadingMemoryResults = false;
+      this.errorMemoryResults = this.currentGrade 
+        ? `No se encontraron estudiantes en ${this.gradeTitle} para los resultados de memoria.`
+        : 'No se encontraron estudiantes para los resultados de memoria.';
+      return;
+    }
 
-        const memoryResultsObservables = users.map(user => {
-          return this.memoryService.getStudentMemoryResults(user.id).pipe(
-            map(results => {
-              const latestMemoryResult = results && results.length > 0 ? results[0] : null;
+    const memoryResultsObservables = users.map(user => {
+      return this.memoryService.getStudentMemoryResults(user.id).pipe(
+        map(results => {
+          const latestMemoryResult = results && results.length > 0 ? results[0] : null;
+          if (latestMemoryResult) {
+            return {
+              id: user.id,
+              name: user.name,
+              lastname: user.lastname,
+              grade: user.grade,
+              level_name: latestMemoryResult.level_name,
+              score: latestMemoryResult.score,
+              elapsedTime: latestMemoryResult.elapsedTime,
+              totalPairs: latestMemoryResult.totalPairs,
+              intentRemaining: latestMemoryResult.intentRemaining,
+              level: latestMemoryResult.level,
+            } as MemoryStudentDisplay;
+          } else {
+            return {
+              id: user.id,
+              name: user.name,
+              lastname: user.lastname,
+              grade: user.grade,
+              level_name: null,
+              score: 0,
+              elapsedTime: 0,
+              totalPairs: 0,
+              intentRemaining: 0,
+              level: null,
+            } as MemoryStudentDisplay;
+          }
+        }),
+        catchError(err => {
+          console.error(`Error al obtener resultados de memoria para el estudiante ${user.name} (ID: ${user.id}):`, err);
+          return of({
+            id: user.id,
+            name: user.name,
+            lastname: user.lastname,
+            grade: user.grade,
+            level_name: null,
+            score: 0,
+            elapsedTime: 0,
+            totalPairs: 0,
+            intentRemaining: 0,
+            level: null,
+          } as MemoryStudentDisplay);
+        })
+      );
+    });
 
-              if (latestMemoryResult) {
-                return {
-                  id: user.id,
-                  name: user.name,
-                  lastname: user.lastname,
-                  grade: user.grade,
-                  level_name: latestMemoryResult.level_name,
-                  score: latestMemoryResult.score,
-                  elapsedTime: latestMemoryResult.elapsedTime,
-                  totalPairs: latestMemoryResult.totalPairs,
-                  intentRemaining: latestMemoryResult.intentRemaining,
-                } as MemoryStudentDisplay;
-              } else {
-                return {
-                  id: user.id,
-                  name: user.name,
-                  lastname: user.lastname,
-                  grade: user.grade,
-                  level_name: null,
-                  score: 0,
-                  elapsedTime: 0,
-                  totalPairs: 0,
-                  intentRemaining: 0,
-                } as MemoryStudentDisplay;
-              }
-            }),
-            catchError(err => {
-              console.error(`Error al obtener resultados de memoria para el estudiante ${user.name} (ID: ${user.id}):`, err);
-              return of({
-                id: user.id,
-                name: user.name,
-                lastname: user.lastname,
-                grade: user.grade,
-                level_name: null,
-                score: 0,
-                elapsedTime: 0,
-                totalPairs: 0,
-                intentRemaining: 0,
-              } as MemoryStudentDisplay);
-            })
-          );
-        });
-
-        return forkJoin(memoryResultsObservables);
-      }),
-      catchError(err => {
-        console.error('Error al cargar los resultados de memoria de todos los estudiantes:', err);
-        this.errorMemoryResults = 'Error al cargar los resultados de memoria de los estudiantes. Por favor, inténtalo de nuevo.';
-        this.loadingMemoryResults = false;
-        return of([]);
-      })
-    ).subscribe(
+    forkJoin(memoryResultsObservables).subscribe(
       (memoryData: MemoryStudentDisplay[]) => {
         this.memoryResultsData.data = memoryData;
         this.loadingMemoryResults = false;
         console.log('[ProgressComponent] Resultados de memoria de estudiantes cargados:', this.memoryResultsData.data);
       },
-      () => {
+      (error) => {
+        console.error('Error al cargar los resultados de memoria de todos los estudiantes:', error);
+        this.errorMemoryResults = 'Error al cargar los resultados de memoria de los estudiantes. Por favor, inténtalo de nuevo.';
         this.loadingMemoryResults = false;
       }
     );
@@ -400,82 +451,86 @@ private updateGradeTitle(): void {
     this.loadingRiddleResults = true;
     this.errorRiddleResults = null;
 
-    // Usar getUsersByGrade si hay un grado específico, sino usar getUsers
-    const usersObservable = this.currentGrade 
-      ? this.userService.getUsersByGrade(this.currentGrade)
-      : this.userService.getUsers();
+    // ✅ Cargar usuarios si no están en cache
+    if (!this.usersLoaded || this.cachedUsers.length === 0) {
+      this.getUsersObservable().subscribe(users => {
+        this.processRiddleData(users);
+      });
+    } else {
+      // ✅ Usar usuarios del cache directamente
+      console.log('Procesando riddle con usuarios del cache:', this.cachedUsers.length);
+      this.processRiddleData(this.cachedUsers);
+    }
+  }
 
-    usersObservable.pipe(
-      map(response => response.data as User[]),
-      switchMap(users => {
-        if (!users || users.length === 0) {
-          this.loadingRiddleResults = false;
-          this.errorRiddleResults = this.currentGrade 
-            ? `No se encontraron estudiantes en ${this.gradeTitle} para los resultados de "Adivina la Palabra Oculta".`
-            : 'No se encontraron estudiantes para los resultados de "Adivina la Palabra Oculta".';
-          return of([]);
-        }
+  // ✅ Método para procesar datos de riddle
+  private processRiddleData(users: User[]): void {
+    if (!users || users.length === 0) {
+      this.loadingRiddleResults = false;
+      this.errorRiddleResults = this.currentGrade 
+        ? `No se encontraron estudiantes en ${this.gradeTitle} para los resultados de "Adivina la Palabra Oculta".`
+        : 'No se encontraron estudiantes para los resultados de "Adivina la Palabra Oculta".';
+      return;
+    }
 
-        const riddleResultsObservables = users.map(user => {
-          return this.riddleService.getStudentRiddleResults(user.id).pipe(
-            map(results => {
-              const latestRiddleResult = results && results.length > 0 ? results[0] : null;
+    const riddleResultsObservables = users.map(user => {
+      return this.riddleService.getStudentRiddleResults(user.id).pipe(
+        map(results => {
+          console.log('results:', results);
+          const latestRiddleResult = results && results.length > 0 ? results[0] : null;
 
-              if (latestRiddleResult) {
-                return {
-                  id: user.id,
-                  name: user.name,
-                  lastname: user.lastname,
-                  grade: user.grade,
-                  level_name: latestRiddleResult.level_name,
-                  score: latestRiddleResult.score,
-                  time_taken: latestRiddleResult.time_taken,
-                  words_guessed: latestRiddleResult.words_guessed,
-                } as RiddleStudentDisplay;
-              } else {
-                return {
-                  id: user.id,
-                  name: user.name,
-                  lastname: user.lastname,
-                  grade: user.grade,
-                  level_name: null,
-                  score: 0,
-                  time_taken: 0,
-                  words_guessed: 0,
-                } as RiddleStudentDisplay;
-              }
-            }),
-            catchError(err => {
-              console.error(`Error al obtener resultados de Riddle para el estudiante ${user.name} (ID: ${user.id}):`, err);
-              return of({
-                id: user.id,
-                name: user.name,
-                lastname: user.lastname,
-                grade: user.grade,
-                level_name: null,
-                score: 0,
-                time_taken: 0,
-                words_guessed: 0,
-              } as RiddleStudentDisplay);
-            })
-          );
-        });
+          if (latestRiddleResult) {
+            return {
+              id: user.id,
+              name: user.name,
+              lastname: user.lastname,
+              grade: user.grade,
+              level_name: latestRiddleResult.level_name,
+              score: latestRiddleResult.score,
+              time_taken: latestRiddleResult.time_taken,
+              words_guessed: latestRiddleResult.words_guessed,
+              level: latestRiddleResult.level,
+            } as RiddleStudentDisplay;
+          } else {
+            return {
+              id: user.id,
+              name: user.name,
+              lastname: user.lastname,
+              grade: user.grade,
+              level_name: null,
+              score: 0,
+              time_taken: 0,
+              words_guessed: 0,
+              level: null,
+            } as RiddleStudentDisplay;
+          }
+        }),
+        catchError(err => {
+          console.error(`Error al obtener resultados de Riddle para el estudiante ${user.name} (ID: ${user.id}):`, err);
+          return of({
+            id: user.id,
+            name: user.name,
+            lastname: user.lastname,
+            grade: user.grade,
+            level_name: null,
+            score: 0,
+            time_taken: 0,
+            words_guessed: 0,
+            level: null,
+          } as RiddleStudentDisplay);
+        })
+      );
+    });
 
-        return forkJoin(riddleResultsObservables);
-      }),
-      catchError(err => {
-        console.error('Error al cargar los resultados de Riddle de todos los estudiantes:', err);
-        this.errorRiddleResults = 'Error al cargar los resultados de "Adivina la Palabra Oculta" de los estudiantes. Por favor, inténtalo de nuevo.';
-        this.loadingRiddleResults = false;
-        return of([]);
-      })
-    ).subscribe(
+    forkJoin(riddleResultsObservables).subscribe(
       (riddleData: RiddleStudentDisplay[]) => {
         this.riddleResultsData.data = riddleData;
         this.loadingRiddleResults = false;
         console.log('[ProgressComponent] Resultados de Riddle de estudiantes cargados:', this.riddleResultsData.data);
       },
-      () => {
+      (error) => {
+        console.error('Error al cargar los resultados de Riddle de todos los estudiantes:', error);
+        this.errorRiddleResults = 'Error al cargar los resultados de "Adivina la Palabra Oculta" de los estudiantes. Por favor, inténtalo de nuevo.';
         this.loadingRiddleResults = false;
       }
     );
@@ -552,7 +607,7 @@ private updateGradeTitle(): void {
       result.name,
       result.lastname,
       result.grade === 'first' ? 'Primer grado' : result.grade === 'second' ? 'Segundo grado' : result.grade === 'third' ? 'Tercer grado' : 'No definido',
-      result.level_name ?? 'N/A',
+      result.level?.level ?? 'N/A',
       (result.score ?? '0').toString(),
       (result.elapsedTime ?? '0').toString(),
       (result.totalPairs ?? '0').toString()

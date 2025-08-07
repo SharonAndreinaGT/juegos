@@ -186,13 +186,11 @@ export class MemoryService {
    * Se ordena por fecha de creación descendente para obtener el más reciente.
    */
   getStudentMemoryResults(studentId: string): Observable<MemoryResult[]> {
-    console.log(`[MemoryService] Obteniendo resultados de memoria para estudiante ID: ${studentId}`);
     return this.http.get<any>(
-      `${this.memoryResultsApiUrl}?filter[student_id][_eq]=${studentId}&sort=-created_at`
+      `${this.memoryResultsApiUrl}?filter[student_id][_eq]=${studentId}&sort=-created_at&fields=id,student_id,level,level.level,score,elapsedTime,matchedPairs,totalPairs,intentRemaining,completed,created_at`
     ).pipe(
       // Primer map para obtener los datos crudos de memory_results
       map(response => {
-        console.log('[MemoryService] Raw Directus data for student memory results:', response.data);
         return response.data || [];
       }),
       // switchMap para hacer llamadas adicionales por cada resultado
@@ -219,7 +217,8 @@ export class MemoryService {
                   totalPairs: item.totalPairs,
                   intentRemaining: item.intentRemaining,
                   completed: item.completed,
-                  student_id: item.student_id
+                  student_id: item.student_id,
+                  level: item.level
                 } as MemoryResult; // Casteamos a MemoryResult
               }),
               catchError(err => {
@@ -235,7 +234,8 @@ export class MemoryService {
                   totalPairs: item.totalPairs,
                   intentRemaining: item.intentRemaining,
                   completed: item.completed,
-                  student_id: item.student_id
+                  student_id: item.student_id,
+                  level: item.level
                 } as MemoryResult);
               })
             );
@@ -252,7 +252,8 @@ export class MemoryService {
               totalPairs: item.totalPairs,
               intentRemaining: item.intentRemaining,
               completed: item.completed,
-              student_id: item.student_id
+              student_id: item.student_id,
+              level: item.level
             } as MemoryResult);
           }
         });

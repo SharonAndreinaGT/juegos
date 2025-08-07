@@ -186,12 +186,10 @@ export class PuzzleService {
    * @returns Un Observable que emite un array de PuzzleResult.
    */
   getStudentPuzzleResults(studentId: string): Observable<PuzzleResult[]> {
-  console.log(`[PuzzleService] Obteniendo resultados para estudiante ID: ${studentId}`);
   return this.http.get<any>(
     `${this.directusBaseUrl}/items/${this.puzzleResultsCollection}?filter[student_id][_eq]=${studentId}&fields=*,level_name, level.level&sort=-created_at`
   ).pipe(
     map(response => {
-      console.log('[PuzzleService] Resultados de rompecabezas obtenidos:', response.data);
       return response.data || [];
     })
   );

@@ -113,7 +113,7 @@ export class RiddleComponent implements OnInit, OnDestroy, CanComponentDeactivat
 
         if (configData) {
           // Asignar el ID del nivel a currentLevel
-          this.currentLevel = configData.level!.level || '';
+          this.currentLevel = configData.level || '';
           console.log(`[RiddleComponent] Current level asignado: ${this.currentLevel}`);
           
           this.activeLevelConfig = configData;
@@ -434,12 +434,13 @@ export class RiddleComponent implements OnInit, OnDestroy, CanComponentDeactivat
 
     // Si el juego se completó exitosamente, actualizar el progreso del estudiante
     if (isGameCompleted && this.currentStudentId) {
-      this.studentProgressService.completeLevel(this.currentLevel);
+      this.studentProgressService.completeLevel(this.currentLevel.id);
       console.log(`[RiddleComponent] Nivel completado: ${this.currentLevel}`);
     }
 
     const gameResult: RiddleResult = {
       level_name: this.activeLevelConfig.level_name,
+      level: this.currentLevel.id, // ✅ Agregar el ID del nivel actual
       score: this.score, 
       attempts_made: this.totalIncorrectGuessesMade,
       words_guessed: this.guessedWordsCount,

@@ -14,6 +14,7 @@ export interface PuzzleResult {
   id?: string;
   student_id: string; // Este será el ID (PK) de Directus, aunque sea Integer en DB, Directus API lo envía como string.
   level_name: string;
+  level?: any; // ✅ ID del nivel que se está jugando
   score: number;
   stars: number;
   moves: number;

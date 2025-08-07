@@ -14,6 +14,7 @@ export interface MemoryResult {
   id?: string;
   level_id?: string;
   level_name?: string | null;
+  level?: any; // ✅ ID del nivel que se está jugando
   score: number;
   stars: number;
   elapsedTime: number;

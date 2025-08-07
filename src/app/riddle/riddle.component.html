@@ -19,7 +19,7 @@
         </div>
         
         <div class="status">
-          <p class="level-info"><span>{{ currentLevel }}</span></p>
+          <p class="level-info"><span>{{ currentLevel.level }}</span></p>
           <p class="intent-display">Intentos: <span>{{ maxIncorrectGuesses - incorrectGuesses }}</span></p>
           <p class="word-progress">Palabra <span>{{ currentWordIndex + 1 }}</span> de <span>{{ words.length }}</span></p>
           <p *ngIf="gameStatus === 'playing' || gameStatus === 'time-up'" class="game-timer">

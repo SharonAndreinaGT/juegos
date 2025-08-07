@@ -47,7 +47,7 @@ export class MemoryService {
   // Obtiene la configuración activa del juego de memoria para un grado específico
   getActiveMemoryConfigByGrade(grade: string): Observable<any> {
     console.log(`[MemoryService] Obteniendo memoria activa para grado: ${grade}`);
-    const url = `${this.apiUrl}?filter[grade][_eq]=${grade}&filter[isActive][_eq]=true&fields=id,level,level.level,grade,isActive,card_count,time_limit,intent,images,level.level`;
+    const url = `${this.apiUrl}?filter[grade][_eq]=${grade}&filter[isActive][_eq]=true&fields=id,level,level.level,level.id,grade,isActive,card_count,time_limit,intent,images,level.level`;
     console.log(`[MemoryService] URL de consulta: ${url}`);
     return this.http.get<any>(url).pipe(
       map(response => {

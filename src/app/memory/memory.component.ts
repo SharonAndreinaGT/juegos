@@ -101,7 +101,7 @@ export class MemoryComponent implements OnInit, CanComponentDeactivate {
 
         if (configData) {
           // Asignar el ID del nivel a currentLevel
-          this.currentLevel = configData.level!.level || '';
+          this.currentLevel = configData.level || '';
           console.log(`[MemoryComponent] Current level asignado: ${this.currentLevel}`);
           
           this.activeLevel = configData;
@@ -314,7 +314,7 @@ initializeGame(config: MemoryConfig): void {
       
       // Si el juego se completó exitosamente, actualizar el progreso del estudiante
       if (this.matchedPairs === this.totalPairs && this.currentStudentId) {
-        this.studentProgressService.completeLevel(this.currentLevel);
+        this.studentProgressService.completeLevel(this.currentLevel.id);
         console.log(`[MemoryComponent] Nivel completado: ${this.currentLevel}`);
       }
       
@@ -322,6 +322,7 @@ initializeGame(config: MemoryConfig): void {
         const result: MemoryResult = {
         student_id: this.currentStudentId,
         level_id: this.activeLevel?.id, // Asumiendo que MemoryConfig tiene un ID
+        level: this.currentLevel.id, // ✅ Agregar el ID del nivel actual
         score: this.score,
         stars: this.stars,
         elapsedTime: this.initialTimeLimit - this.elapsedTime, // Guardar el tiempo transcurrido real

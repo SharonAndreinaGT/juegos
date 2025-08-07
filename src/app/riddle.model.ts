@@ -22,6 +22,7 @@ export interface RiddleLevel {
 export interface RiddleResult {
   id?: string; // Directus ID, será generado por Directus
   level_name: string; // Nombre del nivel jugado (e.g., 'Fácil', 'Medio', 'Difícil')
+  level?: any; // ✅ ID del nivel que se está jugando
   score: number;      // Puntaje obtenido
   attempts_made: number; // Intentos usados
   words_guessed: number; // Cantidad de palabras adivinadas

@@ -19,7 +19,7 @@
         </div>
         
         <div class="status">
-          <p class="level-info" *ngIf="activeLevel"><span>{{ currentLevel }}</span></p>
+          <p class="level-info" *ngIf="activeLevel"><span>{{ currentLevel.level }}</span></p>
           <p class="intent-display">Intentos: <span>{{ intent }}</span></p>
           <p class="time-display">Tiempo: <span>{{ formatTime(elapsedTime) }}</span></p>
         </div>

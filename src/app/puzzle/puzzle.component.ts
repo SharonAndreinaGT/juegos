@@ -313,6 +313,7 @@ export class PuzzleComponent implements OnInit, OnDestroy, CanComponentDeactivat
 
     const gameResult: PuzzleResult = {
       level_name: this.currentGrade,
+      level: this.currentLevel, // ✅ Agregar el ID del nivel actual
       score: this.score,
       moves: this.moves,
       stars: this.stars,

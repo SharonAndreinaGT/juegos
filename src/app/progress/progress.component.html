@@ -37,7 +37,7 @@
                 <ng-container matColumnDef="level_name">
                   <th mat-header-cell *matHeaderCellDef> Nivel </th>
                   <td mat-cell *matCellDef="let student">
-                    {{ student.latestPuzzleResult?.level_name ?? '0' }}
+                    {{ student.latestPuzzleResult?.level.level ?? '0' }}
                   </td>
                 </ng-container>
 

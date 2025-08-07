@@ -176,7 +176,7 @@ export class RiddleService {
   getStudentRiddleResults(studentId: string): Observable<RiddleResult[]> {
     console.log(`[RiddleService] Obteniendo resultados de Riddle para estudiante ID: ${studentId}`);
     return this.http.get<any>(
-      `${this.directusResultsUrl}?filter[student_id][_eq]=${studentId}&sort=-created_at`
+      `${this.directusResultsUrl}?filter[student_id][_eq]=${studentId}&sort=-created_at&fields=id,student_id,level,level.level,score,time_taken,words_guessed,created_at`
     ).pipe(
       map(response => {
         console.log('[RiddleService] Raw Directus data for student riddle results:', response.data);

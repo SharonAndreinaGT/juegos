@@ -107,7 +107,12 @@ export class ChartComponent implements OnInit {
     this.getPromedioScore();
     this.getTiempoPromedio();
     this.getRendimientoPorGrado();
-    this.getDistribucionPorGrado();
+    
+    // ✅ Solo cargar distribución por grado si es admin
+    if (this.isAdmin()) {
+      this.getDistribucionPorGrado();
+    }
+    
     this.getProgresoMensual();
   }
 

@@ -101,7 +101,7 @@
           </mat-card-content>
         </mat-card>
 
-        <mat-card class="chart-card">
+        <mat-card class="chart-card" *ngIf="isAdmin()">
           <mat-card-content>
             <canvas #pieChartCanvas baseChart
               [data]="pieChartData"

@@ -1,73 +1,73 @@
-<h2 mat-dialog-title>Edit User</h2>
+<h2 mat-dialog-title>Editar docente</h2>
 <mat-dialog-content>
   <form [formGroup]="userForm" class="edit-user-form">
     <mat-form-field class="full-width">
-      <mat-label>First Name</mat-label>
+      <mat-label>Nombre</mat-label>
       <input matInput formControlName="first_name" required>
       <mat-error *ngIf="userForm.get('first_name')?.hasError('required')">
-        First name is required
+        El nombre es requerido
       </mat-error>
     </mat-form-field>
 
     <mat-form-field class="full-width">
-      <mat-label>Last Name</mat-label>
+      <mat-label>Apellido</mat-label>
       <input matInput formControlName="last_name" required>
       <mat-error *ngIf="userForm.get('last_name')?.hasError('required')">
-        Last name is required
+        El apellido es requerido
       </mat-error>
     </mat-form-field>
 
     <mat-form-field class="full-width">
-      <mat-label>Email</mat-label>
+      <mat-label>Correo</mat-label>
       <input matInput formControlName="email" type="email" required>
       <mat-error *ngIf="userForm.get('email')?.hasError('required')">
-        Email is required
+        El correo es requerido
       </mat-error>
       <mat-error *ngIf="userForm.get('email')?.hasError('email')">
-        Please enter a valid email
+        Por favor introduzca un correo válido
       </mat-error>
     </mat-form-field>
 
     <mat-form-field class="full-width">
-      <mat-label>Status</mat-label>
+      <mat-label>Estado</mat-label>
       <mat-select formControlName="status" required>
         <mat-option value="active">Active</mat-option>
         <mat-option value="inactive">Inactive</mat-option>
       </mat-select>
       <mat-error *ngIf="userForm.get('status')?.hasError('required')">
-        Status is required
+        El estado es requerido
       </mat-error>
     </mat-form-field>
 
     <mat-form-field class="full-width">
-      <mat-label>Grade</mat-label>
+      <mat-label>Grado</mat-label>
       <mat-select formControlName="grade" required>
         <mat-option *ngFor="let grade of grades" [value]="grade.id">
           {{grade.grade || grade.name}}
         </mat-option>
       </mat-select>
       <mat-error *ngIf="userForm.get('grade')?.hasError('required')">
-        Grade is required
+        El grado es requerido
       </mat-error>
     </mat-form-field>
 
     <mat-form-field class="full-width">
-      <mat-label>Section</mat-label>
+      <mat-label>Seccion</mat-label>
       <mat-select formControlName="section" required>
         <mat-option *ngFor="let section of sections" [value]="section.id">
           {{section.section || section.name}}
         </mat-option>
       </mat-select>
       <mat-error *ngIf="userForm.get('section')?.hasError('required')">
-        Section is required
+        La seccion es requerida
       </mat-error>
     </mat-form-field>
   </form>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
-  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-button (click)="onCancel()">Cancelar</button>
   <button mat-raised-button color="primary" (click)="onSave()" [disabled]="userForm.invalid || isLoading">
     <mat-spinner diameter="20" *ngIf="isLoading"></mat-spinner>
-    <span *ngIf="!isLoading">Save</span>
+    <span *ngIf="!isLoading">Guardar</span>
   </button>
 </mat-dialog-actions>

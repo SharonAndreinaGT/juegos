@@ -3,7 +3,7 @@
     <div class="users-table-container">
       <mat-card class="users-table-card">
         <mat-card-header>
-          <mat-card-title>Lista de Docentes</mat-card-title>
+          <mat-card-title class="welcome-content">Lista de Docentes</mat-card-title>
         </mat-card-header>
         <mat-card-content>
           <div *ngIf="users.length === 0" class="no-users-message">
@@ -63,7 +63,7 @@
                   mat-icon-button 
                   color="primary" 
                   (click)="editUser(user)"
-                  matTooltip="Edit User"
+                  matTooltip="Editar"
                   class="edit-button"
                 >
                   <mat-icon>edit</mat-icon>

@@ -14,6 +14,12 @@
   border-radius: 10px;
   background-color: #f0f8ff;
 }
+.welcome-content{
+    font-size: 2.5em; 
+    color: #3f51b5; 
+    margin-bottom: 20px;
+    font-family: 'Arial', sans-serif; 
+}
 
 .menu-header-content {
   display: flex; /* Convierte el contenedor en un flex container */

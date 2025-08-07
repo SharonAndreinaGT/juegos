@@ -205,7 +205,7 @@ export class MemoryService {
         const resultsWithLevelNames$ = results.map(item => {
           if (item.level_id) {
             // Si hay level_id, busca la configuración del nivel para obtener el level_name
-            return this.http.get<any>(`${this.apiUrl}/${item.level_id}?fields=level_name`).pipe(
+            return this.http.get<any>(`${this.apiUrl}/${item.level_id}`).pipe(
               map(levelConfigResponse => {
                 const levelName = levelConfigResponse.data?.level_name || 'N/A';
                 return {

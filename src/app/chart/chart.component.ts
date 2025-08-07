@@ -3,6 +3,7 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { Chart, ChartConfiguration, ChartData, ChartType } from 'chart.js';
 import { NgChartsModule } from 'ng2-charts';
+import { forkJoin } from 'rxjs';
 import { UserService } from '../user.service';
 import { PuzzleService } from '../puzzle.service';
 import { MemoryService } from '../memory.service';
@@ -67,7 +68,6 @@ export class ChartComponent implements OnInit {
   private getCurrentGrade(): void {
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')[0];
-      console.log(userInfo)
       
       // ✅ Si es admin, no filtrar por grado (mostrar todos los datos)
       if (this.isAdmin()) {
@@ -127,7 +127,6 @@ export class ChartComponent implements OnInit {
     this.loadingEstudiantes = true;
     this.errorEstudiantes = false;
     
-    console.log('datos:', this.currentGrade)
     // ✅ Si es admin (currentGrade vacío), obtener todos los usuarios
     // ✅ Si es docente, filtrar por su grado específico
     const usersObservable = this.currentGrade 
@@ -155,7 +154,6 @@ export class ChartComponent implements OnInit {
     this.loadingPartidas = true;
     this.errorPartidas = false;
     
-    console.log('datos:', this.currentGrade)
     // ✅ Si es admin (currentGrade vacío), obtener todos los usuarios
     // ✅ Si es docente, filtrar por su grado específico
     const usersObservable = this.currentGrade 
@@ -227,7 +225,6 @@ export class ChartComponent implements OnInit {
     usersObservable.subscribe({
       next: (response) => {
         const users = response.data || [];
-        console.log(users)
         let scores: number[] = [];
         let completed = 0;
         const totalUsers = users.length * 3; // 3 juegos por usuario
@@ -360,97 +357,198 @@ export class ChartComponent implements OnInit {
     this.loadingRendimiento = true;
     this.errorRendimiento = false;
     
-    // ✅ Si es admin (currentGrade vacío), obtener todos los usuarios
-    // ✅ Si es docente, filtrar por su grado específico
-    const usersObservable = this.currentGrade 
-      ? this.userService.getUsersByGrade(this.currentGrade)
-      : this.userService.getUsers();
+    if (this.isAdmin()) {
+      // ✅ Para admin: obtener usuarios de los 3 grados específicos y calcular rendimiento por separado      
+      const primerGrado = '87b4cb0a-81bb-4217-9f17-6a545fc39f73';
+      const segundoGrado = 'ef7220b7-7bc2-4b91-88d1-47892aa57576';
+      const tercerGrado = '0acec409-6850-4152-b640-662fe9217123';
+      
+      // Obtener usuarios de cada grado
+      const primerGradoUsers$ = this.userService.getUsersByGrade(primerGrado);
+      const segundoGradoUsers$ = this.userService.getUsersByGrade(segundoGrado);
+      const tercerGradoUsers$ = this.userService.getUsersByGrade(tercerGrado);
+      
+      // Combinar los resultados
+      forkJoin([primerGradoUsers$, segundoGradoUsers$, tercerGradoUsers$]).subscribe({
+        next: (responses) => {
+          const primerGradoUsers = responses[0].data || [];
+          const segundoGradoUsers = responses[1].data || [];
+          const tercerGradoUsers = responses[2].data || [];
+          
+          console.log('🔍 [getRendimientoPorGrado] Usuarios Primer Grado:', primerGradoUsers.length);
+          console.log('🔍 [getRendimientoPorGrado] Usuarios Segundo Grado:', segundoGradoUsers.length);
+          console.log('🔍 [getRendimientoPorGrado] Usuarios Tercer Grado:', tercerGradoUsers.length);
+          
+          // Procesar cada grado por separado
+          this.procesarRendimientoPorGradoAdmin(primerGradoUsers, primerGrado, 'Primer Grado');
+          this.procesarRendimientoPorGradoAdmin(segundoGradoUsers, segundoGrado, 'Segundo Grado');
+          this.procesarRendimientoPorGradoAdmin(tercerGradoUsers, tercerGrado, 'Tercer Grado');
+        },
+        error: (error) => {
+          console.error('🔍 [getRendimientoPorGrado] Error obteniendo usuarios:', error);
+          this.errorRendimiento = true;
+          this.loadingRendimiento = false;
+        }
+      });
+    } else {
+      // ✅ Para docentes: mantener la lógica actual
+      const usersObservable = this.userService.getUsersByGrade(this.currentGrade);
+      
+      usersObservable.subscribe({
+        next: (response) => {
+          const users = response.data || [];
+          console.log('🔍 [getRendimientoPorGrado] Usuarios del docente:', users.length);
+          
+          let allResults: { student_id: any, score: number }[] = [];
+          let completed = 0;
+          const totalUsers = users.length * 3; // 3 juegos por usuario
 
-    usersObservable.subscribe({
-      next: (response) => {
-        const users = response.data || [];
-        let allResults: { student_id: any, score: number }[] = [];
-        let completed = 0;
-        const totalUsers = users.length * 3; // 3 juegos por usuario
-
-        const onComplete = () => {
-          completed++;
-          if (completed === totalUsers) {
-            // Calcular promedio del grado
-            if (allResults.length > 0) {
-              if (this.currentGrade) {
+          const onComplete = () => {
+            completed++;
+            if (completed === totalUsers) {
+              console.log('🔍 [getRendimientoPorGrado] Total resultados del docente:', allResults.length);
+              
+              if (allResults.length > 0) {
                 const sum = allResults.reduce((a, b) => a + b.score, 0);
                 const average = sum / allResults.length;
                 this.rendimientoPorGrado[this.currentGrade || 'general'] = Math.round(average * 100) / 100;
+                console.log('🔍 [getRendimientoPorGrado] Promedio del docente:', this.rendimientoPorGrado[this.currentGrade || 'general']);
               } else {
-                const gradeScores: { [grade: string]: number[] } = { '87b4cb0a-81bb-4217-9f17-6a545fc39f73': [], 'ef7220b7-7bc2-4b91-88d1-47892aa57576': [], '0acec409-6850-4152-b640-662fe9217123': [] };
-                (['87b4cb0a-81bb-4217-9f17-6a545fc39f73', 'ef7220b7-7bc2-4b91-88d1-47892aa57576', '0acec409-6850-4152-b640-662fe9217123'] as const).forEach(grade => {
-                  const arr = gradeScores[grade];
-                  this.rendimientoPorGrado[grade] = arr.length > 0 ? Math.round((arr.reduce((a, b) => a + b, 0) / arr.length) * 100) / 100 : 0;
-                });
+                this.rendimientoPorGrado[this.currentGrade || 'general'] = 0;
               }
-            } else {
-              this.rendimientoPorGrado[this.currentGrade || 'general'] = 0;
+              
+              // Actualizar gráfico para docente
+              this.actualizarGraficoRendimiento([this.rendimientoPorGrado[this.currentGrade || 'general']], [this.gradeTitle], 'Puntaje Promedio del Grado');
+              this.loadingRendimiento = false;
             }
-            
-            // Actualizar gráfico
-            if (this.barChartData && this.barChartData.datasets && this.barChartData.datasets[0]) {
-              const array = [
-                this.rendimientoPorGrado['87b4cb0a-81bb-4217-9f17-6a545fc39f73'],
-                this.rendimientoPorGrado['ef7220b7-7bc2-4b91-88d1-47892aa57576'],
-                this.rendimientoPorGrado['0acec409-6850-4152-b640-662fe9217123']
-              ]
-              this.barChartData = {
-                ...this.barChartData,
-                labels: [this.gradeTitle],
-                datasets: [{
-                  ...this.barChartData.datasets[0],
-                  data: this.currentGrade ? [this.rendimientoPorGrado[this.currentGrade || 'general']] : array,
-                  label: 'Puntaje Promedio del Grado'
-                }]
-              };
-            }
-            this.loadingRendimiento = false;
-          }
-        };
+          };
 
-        users.forEach((user: any) => {
-          this.puzzleService.getStudentPuzzleResults(user.id).subscribe({
-            next: (results) => {
-              if (results) {
-                allResults = allResults.concat(results.map((r: any) => ({ student_id: user.id, score: r.score })));
-              }
-              onComplete();
-            },
-            error: () => onComplete()
+          users.forEach((user: any) => {
+            this.obtenerResultadosUsuario(user, allResults, onComplete);
           });
+        },
+        error: () => {
+          this.errorRendimiento = true;
+          this.loadingRendimiento = false;
+        }
+      });
+    }
+  }
 
-          this.memoryService.getStudentMemoryResults(user.id).subscribe({
-            next: (results) => {
-              if (results) {
-                allResults = allResults.concat(results.map((r: any) => ({ student_id: user.id, score: r.score })));
-              }
-              onComplete();
-            },
-            error: () => onComplete()
-          });
+  // ✅ Método auxiliar para procesar rendimiento por grado específico para admin
+  private procesarRendimientoPorGradoAdmin(users: any[], gradeId: string, gradeName: string) {
+    console.log(`🔍 [procesarRendimientoPorGradoAdmin] Procesando ${gradeName}:`, users.length, 'usuarios');
+    
+    let allResults: { student_id: any, score: number }[] = [];
+    let completed = 0;
+    const totalUsers = users.length * 3; // 3 juegos por usuario
 
-          this.riddleService.getStudentRiddleResults(user.id).subscribe({
-            next: (results) => {
-              if (results) {
-                allResults = allResults.concat(results.map((r: any) => ({ student_id: user.id, score: r.score })));
-              }
-              onComplete();
-            },
-            error: () => onComplete()
-          });
-        });
-      },
-      error: () => {
-        this.errorRendimiento = true;
-        this.loadingRendimiento = false;
+    const onComplete = () => {
+      completed++;
+      if (completed === totalUsers) {
+        console.log(`🔍 [procesarRendimientoPorGradoAdmin] ${gradeName} - Total resultados:`, allResults.length);
+        
+        if (allResults.length > 0) {
+          const sum = allResults.reduce((a, b) => a + b.score, 0);
+          const average = sum / allResults.length;
+          this.rendimientoPorGrado[gradeId] = Math.round(average * 100) / 100;
+          console.log(`🔍 [procesarRendimientoPorGradoAdmin] ${gradeName} - Promedio:`, this.rendimientoPorGrado[gradeId]);
+        } else {
+          this.rendimientoPorGrado[gradeId] = 0;
+        }
+        
+        // Verificar si todos los grados han sido procesados
+        this.verificarYActualizarGraficoAdmin();
       }
+    };
+
+    users.forEach((user: any) => {
+      this.obtenerResultadosUsuario(user, allResults, onComplete);
     });
+  }
+
+  // ✅ Método auxiliar para obtener resultados de un usuario
+  private obtenerResultadosUsuario(user: any, allResults: any[], onComplete: () => void) {
+    this.puzzleService.getStudentPuzzleResults(user.id).subscribe({
+      next: (results) => {
+        if (results) {
+          // ✅ Usar push para agregar elementos al array existente
+          results.forEach((r: any) => {
+            allResults.push({ 
+              student_id: user.id, 
+              score: r.score 
+            });
+          });
+        }
+        onComplete();
+      },
+      error: () => onComplete()
+    });
+
+    this.memoryService.getStudentMemoryResults(user.id).subscribe({
+      next: (results) => {
+        if (results) {
+          // ✅ Usar push para agregar elementos al array existente
+          results.forEach((r: any) => {
+            allResults.push({ 
+              student_id: user.id, 
+              score: r.score 
+            });
+          });
+        }
+        onComplete();
+      },
+      error: () => onComplete()
+    });
+
+    this.riddleService.getStudentRiddleResults(user.id).subscribe({
+      next: (results) => {
+        if (results) {
+          // ✅ Usar push para agregar elementos al array existente
+          results.forEach((r: any) => {
+            allResults.push({ 
+              student_id: user.id, 
+              score: r.score 
+            });
+          });
+        }
+        onComplete();
+      },
+      error: () => onComplete()
+    });
+  }
+
+  // ✅ Método auxiliar para verificar y actualizar gráfico de admin
+  private verificarYActualizarGraficoAdmin() {
+    const primerGrado = '87b4cb0a-81bb-4217-9f17-6a545fc39f73';
+    const segundoGrado = 'ef7220b7-7bc2-4b91-88d1-47892aa57576';
+    const tercerGrado = '0acec409-6850-4152-b640-662fe9217123';
+    
+    const array = [
+      this.rendimientoPorGrado[primerGrado],
+      this.rendimientoPorGrado[segundoGrado],
+      this.rendimientoPorGrado[tercerGrado]
+    ];
+        
+    this.actualizarGraficoRendimiento(array, ['Primer Grado', 'Segundo Grado', 'Tercer Grado'], 'Puntaje Promedio por Grado');
+    this.loadingRendimiento = false;
+  }
+
+  // ✅ Método auxiliar para actualizar gráfico
+  private actualizarGraficoRendimiento(data: number[], labels: string[], label: string) {
+    if (this.barChartData && this.barChartData.datasets && this.barChartData.datasets[0]) {
+      this.barChartData = {
+        ...this.barChartData,
+        labels: labels,
+        datasets: [{
+          ...this.barChartData.datasets[0],
+          data: data,
+          label: label
+        }]
+      };
+      
+      console.log('🔍 [actualizarGraficoRendimiento] Gráfica actualizada:', this.barChartData);
+    }
   }
 
   actualizarJuegosMasJugados(puzzleCount: number, memoryCount: number, riddleCount: number) {
@@ -469,33 +567,50 @@ export class ChartComponent implements OnInit {
     if (this.pieChartData && this.pieChartData.datasets && this.pieChartData.datasets[0]) {
       this.pieChartData = {
         ...this.pieChartData,
+        labels: ['Primer Grado', 'Segundo Grado', 'Tercer Grado'],
         datasets: [{
           ...this.pieChartData.datasets[0],
           data: [countFirst, countSecond, countThird]
         }]
       };
+      
+      console.log('🔍 [actualizarDistribucionPorGrado] Gráfica actualizada:', this.pieChartData);
     }
   }
 
   getDistribucionPorGrado() {
-    // ✅ Si es admin (currentGrade vacío), obtener todos los usuarios
-    // ✅ Si es docente, filtrar por su grado específico
-    const usersObservable = this.currentGrade 
-      ? this.userService.getUsersByGrade(this.currentGrade)
-      : this.userService.getUsers();
-
-    usersObservable.subscribe({
-      next: (response) => {
-        const users = response.data || [];
-        const countFirst = users.filter((u: any) => u.grade === '87b4cb0a-81bb-4217-9f17-6a545fc39f73').length;
-        const countSecond = users.filter((u: any) => u.grade === 'ef7220b7-7bc2-4b91-88d1-47892aa57576').length;
-        const countThird = users.filter((u: any) => u.grade === '0acec409-6850-4152-b640-662fe9217123').length;
-        this.actualizarDistribucionPorGrado(countFirst, countSecond, countThird);
-      },
-      error: () => {
-        this.actualizarDistribucionPorGrado(0, 0, 0);
-      }
-    });
+    // ✅ Solo ejecutar si es admin
+    if (!this.isAdmin()) {
+      return;
+    }    
+    // ✅ Para admin: obtener usuarios de los 3 grados específicos
+    const primerGrado = '87b4cb0a-81bb-4217-9f17-6a545fc39f73';
+    const segundoGrado = 'ef7220b7-7bc2-4b91-88d1-47892aa57576';
+    const tercerGrado = '0acec409-6850-4152-b640-662fe9217123';
+    
+    // Obtener usuarios de cada grado
+    const primerGradoUsers$ = this.userService.getUsersByGrade(primerGrado);
+    const segundoGradoUsers$ = this.userService.getUsersByGrade(segundoGrado);
+    const tercerGradoUsers$ = this.userService.getUsersByGrade(tercerGrado);
+    
+    // Combinar los resultados
+    forkJoin([primerGradoUsers$, segundoGradoUsers$, tercerGradoUsers$]).subscribe({
+        next: (responses) => {
+          const primerGradoUsers = responses[0].data || [];
+          const segundoGradoUsers = responses[1].data || [];
+          const tercerGradoUsers = responses[2].data || [];
+          // Actualizar la gráfica de distribución
+          this.actualizarDistribucionPorGrado(
+            primerGradoUsers.length,
+            segundoGradoUsers.length,
+            tercerGradoUsers.length
+          );
+        },
+        error: (error) => {
+          console.error('🔍 [getDistribucionPorGrado] Error obteniendo usuarios:', error);
+          this.actualizarDistribucionPorGrado(0, 0, 0);
+        }
+      });
   }
 
   getProgresoMensual() {

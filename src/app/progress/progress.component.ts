@@ -128,6 +128,17 @@ export class ProgressComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.getCurrentGrade();
+
+    // ✅ Escuchar cambios en el localStorage para gradeFilter
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'gradeFilter') {
+        console.log('gradeFilter cambió en progress, recargando datos...');
+        this.reloadDataFromLocalStorage();
+      }
+    });
+
+    // ✅ También verificar al entrar si hay gradeFilter en localStorage
+    this.checkAndReloadFromLocalStorage();
   }
 
   ngAfterViewInit(): void {
@@ -167,6 +178,44 @@ private getCurrentGrade(): void {
     this.loadAllStudentsProgress();
     this.loadAllStudentsMemoryResults();
     this.loadAllStudentsRiddleResults();
+  }
+}
+
+// ✅ Método para verificar y recargar datos desde localStorage
+private checkAndReloadFromLocalStorage(): void {
+  const gradeFilterData = localStorage.getItem('gradeFilter');
+  if (gradeFilterData) {
+    try {
+      const parsedData = JSON.parse(gradeFilterData);
+      console.log('Recargando progress con gradeFilter:', parsedData);
+      // Recargar todas las configuraciones para el nuevo grado
+      this.reloadDataFromLocalStorage();
+    } catch (error) {
+      console.error('Error parsing gradeFilter en progress:', error);
+    }
+  }
+}
+
+// ✅ Método para recargar datos desde localStorage
+private reloadDataFromLocalStorage(): void {
+  const gradeFilterData = localStorage.getItem('gradeFilter');
+  if (gradeFilterData) {
+    try {
+      const parsedData = JSON.parse(gradeFilterData);
+      const gradeId = parsedData.data[0].id;
+      console.log('Recargando progress con gradeId:', gradeId);
+      
+      // Actualizar el grado actual
+      this.currentGrade = gradeId;
+      this.updateGradeTitle();
+      
+      // Recargar todos los datos
+      this.loadAllStudentsProgress();
+      this.loadAllStudentsMemoryResults();
+      this.loadAllStudentsRiddleResults();
+    } catch (error) {
+      console.error('Error parsing gradeFilter en progress:', error);
+    }
   }
 }
 

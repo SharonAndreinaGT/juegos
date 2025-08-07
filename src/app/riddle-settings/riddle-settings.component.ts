@@ -74,6 +74,17 @@ export class RiddleSettingsComponent implements OnInit {
       }
       this.initForms();
     });
+
+    // ✅ Escuchar cambios en el localStorage para gradeFilter
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'gradeFilter') {
+        console.log('gradeFilter cambió en riddle-settings, recargando datos...');
+        this.reloadDataFromLocalStorage();
+      }
+    });
+
+    // ✅ También verificar al entrar si hay gradeFilter en localStorage
+    this.checkAndReloadFromLocalStorage();
   }
 
   initForms(): void {
@@ -94,6 +105,44 @@ export class RiddleSettingsComponent implements OnInit {
       wordsPerLevel: [this.level3Config.words_level, [Validators.required, Validators.min(1)]],
       timeLimit: [this.level3Config.time_limit, [Validators.required, Validators.min(10)]]
     });
+  }
+
+  // ✅ Método para verificar y recargar datos desde localStorage
+  checkAndReloadFromLocalStorage(): void {
+    const gradeFilterData = localStorage.getItem('gradeFilter');
+    if (gradeFilterData) {
+      try {
+        const parsedData = JSON.parse(gradeFilterData);
+        console.log('Recargando riddle-settings con gradeFilter:', parsedData);
+        // Recargar todas las configuraciones para el nuevo grado
+        this.reloadDataFromLocalStorage();
+      } catch (error) {
+        console.error('Error parsing gradeFilter en riddle-settings:', error);
+      }
+    }
+  }
+
+  // ✅ Método para recargar datos desde localStorage
+  reloadDataFromLocalStorage(): void {
+    const gradeFilterData = localStorage.getItem('gradeFilter');
+    if (gradeFilterData) {
+      try {
+        const parsedData = JSON.parse(gradeFilterData);
+        const gradeId = parsedData.data[0].id;
+        console.log('Recargando riddle-settings con gradeId:', gradeId);
+        
+        // Actualizar el grado en las configuraciones
+        this.grade = gradeId;
+        this.level1Config.grade = gradeId;
+        this.level2Config.grade = gradeId;
+        this.level3Config.grade = gradeId;
+        
+        // Recargar los niveles desde Directus
+        this.riddleService.loadLevelsFromDirectus();
+      } catch (error) {
+        console.error('Error parsing gradeFilter en riddle-settings:', error);
+      }
+    }
   }
 
   onTabChange(event: MatTabChangeEvent): void {

@@ -41,11 +41,37 @@ export class PuzzleSettingsComponent implements OnInit {
   ngOnInit(): void {
     // Cargar la configuración existente para cada nivel al iniciar el componente
     this.loadAllLevelConfigs();
+
+    // ✅ Escuchar cambios en el localStorage para gradeFilter
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'gradeFilter') {
+        console.log('gradeFilter cambió en puzzle-settings, recargando datos...');
+        this.loadAllLevelConfigs();
+      }
+    });
+
+    // ✅ También verificar al entrar si hay gradeFilter en localStorage
+    this.checkAndReloadFromLocalStorage();
   }
 
   loadAllLevelConfigs(): void {
     const levelsIds = ['183770b3-0e66-4932-8769-b0c1b4738d79', '98fd8047-6897-4a86-85e2-f430e48956bd', '3c16b66e-0fa4-4ecc-a9ae-41dd832f0bc1'];
     levelsIds.forEach((level, index) => this.loadLevelConfig(level));
+  }
+
+  // ✅ Método para verificar y recargar datos desde localStorage
+  checkAndReloadFromLocalStorage(): void {
+    const gradeFilterData = localStorage.getItem('gradeFilter');
+    if (gradeFilterData) {
+      try {
+        const parsedData = JSON.parse(gradeFilterData);
+        console.log('Recargando puzzle-settings con gradeFilter:', parsedData);
+        // Recargar todas las configuraciones para el nuevo grado
+        this.loadAllLevelConfigs();
+      } catch (error) {
+        console.error('Error parsing gradeFilter en puzzle-settings:', error);
+      }
+    }
   }
 
   /**

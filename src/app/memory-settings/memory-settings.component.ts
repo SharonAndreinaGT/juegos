@@ -84,11 +84,37 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     console.log('Inicialización de componentes de configuración de memoria');
-    this.loadSettings(); 
+    this.loadSettings();
+
+    // ✅ Escuchar cambios en el localStorage para gradeFilter
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'gradeFilter') {
+        console.log('gradeFilter cambió en memory-settings, recargando datos...');
+        this.loadSettings();
+      }
+    });
+
+    // ✅ También verificar al entrar si hay gradeFilter en localStorage
+    this.checkAndReloadFromLocalStorage();
   }
 
   ngOnDestroy(): void {
     //limpiar suscripciones
+  }
+
+  // ✅ Método para verificar y recargar datos desde localStorage
+  checkAndReloadFromLocalStorage(): void {
+    const gradeFilterData = localStorage.getItem('gradeFilter');
+    if (gradeFilterData) {
+      try {
+        const parsedData = JSON.parse(gradeFilterData);
+        console.log('Recargando memory-settings con gradeFilter:', parsedData);
+        // Recargar todas las configuraciones para el nuevo grado
+        this.loadSettings();
+      } catch (error) {
+        console.error('Error parsing gradeFilter en memory-settings:', error);
+      }
+    }
   }
 
   getLevelForm(levelKey: string): FormGroup {
@@ -264,7 +290,6 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
       const existingConfigData = existingConfigResponse?.data?.[0];
       console.log(`[MemorySettingsComponent] Configuración existente para level ${level}:`, existingConfigData);
       const configToSave: MemoryConfig = {
-        level_name: levelName,
         card_count: levelForm.get('card_count')?.value,
         time_limit: levelForm.get('time_limit')?.value,
         intent: levelForm.get('intent')?.value,
@@ -276,7 +301,6 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
 
       console.log(`[MemorySettingsComponent] Configuración a guardar para ${levelKey}:`, {
         id: configToSave.id,
-        level_name: configToSave.level_name,
         level: configToSave.level,
         grade: configToSave.grade,
         isActive: configToSave.isActive,
@@ -296,7 +320,7 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
 
       // Si este nivel se va a activar, desactivar todos los demás niveles del mismo grado primero en la DB
       if (configToSave.isActive) {
-        console.log(`[MemorySettingsComponent] Iniciando desactivación de otros niveles del mismo grado. Nivel activo: ${configToSave.level_name} (ID: ${configToSave.level})`);
+        console.log(`[MemorySettingsComponent] Iniciando desactivación de otros niveles del mismo grado.  (ID: ${configToSave.level})`);
         
         // Obtener el grado actual del usuario
         const grade = JSON.parse(localStorage.getItem('gradeFilter') || '{}').data?.[0]?.id || '';
@@ -324,7 +348,6 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
             const isNotCurrentLevel = config.level !== configToSave.level;
             
             console.log(`[MemorySettingsComponent] Evaluando configuración desde DB:`, {
-              level_name: config.level_name,
               level_id: config.level,
               grade: config.grade,
               isActive: config.isActive,
@@ -343,7 +366,7 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
           // Desactivar cada configuración encontrada
           const deactivationPromises = configsToDeactivate.map(async (config: MemoryConfig) => {
             try {
-              console.log(`[MemorySettingsComponent] Desactivando ${config.level_name} (ID: ${config.id})`);
+              console.log(`[MemorySettingsComponent] Desactivando  (ID: ${config.id})`);
               
               // Obtener la configuración completa del nivel a desactivar antes de enviarla
               const currentDbConfigResponse = await this.memoryService.getMemoryConfigByLevel(config.level!).toPromise();
@@ -353,7 +376,7 @@ export class MemorySettingsComponent implements OnInit, OnDestroy {
                 // Modificar la copia completa y enviarla
                 currentDbConfig.isActive = false;
                 await this.memoryService.saveMemoryConfig(currentDbConfig).toPromise();
-                console.log(`[MemorySettingsComponent] ${config.level_name} desactivado en Directus.`);
+                console.log(`[MemorySettingsComponent] ${config.level} desactivado en Directus.`);
               } else {
                 console.log(`[MemorySettingsComponent] No se pudo obtener configuración completa para ${config.level_name}`);
               }

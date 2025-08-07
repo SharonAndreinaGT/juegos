@@ -1,7 +1,7 @@
 export class MemoryConfig {
   id?: string;
   level_name?: string;
-  level?: string;
+  level?: any;
   card_count?: number;
   time_limit?: number;
   intent?: number | undefined;

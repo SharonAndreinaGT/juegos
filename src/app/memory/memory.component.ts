@@ -8,6 +8,7 @@ import { MemoryService } from '../memory.service';
 import { SharedDataService } from '../sharedData.service';
 import { Router } from '@angular/router';
 import { CanComponentDeactivate, NavigationGuardService } from '../navigation-guard.service';
+import { StudentProgressService } from '../student-progress.service';
 
 export interface Card {
   id?: number | null;
@@ -27,6 +28,7 @@ export class MemoryComponent implements OnInit, CanComponentDeactivate {
 
   cards: Card[] = [];
   activeLevel: MemoryConfig | null = null; // Variable para guardar la configuración del nivel activo
+  currentLevel: any = ''; // Variable para el ID del nivel actual
 
   // Variables para el estado del juego (asegúrate de que las tienes inicializadas como necesites)
   intent: number = 0; // Intentos actuales
@@ -53,13 +55,27 @@ export class MemoryComponent implements OnInit, CanComponentDeactivate {
     private router: Router,
     private memoryService: MemoryService,
     private snackBar: MatSnackBar, // Inyectar MatSnackBar para notificaciones
-    private navigationGuardService: NavigationGuardService
+    private navigationGuardService: NavigationGuardService,
+    private studentProgressService: StudentProgressService
   ) { }
 
   ngOnInit(): void {
     this.sharedDataService.loggedInStudentId$.subscribe((studentId: string | null) => {
       this.currentStudentId = studentId;
       console.log(`[MemoryComponent] ID de estudiante obtenido del servicio compartido: ${this.currentStudentId}`);
+      
+      if (studentId) {
+        // Cargar o inicializar progreso del estudiante
+        let progress = this.studentProgressService.loadProgressFromLocalStorage(studentId, 'memory');
+        if (!progress) {
+          this.studentProgressService.initializeProgress(studentId, 'memory');
+          progress = this.studentProgressService.getCurrentProgress();
+        }
+        
+        if (progress) {
+          console.log(`[MemoryComponent] Progreso del estudiante cargado:`, progress);
+        }
+      }
     });
 
     this.loadActiveMemoryConfig();
@@ -67,21 +83,36 @@ export class MemoryComponent implements OnInit, CanComponentDeactivate {
 
 
   loadActiveMemoryConfig(): void {
-    // Obtener la configuración activa (isActive: true) desde la base de datos
-    this.memoryService.getActiveMemoryConfig().subscribe(
-      (response: any) => {
-        // Obtener el primer registro activo (debería ser solo uno)
-        const activeConfig = response.data?.[0];
-        console.log('Configuración activa encontrada:', activeConfig);
+    // Obtener el grado del estudiante desde localStorage
+    const grade = localStorage.getItem('gradeStudent') || '';
+    if (!grade) {
+      console.error('[MemoryComponent] No se encontró el grado del estudiante');
+      this.snackBar.open('Error: No se encontró el grado del estudiante.', 'Cerrar', { duration: 5000 });
+      return;
+    }
 
-        if (activeConfig) {
-          this.activeLevel = activeConfig;
-          this.initializeGame(activeConfig); // Inicializar el juego con la nueva configuración
+    console.log(`[MemoryComponent] Cargando configuración del nivel activo del grado del estudiante: ${grade}`);
+    
+    // Obtener la configuración activa específica del grado del estudiante
+    this.memoryService.getActiveMemoryConfigByGrade(grade).subscribe(
+      (response: any) => {
+        const configData: MemoryConfig | undefined = response?.data?.[0];
+        console.log('[MemoryComponent] Configuración activa encontrada:', configData);
+
+        if (configData) {
+          // Asignar el ID del nivel a currentLevel
+          this.currentLevel = configData.level!.level || '';
+          console.log(`[MemoryComponent] Current level asignado: ${this.currentLevel}`);
+          
+          this.activeLevel = configData;
+          this.initializeGame(configData); // Inicializar el juego con la nueva configuración
         } else {
-          this.snackBar.open('No se encontró un nivel activo. Por favor, activa un nivel en los ajustes.', 'Cerrar', { duration: 5000 });
+          console.warn('[MemoryComponent] No se encontró configuración activa para el grado del estudiante');
+          this.snackBar.open('No se encontró un nivel activo para tu grado. Por favor, contacta al administrador.', 'Cerrar', { duration: 5000 });
         }
       },
       (error) => {
+        console.error('[MemoryComponent] Error al cargar la configuración:', error);
         this.snackBar.open('Error al cargar la configuración del nivel activo. Por favor, comprueba la conexión con Directus.', 'Cerrar', { duration: 5000 });
       }
     );
@@ -280,6 +311,13 @@ initializeGame(config: MemoryConfig): void {
   private checkGameEnd(): void {
     if (!this.gameStarted && (this.matchedPairs === this.totalPairs || this.intentExceeded || this.timeExceeded)) {
       this.calculateScoreAndStars();
+      
+      // Si el juego se completó exitosamente, actualizar el progreso del estudiante
+      if (this.matchedPairs === this.totalPairs && this.currentStudentId) {
+        this.studentProgressService.completeLevel(this.currentLevel);
+        console.log(`[MemoryComponent] Nivel completado: ${this.currentLevel}`);
+      }
+      
       // guardar el resultado en directus
         const result: MemoryResult = {
         student_id: this.currentStudentId,
@@ -293,6 +331,7 @@ initializeGame(config: MemoryConfig): void {
         completed: this.matchedPairs === this.totalPairs
       };
         console.log('Resultado del juego:', result);
+        console.log(`[MemoryComponent] Intentos restantes al guardar: ${this.intent}`);
         this.memoryService.saveMemoryResult(result).subscribe(
         () => console.log('Resultado del juego guardado con éxito'),
         (error) => console.error('Error al guardar el resultado del juego', error)

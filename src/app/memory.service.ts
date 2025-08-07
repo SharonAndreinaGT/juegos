@@ -44,6 +44,23 @@ export class MemoryService {
     return this.http.get<any>(`${this.apiUrl}?filter[isActive][_eq]=true&fields=*,id`);
   }
 
+  // Obtiene la configuración activa del juego de memoria para un grado específico
+  getActiveMemoryConfigByGrade(grade: string): Observable<any> {
+    console.log(`[MemoryService] Obteniendo memoria activa para grado: ${grade}`);
+    const url = `${this.apiUrl}?filter[grade][_eq]=${grade}&filter[isActive][_eq]=true&fields=id,level,level.level,grade,isActive,card_count,time_limit,intent,images,level.level`;
+    console.log(`[MemoryService] URL de consulta: ${url}`);
+    return this.http.get<any>(url).pipe(
+      map(response => {
+        console.log(`[MemoryService] Respuesta de memoria activa:`, response);
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error(`[MemoryService] Error al obtener memoria activa para grado ${grade}:`, error);
+        return of(null);
+      })
+    );
+  }
+
   // Obtiene todas las configuraciones del juego de memoria
   getAllMemoryConfigs(): Observable<any> {
     const isAdmin = this.isAdmin();
@@ -104,8 +121,16 @@ export class MemoryService {
   //metodo ara guardar y enviar el resultado
   saveMemoryResult(result: MemoryResult): Observable<MemoryResult> {
     console.log('[MemoryService] Guardando resultado del juego de memoria:', result);
+    console.log(`[MemoryService] Intentos restantes en el payload: ${result.intentRemaining}`);
     return this.http.post<MemoryResult>(this.memoryResultsApiUrl, result).pipe(
-      map(response => response)
+      map(response => {
+        console.log('[MemoryService] Respuesta del servidor:', response);
+        return response;
+      }),
+      catchError((error: any) => {
+        console.error('[MemoryService] Error al guardar resultado:', error);
+        throw error;
+      })
     );
   }
 

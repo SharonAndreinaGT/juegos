@@ -79,8 +79,29 @@ export class GamesOptionsComponent implements OnInit {
   }
 
   gamesMemory(): void {
-    this.router.navigate(['/memory']);
-    console.log(`[GamesOptionsComponent] Navigating to /memory (MemoryComponent will get active level from service).`);
+    // Obtener el ID del estudiante y su progreso actual
+    this.sharedDataService.loggedInStudentId$.subscribe(studentId => {
+      if (studentId) {
+        // Cargar o inicializar progreso del estudiante
+        let progress = this.studentProgressService.loadProgressFromLocalStorage(studentId, 'memory');
+        if (!progress) {
+          this.studentProgressService.initializeProgress(studentId, 'memory');
+          progress = this.studentProgressService.getCurrentProgress();
+        }
+        
+        if (progress) {
+          // Navegar al nivel actual del estudiante
+          this.router.navigate(['/memory']);
+          console.log(`[GamesOptionsComponent] Navigating to /memory with current level: ${progress.currentLevel}`);
+        } else {
+          // Fallback al primer nivel
+          this.router.navigate(['/memory']);
+        }
+      } else {
+        // Si no hay estudiante logueado, ir al primer nivel
+        this.router.navigate(['/memory']);
+      }
+    });
   }
 
   gamesRiddle(): void {

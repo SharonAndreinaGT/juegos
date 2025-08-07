@@ -68,12 +68,18 @@ export class ChartComponent implements OnInit {
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')[0];
       console.log(userInfo)
-      this.currentGrade = userInfo.grade || '';
       
-      // Actualizar el título según el grado
-      this.updateGradeTitle();
+      // ✅ Si es admin, no filtrar por grado (mostrar todos los datos)
+      if (this.isAdmin()) {
+        this.currentGrade = '';
+        this.gradeTitle = 'Gráficas del Progreso - Todos los Grados';
+      } else {
+        // ✅ Para docentes, mantener la lógica actual
+        this.currentGrade = userInfo.grade || '';
+        this.updateGradeTitle();
+      }
       
-      // Cargar datos del grado específico
+      // Cargar datos
       this.loadChartData();
     } catch (error) {
       console.error('Error al obtener el grado del usuario:', error);
@@ -122,6 +128,8 @@ export class ChartComponent implements OnInit {
     this.errorEstudiantes = false;
     
     console.log('datos:', this.currentGrade)
+    // ✅ Si es admin (currentGrade vacío), obtener todos los usuarios
+    // ✅ Si es docente, filtrar por su grado específico
     const usersObservable = this.currentGrade 
       ? this.userService.getUsersByGrade(this.currentGrade)
       : this.userService.getUsers();
@@ -148,6 +156,8 @@ export class ChartComponent implements OnInit {
     this.errorPartidas = false;
     
     console.log('datos:', this.currentGrade)
+    // ✅ Si es admin (currentGrade vacío), obtener todos los usuarios
+    // ✅ Si es docente, filtrar por su grado específico
     const usersObservable = this.currentGrade 
       ? this.userService.getUsersByGrade(this.currentGrade)
       : this.userService.getUsers();
@@ -208,6 +218,8 @@ export class ChartComponent implements OnInit {
     this.loadingScore = true;
     this.errorScore = false;
     
+    // ✅ Si es admin (currentGrade vacío), obtener todos los usuarios
+    // ✅ Si es docente, filtrar por su grado específico
     const usersObservable = this.currentGrade 
       ? this.userService.getUsersByGrade(this.currentGrade)
       : this.userService.getUsers();
@@ -276,6 +288,8 @@ export class ChartComponent implements OnInit {
     this.loadingTiempo = true;
     this.errorTiempo = false;
     
+    // ✅ Si es admin (currentGrade vacío), obtener todos los usuarios
+    // ✅ Si es docente, filtrar por su grado específico
     const usersObservable = this.currentGrade 
       ? this.userService.getUsersByGrade(this.currentGrade)
       : this.userService.getUsers();
@@ -294,10 +308,10 @@ export class ChartComponent implements OnInit {
               const sum = tiempos.reduce((a, b) => a + b, 0);
               const avg = sum / tiempos.length;
               const min = Math.floor(avg / 60);
-              const sec = Math.round(avg % 60);
-              this.tiempoPromedio = `${min} min ${sec} s`;
+              const seg = Math.round(avg % 60);
+              this.tiempoPromedio = `${min}:${seg.toString().padStart(2, '0')}`;
             } else {
-              this.tiempoPromedio = '0 min';
+              this.tiempoPromedio = '0:00';
             }
             this.loadingTiempo = false;
           }
@@ -307,7 +321,7 @@ export class ChartComponent implements OnInit {
           this.puzzleService.getStudentPuzzleResults(user.id).subscribe({
             next: (results) => {
               if (results) {
-                tiempos = tiempos.concat(results.map((r: any) => r.time).filter((t: any) => typeof t === 'number'));
+                tiempos = tiempos.concat(results.map((r: any) => r.time_taken).filter((t: any) => typeof t === 'number'));
               }
               onComplete();
             },
@@ -346,6 +360,8 @@ export class ChartComponent implements OnInit {
     this.loadingRendimiento = true;
     this.errorRendimiento = false;
     
+    // ✅ Si es admin (currentGrade vacío), obtener todos los usuarios
+    // ✅ Si es docente, filtrar por su grado específico
     const usersObservable = this.currentGrade 
       ? this.userService.getUsersByGrade(this.currentGrade)
       : this.userService.getUsers();
@@ -370,7 +386,7 @@ export class ChartComponent implements OnInit {
                 const gradeScores: { [grade: string]: number[] } = { '87b4cb0a-81bb-4217-9f17-6a545fc39f73': [], 'ef7220b7-7bc2-4b91-88d1-47892aa57576': [], '0acec409-6850-4152-b640-662fe9217123': [] };
                 (['87b4cb0a-81bb-4217-9f17-6a545fc39f73', 'ef7220b7-7bc2-4b91-88d1-47892aa57576', '0acec409-6850-4152-b640-662fe9217123'] as const).forEach(grade => {
                   const arr = gradeScores[grade];
-                  this.rendimientoPorGrado[grade] = arr.length > 0 ? Math.round((arr.reduce((a, b) => a + b, 0) / arr.length) * 100) / 100 : 0;
+                  this.rendimientoPorGrado[grade] = arr.length > 0 ? Math.round((arr.reduce((a, b) => a + b, 0) / arr.length) * 100) / 100 : 0;
                 });
               }
             } else {
@@ -462,6 +478,8 @@ export class ChartComponent implements OnInit {
   }
 
   getDistribucionPorGrado() {
+    // ✅ Si es admin (currentGrade vacío), obtener todos los usuarios
+    // ✅ Si es docente, filtrar por su grado específico
     const usersObservable = this.currentGrade 
       ? this.userService.getUsersByGrade(this.currentGrade)
       : this.userService.getUsers();
@@ -481,6 +499,8 @@ export class ChartComponent implements OnInit {
   }
 
   getProgresoMensual() {
+    // ✅ Si es admin (currentGrade vacío), obtener todos los usuarios
+    // ✅ Si es docente, filtrar por su grado específico
     const usersObservable = this.currentGrade 
       ? this.userService.getUsersByGrade(this.currentGrade)
       : this.userService.getUsers();

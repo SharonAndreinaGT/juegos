@@ -65,7 +65,7 @@ export class PuzzleService {
   getActivePuzzleConfigByGrade(grade: string): Observable<any> {
     console.log(`[PuzzleService] Obteniendo puzzle activo para grado: ${grade}`);
     
-    const url = `${this.apiUrl}?filter[grade][_eq]=${grade}&filter[isActive][_eq]=true&fields=id,level,rows,cols,time_limit,imageUrl,isActive,grade, level.level`;
+    const url = `${this.apiUrl}?filter[grade][_eq]=${grade}&filter[isActive][_eq]=true&fields=id,level,level.id,rows,cols,time_limit,imageUrl,isActive,grade, level.level`;
     console.log(`[PuzzleService] URL de consulta: ${url}`);
     
     return this.http.get<any>(url).pipe(

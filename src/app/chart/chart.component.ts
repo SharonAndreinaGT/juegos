@@ -169,9 +169,17 @@ export class ChartComponent implements OnInit {
         let memoryCount = 0;
         let riddleCount = 0;
 
+        // ✅ CORRECCIÓN: El total esperado debe ser users.length * 3
+        const totalExpected = users.length * 3;
+        console.log('Total de consultas esperadas:', totalExpected, 'para', users.length, 'usuarios');
+
         const onComplete = () => {
+          console.log('completed:', completed);
           completed++;
-          if (completed === 3) {
+          
+          // ✅ CORRECCIÓN: Comparar con el total esperado
+          if (completed === totalExpected) {
+            console.log('totalPartidas:', puzzleCount + memoryCount + riddleCount);
             this.totalPartidas = puzzleCount + memoryCount + riddleCount;
             this.loadingPartidas = false;
             this.actualizarJuegosMasJugados(puzzleCount, memoryCount, riddleCount);
@@ -182,8 +190,9 @@ export class ChartComponent implements OnInit {
         users.forEach((user: any) => {
           this.puzzleService.getStudentPuzzleResults(user.id).subscribe({
             next: (results) => {
-              console.log(results)
+              console.log('results puzzle:', results);
               puzzleCount += results ? results.length : 0;
+              console.log('puzzleCount:', puzzleCount);
               onComplete();
             },
             error: () => onComplete()
@@ -191,8 +200,9 @@ export class ChartComponent implements OnInit {
 
           this.memoryService.getStudentMemoryResults(user.id).subscribe({
             next: (results) => {
-              console.log(results)
+              console.log('results memory:', results);
               memoryCount += results ? results.length : 0;
+              console.log('memoryCount:', memoryCount);
               onComplete();
             },
             error: () => onComplete()
@@ -200,8 +210,9 @@ export class ChartComponent implements OnInit {
 
           this.riddleService.getStudentRiddleResults(user.id).subscribe({
             next: (results) => {
-              console.log(results)
+              console.log('results riddle:', results);
               riddleCount += results ? results.length : 0;
+              console.log('riddleCount:', riddleCount);
               onComplete();
             },
             error: () => onComplete()

@@ -115,7 +115,7 @@ export class PuzzleComponent implements OnInit, OnDestroy, CanComponentDeactivat
           console.log(`[PuzzleComponent] Usando configuración activa:`, configData);
           
           // Asignar el ID del nivel a currentLevel
-          this.currentLevel = configData.level?.level || '';
+          this.currentLevel = configData.level || '';
           console.log(`[PuzzleComponent] Current level asignado: ${this.currentLevel}`);
           
           this.rows = configData.rows ?? 3;
@@ -137,7 +137,8 @@ export class PuzzleComponent implements OnInit, OnDestroy, CanComponentDeactivat
             rows: this.rows,
             cols: this.cols,
             imageUrl: this.imageUrl,
-            time_limit: this.timeLimit
+            time_limit: this.timeLimit,
+            level: this.currentLevel.id
           });
 
         } else {
@@ -313,13 +314,13 @@ export class PuzzleComponent implements OnInit, OnDestroy, CanComponentDeactivat
 
     const gameResult: PuzzleResult = {
       level_name: this.currentGrade,
-      level: this.currentLevel, // ✅ Agregar el ID del nivel actual
+      level: this.currentLevel.id,
       score: this.score,
       moves: this.moves,
       stars: this.stars,
       time: this.timeLimit - this.timeLeft,
       is_complete: this.isComplete,
-      student_id: this.currentStudentId
+      student_id: this.currentStudentId,
     };
 
     console.log('[PuzzleComponent] Intentando guardar resultado:', gameResult);

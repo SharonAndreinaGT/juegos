@@ -200,7 +200,7 @@ export class MemoryService {
         }
 
         // Crear un array de Observables para obtener el nombre del nivel para cada resultado
-        const resultsWithLevelNames$ = results.map(item => {
+        const resultsWithLevelNames = results.map(item => {
           if (item.level_id) {
             // Si hay level_id, busca la configuración del nivel para obtener el level_name
             return this.http.get<any>(`${this.apiUrl}/${item.level_id}`).pipe(
@@ -258,7 +258,7 @@ export class MemoryService {
           }
         });
         // Usa forkJoin para esperar a que todas las llamadas de nivel se completen
-        return forkJoin(resultsWithLevelNames$);
+        return forkJoin(resultsWithLevelNames);
       }),
       catchError(error => {
         console.error('[MemoryService] Error general al obtener resultados de memoria:', error);
@@ -275,7 +275,7 @@ export class MemoryService {
         if (results.length === 0) {
           return of([]);
         }
-        const resultsWithLevelNames$ = results.map(item => {
+        const resultsWithLevelNames = results.map(item => {
           if (item.level_id) {
             return this.http.get<any>(`${this.apiUrl}/${item.level_id}?fields=level_name`).pipe(
               map(levelConfigResponse => {
@@ -313,7 +313,7 @@ export class MemoryService {
             } as MemoryResult);
           }
         });
-        return forkJoin(resultsWithLevelNames$);
+        return forkJoin(resultsWithLevelNames);
       }),
       catchError(error => {
         console.error('[MemoryService] Error general al obtener todos los resultados de memoria:', error);

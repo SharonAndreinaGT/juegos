@@ -182,6 +182,7 @@ export class ChartComponent implements OnInit {
         users.forEach((user: any) => {
           this.puzzleService.getStudentPuzzleResults(user.id).subscribe({
             next: (results) => {
+              console.log(results)
               puzzleCount += results ? results.length : 0;
               onComplete();
             },
@@ -190,6 +191,7 @@ export class ChartComponent implements OnInit {
 
           this.memoryService.getStudentMemoryResults(user.id).subscribe({
             next: (results) => {
+              console.log(results)
               memoryCount += results ? results.length : 0;
               onComplete();
             },
@@ -198,6 +200,7 @@ export class ChartComponent implements OnInit {
 
           this.riddleService.getStudentRiddleResults(user.id).subscribe({
             next: (results) => {
+              console.log(results)
               riddleCount += results ? results.length : 0;
               onComplete();
             },

@@ -251,4 +251,40 @@ export class UserService {
       })
     );
   }
+
+  // Elimina a todos los estudiantes de un grado específico.
+  deleteStudentsByGrade(gradeId: string): Observable<any> {
+    const token = this.authService.getToken();
+    if (!token) {
+      return of({ success: false, error: 'No hay token de autenticación' });
+    }
+    
+    // Primero, obtenemos todos los IDs de los estudiantes en ese grado
+    return this.getUsersByGrade(gradeId).pipe(
+      map((studentsResponse: any) => studentsResponse.data || []),
+      switchMap((students: any[]) => {
+        if (students.length === 0) {
+          return of({ success: true, message: 'No hay estudiantes para eliminar' });
+        }
+
+        // Creamos un array de IDs para la petición DELETE
+        const studentIds = students.map(student => student.id);
+        
+        // enviando un array de IDs en el cuerpo de la petición DELETE
+        const url = `${this.apiUrl}`; 
+        const options = {
+          headers: { Authorization: `Bearer ${token}` },
+          body: studentIds // ✅ Envía los IDs en el cuerpo de la petición
+        };
+
+        return this.http.delete<any>(url, options).pipe(
+          map(() => ({ success: true, message: `Se eliminaron ${studentIds.length} estudiantes.` })),
+          catchError(error => {
+            console.error('Error al eliminar estudiantes por grado:', error);
+            return of({ success: false, error: 'Error al eliminar estudiantes.' });
+          })
+        );
+      })
+    );
+  }
 }

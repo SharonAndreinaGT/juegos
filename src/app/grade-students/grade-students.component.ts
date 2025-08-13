@@ -24,6 +24,7 @@ export class GradeStudentsComponent implements OnInit {
   dataSource = new MatTableDataSource<any>([]);
 
   isAdmin: boolean = false;
+  isLastGrade: boolean = false; // Nueva propiedad para determinar si es el último grado
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -69,6 +70,7 @@ export class GradeStudentsComponent implements OnInit {
         this.students = [...this.allStudents];
         this.dataSource.data = this.students;
         this.extractAvailableSections();
+        this.checkIfLastGrade(grade); // Verificar si es el último grado
       },
       (error: any) => {
         console.error('Error loading students:', error);
@@ -77,6 +79,31 @@ export class GradeStudentsComponent implements OnInit {
         });
       }
     );
+  }
+
+  // Método para verificar si es el último grado
+  checkIfLastGrade(gradeId: string) {
+    this.userService.getGradeFilter().then((gradeResponse: any) => {
+      const currentGrade = gradeResponse.data?.[0];
+      if (currentGrade && currentGrade.level) {
+        const currentLevel = currentGrade.level;
+        const nextLevel = currentLevel + 1;
+
+        this.userService.getNextGrade(currentLevel).subscribe({
+          next: (nextGradeResponse: any) => {
+            const nextGrade = nextGradeResponse.data?.[0];
+            this.isLastGrade = !nextGrade; // Si no hay grado siguiente, es el último
+          },
+          error: (error) => {
+            console.error('Error al verificar si es el último grado:', error);
+            this.isLastGrade = false;
+          }
+        });
+      }
+    }).catch((error) => {
+      console.error('Error al obtener el grado actual:', error);
+      this.isLastGrade = false;
+    });
   }
 
   // ✅ Método para recargar datos desde localStorage
@@ -222,10 +249,34 @@ export class GradeStudentsComponent implements OnInit {
       this.userService.getNextGrade(currentLevel).subscribe({
         next: (nextGradeResponse: any) => {
           const nextGrade = nextGradeResponse.data?.[0];
+          
           if (!nextGrade) {
-            this.snackBar.open(`No existe un ${nextLevel}to grado`, 'Cerrar', {
-              duration: 3000,
-            });
+            // No existe un grado siguiente, eliminar estudiantes
+            const confirmMessage = `No existe un ${nextLevel}to grado. ¿Está seguro de que desea eliminar todos los estudiantes del grado "${currentGrade.grade}"? Esta acción no se puede deshacer.`;
+            
+            if (confirm(confirmMessage)) {
+              this.userService.deleteStudentsByGrade(currentGradeId).subscribe({
+                next: (result: any) => {
+                  if (result.success) {
+                    this.snackBar.open(result.message, 'Cerrar', {
+                      duration: 5000,
+                    });
+                    // Recargar la lista de estudiantes
+                    this.loadStudents(currentGradeId);
+                  } else {
+                    this.snackBar.open(result.error || 'Error al eliminar estudiantes', 'Cerrar', {
+                      duration: 3000,
+                    });
+                  }
+                },
+                error: (error) => {
+                  console.error('Error al eliminar estudiantes:', error);
+                  this.snackBar.open('Error al eliminar estudiantes', 'Cerrar', {
+                    duration: 3000,
+                  });
+                }
+              });
+            }
             return;
           }
 

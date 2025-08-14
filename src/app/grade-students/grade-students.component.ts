@@ -252,7 +252,7 @@ export class GradeStudentsComponent implements OnInit {
           
           if (!nextGrade) {
             // No existe un grado siguiente, eliminar estudiantes
-            const confirmMessage = `No existe un ${nextLevel}to grado. ¿Está seguro de que desea eliminar todos los estudiantes del grado "${currentGrade.grade}"? Esta acción no se puede deshacer.`;
+            const confirmMessage = `¿Está seguro de que desea promover todos los estudiantes del grado "${currentGrade.grade}"? Esta acción no se puede deshacer.`;
             
             if (confirm(confirmMessage)) {
               this.userService.deleteStudentsByGrade(currentGradeId).subscribe({
